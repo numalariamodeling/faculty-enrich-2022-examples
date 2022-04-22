@@ -39,11 +39,12 @@ EMOD How To's:
 - Inspect `simulation_outputs` to see generated simulation results
 - Done!
 
-<!-- 
-<details><summary><span>SOME RESULT OUTPUT - DEMOGRAPHICS FILE?</span></summary>
+
+<details><summary><span>Generated files after successful execution of scripts</span></summary>
 <p>
 
-![img](../static/w1.1_console_runsim.png)
+![img](../static/w2.1_directories_files.png)
+
 </p>
 </details>
--->
+
