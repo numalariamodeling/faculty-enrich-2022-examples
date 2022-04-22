@@ -1,4 +1,4 @@
-### Example code for Week 1
+### Week 1: Overview of EMOD
 
 [Lesson Week 1](https://faculty-enrich-2022.netlify.app/lessons/week-1/)
 

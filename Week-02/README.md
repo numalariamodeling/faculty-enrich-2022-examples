@@ -1,4 +1,4 @@
-### Example code for Week 2
+### Week 2: Basic building blocks of EMOD
 
 [Lesson Week 2](https://faculty-enrich-2022.netlify.app/lessons/week-2/)
 
