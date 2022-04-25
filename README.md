@@ -5,6 +5,23 @@
 Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment
 program 2022.
 
+#### Weekly examples
+
+- [Go to Week 1](#week1)
+- [Go to Week 2](#week2)
+- [Go to Week 3](#week3)
+- [Go to Week 4](#week4)
+- Week 5: no technical track
+- [Go to Week 6](#week6)
+- [Go to Week 7](#week7)
+- [Go to Week 8](#week8)
+- [Go to Week 9](#week9)
+- Week 10: no technical track
+- [Go to Week 11](#week11)
+- [Go to Week 12](#week12)
+- [Go to Week 13](#week13)
+- [Go to Week 14](#week14)
+
 __Table 1: Overview of scripts used throughout the course__
 
 |Script |Description | 
@@ -12,10 +29,9 @@ __Table 1: Overview of scripts used throughout the course__
 |run_exampleSim.py |the main simulation script which will be expanded and modified throughout the lessons | 
 |analyze_exampleSim_w1.py |the main analyzer script which changes each week (w1, w2,...w5) | 
 |generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
+|plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R | 
 
-</br>
-
-## Week 1: Overview of EMOD
+## Week 1: Overview of EMOD <a name="week1"></a>
 
 [Lesson Week 1](https://faculty-enrich-2022.netlify.app/lessons/week-1/)
 
@@ -29,24 +45,17 @@ __Table 1: Overview of scripts used throughout the course__
 - Inspect `simulation_outputs` to see generated simulation results (csv file)
 - Done!
 
-<details><summary><span>Terminal output after successful submission of experiment</span></summary>
-<p>
-
-![img](../static/w1.1_console_runsim.png)
-</p>
-</details>
-
-
 <details><summary><span>Check results</span></summary>
 <p>
+
 Terminal output after successful submission of analyzer
 
-![img](../static/w1.1._console_analyzer.png)
+![img](static/w1.1._console_analyzer.png)
 
 </p>
 </details>
 
-## Week 2: Basic building blocks of EMOD
+## Week 2: Basic building blocks of EMOD <a name="week2"></a>
 
 [Lesson Week 2](https://faculty-enrich-2022.netlify.app/lessons/week-2/)
 
@@ -85,16 +94,16 @@ EMOD How To's:
 
 Generated simulation files
 
-![img](../static/w2.1_directories_files.png)
+![img](static/w2.1_directories_files.png)
 
 Generated plot
 
-![img](../static/All_Age_Monthly_Cases.png)
+![img](static/All_Age_Monthly_Cases.png)
 
 </p>
 </details>
 
-## Week 3: Interventions in EMOD
+## Week 3: Interventions in EMOD <a name="week3"></a>
 
 [Lesson Week 3](https://faculty-enrich-2022.netlify.app/lessons/week-3/)
 
@@ -140,7 +149,7 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
@@ -235,13 +244,12 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-
-## Week 4: Analyzers and plotters
+## Week 4: Analyzers and plotters <a name="week4"></a>
 
 [Lesson Week 4](https://faculty-enrich-2022.netlify.app/lessons/week-4/)
 
@@ -266,14 +274,14 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-### Week 5: no technical curriculum
+### Week 5: no technical curriculum <a name="week5"></a>
 
-## Week 6: Serialization
+## Week 6: Serialization <a name="week6"></a>
 
 [Lesson Week 6](https://faculty-enrich-2022.netlify.app/lessons/week-6/)
 
@@ -290,12 +298,12 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-## Week 7: Sweeping and calibration
+## Week 7: Sweeping and calibration <a name="week7"></a>
 
 [Lesson Week 7](https://faculty-enrich-2022.netlify.app/lessons/week-7/)
 
@@ -312,7 +320,7 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
@@ -334,12 +342,12 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-## Week 9: Infusing simulations with real data
+## Week 9: Infusing simulations with real data <a name="week9"></a>
 
 [Lesson Week 9](https://faculty-enrich-2022.netlify.app/lessons/week-9/)
 
@@ -355,14 +363,14 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-### Week 10: no technical curriculum
+### Week 10: no technical curriculum <a name="week10"></a>
 
-## Week 11: Advanced EMOD: HBHI workflow as a complex example
+## Week 11: Advanced EMOD: HBHI workflow as a complex example <a name="week11"></a>
 
 [Lesson Week 11](https://faculty-enrich-2022.netlify.app/lessons/week-11/)
 
@@ -378,12 +386,12 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-## Week 12: Advanced EMOD: Spatial modeling in EMOD
+## Week 12: Advanced EMOD: Spatial modeling in EMOD <a name="week12"></a>
 
 [Lesson Week 12](https://faculty-enrich-2022.netlify.app/lessons/week-12/)
 
@@ -399,12 +407,12 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-## Week 13: Advanced EMOD: gene drive and reactive interventions
+## Week 13: Advanced EMOD: gene drive and reactive interventions <a name="week13"></a>
 
 [Lesson Week 13](https://faculty-enrich-2022.netlify.app/lessons/week-13/)
 
@@ -420,12 +428,12 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
 
-## Week 14: HPC
+## Week 14: HPC <a name="week14"></a>
 
 [Lesson Week 14](https://faculty-enrich-2022.netlify.app/lessons/week-14/)
 
@@ -441,7 +449,7 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](../static/w2.1_directories_files.png)-->
+<!--![img](static/w2.1_directories_files.png)-->
 
 </p>
 </details>
