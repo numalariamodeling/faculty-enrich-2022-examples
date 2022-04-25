@@ -1,9 +1,5 @@
 .idea/
 *.log
-/simulation_outputs/*
-/experiments/*
-/input/*
-!/input/my_demographics.json
-!/input/Namawala/*
+
 Solution_scripts/Week-02/input/
 3014cb13-41b2-c731-e2b2-e1bd53c02574/
