@@ -32,14 +32,14 @@ __Table 1: Overview of scripts used throughout the course__
 |plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R | 
 |analyzer_collection.py | collection of different analyzers used| 
 
-
-
-
 ## Week 1: Overview of EMOD <a name="week1"></a>
 
 [Lesson Week 1](https://faculty-enrich-2022.netlify.app/lessons/week-1/)
 
 ### Instructions
+
+<details><summary><span>Click to expand</span></summary>
+<p>
 
 - Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username
 - Run simulation via `python run_exampleSim.py`
@@ -59,6 +59,9 @@ Terminal output after successful submission of analyzer
 </p>
 </details>
 
+</p>
+</details>
+
 ## Week 2: Basic building blocks of EMOD <a name="week2"></a>
 
 [Lesson Week 2](https://faculty-enrich-2022.netlify.app/lessons/week-2/)
@@ -71,16 +74,19 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - Create _demographics_ and _climate_ files via `generate_input_files.py`
 - Update default parameters in `python run_exampleSim.py`:
 
     ```py
     cb.update_params({
         'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
-        "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_single_node_air_temperature_daily.bin'),
-        "Land_Temperature_Filename": os.path.join('Ghana', 'Ghana_single_node_land_temperature_daily.bin'),
-        "Rainfall_Filename": os.path.join('Ghana', 'Ghana_single_node_rainfall_daily.bin'),
-        "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_single_node_relative_humidity_daily.bin')
+        "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
+        "Land_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
+        "Rainfall_Filename": os.path.join('Ghana', 'Ghana_30arcsec_rainfall_daily.bin'),
+        "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin')
     })
     ```
 
@@ -107,6 +113,9 @@ Generated plot
 </p>
 </details>
 
+</p>
+</details>
+
 ## Week 3: Interventions in EMOD <a name="week3"></a>
 
 [Lesson Week 3](https://faculty-enrich-2022.netlify.app/lessons/week-3/)
@@ -124,6 +133,9 @@ EMOD How To's:
 ### Instructions
 
 #### PART I - customization of the simulation, add interventions and reports
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
 
 - Add interventions and create campaign files
     - add `add_health_seeking` module import and code chunk into the script (see EMOD How To's)
@@ -160,7 +172,13 @@ EMOD How To's:
 </p>
 </details>
 
+</p>
+</details>
+
 #### PART II - multi-simulation experiment using ModBuilder
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
 
 - Further modify the simulation script to run multiple simulations using the detailed steps below
     - import modules  `from simtools.ModBuilder import ModBuilder, ModFn`
@@ -255,39 +273,49 @@ EMOD How To's:
 </p>
 </details>
 
+</p>
+</details>
+
 ## Week 4: Analyzers and plotters <a name="week4"></a>
 
 [Lesson Week 4](https://faculty-enrich-2022.netlify.app/lessons/week-4/)
 
 EMOD How To's:
+
 - [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports)
 - [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
 - Analyzers
 
-
 ### Instructions
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
 
 - Change _exp_name_  for week 4 `f'{user}_FE_2022_example_w4'`
 - Customize simulation experiment:
-  - extend the simulation duration to >1 year, modify your simulation script as shown below
-     ```py
-    cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
-    years = 5
-    sim_start = 2022
-    cb.update_params({'Simulation_Duration': years*365 })
-    
-    for year in range(years):
-        sim_year = sim_start + year
-        add_summary_report(cb, start=365, interval=30,
-                       age_bins=[0.25, 5, 100],
-                       description=f'Monthly_U5_{sim_year}')
-    
-        # Optional, add additional age group
-        add_summary_report(cb, start=365, interval=30,
-                   age_bins=[0.25, 2,10, 100],
-                   description=f'Monthly_2to10_{sim_year}')
-     ```
-  - select campaigns and coverage levels to your choosing 
+    - extend the simulation duration to >1 year, modify your simulation script as shown below
+       ```py
+          cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
+          years = 5
+          sim_start = 2022
+          cb.update_params({'Simulation_Duration': years*365 })
+          
+          for year in range(years):
+            start_day = 365 + 365 * year
+            sim_year = sim_start_year + year
+            add_summary_report(cb, start=start_day, interval=30,
+                               age_bins=[0.25, 5, 100],
+                               description=f'Monthly_U5_{sim_year}')
+          
+          # Optional, add additional age group
+          for year in range(years):
+            start_day = 365 + 365 * year
+            sim_year = sim_start_year + year
+            add_summary_report(cb, start=start_day, interval=30,
+                               age_bins=[0.25, 2,10, 100],
+                               description=f'Monthly_2to10_{sim_year}')
+       ```
+    - select campaigns and coverage levels to your choosing
 - Run simulation and wait for simulation to finish (~10 minutes)
 - Run analyzer script for Week 4 (`analyze_exampleSim_w4.py`)
 - Run plotting scripts:
@@ -305,6 +333,9 @@ EMOD How To's:
 </p>
 </details>
 
+</p>
+</details>
+
 ### Week 5: no technical curriculum <a name="week5"></a>
 
 ## Week 6: Serialization <a name="week6"></a>
@@ -318,6 +349,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -325,6 +359,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -340,6 +377,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -347,6 +387,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -362,6 +405,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -369,6 +415,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -383,6 +432,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -390,6 +442,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -406,6 +461,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -413,6 +471,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -427,6 +488,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -434,6 +498,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -448,6 +515,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -455,6 +525,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
@@ -469,6 +542,9 @@ EMOD How To's:
 
 ### Instructions
 
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
 - [TODO]
 
 <details><summary><span>Check results</span></summary>
@@ -476,6 +552,9 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 </p>
 </details>
