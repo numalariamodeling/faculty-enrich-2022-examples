@@ -30,6 +30,10 @@ __Table 1: Overview of scripts used throughout the course__
 |analyze_exampleSim_w1.py |the main analyzer script which changes each week (w1, w2,...w5) | 
 |generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
 |plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R | 
+|analyzer_collection.py | collection of different analyzers used| 
+
+
+
 
 ## Week 1: Overview of EMOD <a name="week1"></a>
 
@@ -114,6 +118,7 @@ EMOD How To's:
 - Add IRS
 - [Add larvicides](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-larvicides)
 - [Add drug campaigns](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-drug-campaigns)
+- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports)
 - [Using the model builder to set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
 ### Instructions
@@ -255,14 +260,34 @@ EMOD How To's:
 [Lesson Week 4](https://faculty-enrich-2022.netlify.app/lessons/week-4/)
 
 EMOD How To's:
+- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports)
+- [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
+- Analyzers
 
-- Analyzers and plotters
-- [TODO]
 
 ### Instructions
 
--
 - Change _exp_name_  for week 4 `f'{user}_FE_2022_example_w4'`
+- Customize simulation experiment:
+  - extend the simulation duration to >1 year, modify your simulation script as shown below
+     ```py
+    cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
+    years = 5
+    sim_start = 2022
+    cb.update_params({'Simulation_Duration': years*365 })
+    
+    for year in range(years):
+        sim_year = sim_start + year
+        add_summary_report(cb, start=365, interval=30,
+                       age_bins=[0.25, 5, 100],
+                       description=f'Monthly_U5_{sim_year}')
+    
+        # Optional, add additional age group
+        add_summary_report(cb, start=365, interval=30,
+                   age_bins=[0.25, 2,10, 100],
+                   description=f'Monthly_2to10_{sim_year}')
+     ```
+  - select campaigns and coverage levels to your choosing 
 - Run simulation and wait for simulation to finish (~10 minutes)
 - Run analyzer script for Week 4 (`analyze_exampleSim_w4.py`)
 - Run plotting scripts:
