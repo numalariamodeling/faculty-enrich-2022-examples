@@ -8,15 +8,17 @@ from simtools.SetupParser import SetupParser
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import seaborn as sns
 
 mpl.rcParams['pdf.fonttype'] = 42
+palette = sns.color_palette("tab10")
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'LOCAL'
 
 user = os.getlogin()  # user initials
-expt_name = f'{user}_FE_2022_example_w3a'
-expt_id = '2022_04_25_05_14_08_922198'  ## change expt_id
+expt_name = f'{user}_FE_2022_example_w3b'
+expt_id = '2022_04_25_06_46_32_666145'  ## change expt_id
 working_dir = os.path.join('simulation_outputs')
 
 
@@ -29,9 +31,9 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         else:
             return datetime.datetime.strptime(str(x), '%j').month
 
-    def __init__(self, expt_name, working_dir=".", start_year=2022, end_year=2023):
+    def __init__(self, expt_name, sweep_variables=None, working_dir=".", start_year=2022, end_year=2023):
         super(MonthlyInsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
-        self.sweep_variables = ["Run_Number"]
+        self.sweep_variables = sweep_variables or ["Run_Number"]
         self.inset_channels = ['Statistical Population', 'New Clinical Cases', 'New Severe Cases', 'PfHRP2 Prevalence']
         self.expt_name = expt_name
         self.start_year = start_year
@@ -73,6 +75,11 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         adf = pd.concat(selected).reset_index(drop=True)
         adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'All_Age_Monthly_Cases.csv'), index=False)
 
+        # Take mean of runs for plotting
+        self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
+        adf = adf.groupby(['date', 'Month'] + self.sweep_variables)[self.inset_channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
         # Figure with panel per outcome channel
         fig = plt.figure(figsize=(6, 5))
         fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
@@ -90,7 +97,12 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
             ax.set_xlabel('Month')
             ax.set_xticks(range(1, 13))
             ax.set_xticklabels(range(1, 13))
-            ax.plot(adf['Month'], adf[channel], '-', color='black', linewidth=0.8)
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['Month'], sdf[channel], '-', color=palette[si], linewidth=0.8,label=scen)
+
+        axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'All_Age_Monthly_Cases.png'))
 
 
@@ -144,13 +156,19 @@ class MonthlyPfPRAnalyzer(BaseAnalyzer):
         adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'U5_PfPR_ClinicalIncidence.csv'), index=False,
                    index_label=False)
 
+        # Take mean of runs for plotting
+        channels = ['Pop U5', 'Cases U5', 'Severe cases U5', 'PfPR U5']
+        self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
+        adf = adf.groupby(['year', 'Month'] + self.sweep_variables)[channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
         # Figure with panel per outcome channel
         fig = plt.figure(figsize=(6, 5))
         fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
         axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
         fig.suptitle(f'MonthlyPfPRAnalyzer')
 
-        for ai, channel in enumerate(['Pop U5', 'Cases U5', 'Severe cases U5', 'PfPR U5']):
+        for ai, channel in enumerate(channels):
             ax = axes[ai]
             ax.set_title(channel)
             ax.set_ylabel(channel)
@@ -161,16 +179,24 @@ class MonthlyPfPRAnalyzer(BaseAnalyzer):
             ax.set_xlabel('Month')
             ax.set_xticks(range(1, 13))
             ax.set_xticklabels(range(1, 13))
-            ax.plot(adf['Month'], adf[channel], '-', color='black', linewidth=0.8)
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['Month'], sdf[channel], '-', color=palette[si], linewidth=0.8,label=scen)
+
+        axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'U5_PfPR_ClinicalIncidence.png'))
 
 
 if __name__ == "__main__":
     SetupParser.init()
 
+    sweep_variables = ['cm_cov_U5', 'smc_coverage', 'Run_Number']
     analyzers = [MonthlyInsetChartAnalyzer(expt_name=expt_name,
+                                           sweep_variables=sweep_variables,
                                            working_dir=working_dir),
                  MonthlyPfPRAnalyzer(expt_name=expt_name,
+                                     sweep_variables=sweep_variables,
                                      working_dir=working_dir)
                  ]
 
