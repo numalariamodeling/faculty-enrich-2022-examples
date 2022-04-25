@@ -1,5 +1,10 @@
 .idea/
 *.log
-
+/simulation_outputs/*
+!/simulation_outputs/README.md
+/experiments/*
+!/experiments/README.md
+/input/*
+!/input/Namawala/*
 Solution_scripts/Week-02/input/
 3014cb13-41b2-c731-e2b2-e1bd53c02574/
