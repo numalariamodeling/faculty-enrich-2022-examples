@@ -1,26 +1,33 @@
 # Malaria Modeling Faculty Enrichment Program 2022
-## Technical track (EMOD)
 
-Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment program 2022.
+### Technical track (EMOD)
 
+Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment
+program 2022.
 
+__Table 1: Overview of scripts used throughout the course__
 
-### Week 1: Overview of EMOD
+|Script |Description | 
+|-------|------------|
+|run_exampleSim.py |the main simulation script which will be expanded and modified throughout the lessons | 
+|analyze_exampleSim_w1.py |the main analyzer script which changes each week (w1, w2,...w5) | 
+|generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
+
+</br>
+
+## Week 1: Overview of EMOD
 
 [Lesson Week 1](https://faculty-enrich-2022.netlify.app/lessons/week-1/)
 
+### Instructions
 
-#### Instructions:
-
-- Save copy of `simtools.ini` to Week-1 directory and adjust paths `<USERNAME>` with your username  
-- Navigate to `Week-1` via `cd` to make this working directory
-- Run simulation via `python run_example_sim.py`
-- Wait simulation to finish (~20 minutes)
-- Update expt_id in `analyze_example_sim.py`
-- Run analyzer via `python analyze_example_sim.py`
-- Inspect `simulation_outputs` to see generated simulation results
+- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username
+- Run simulation via `python run_exampleSim.py`
+- Wait simulation to finish (~5 minutes)
+- Update expt_id in `analyze_exampleSim_w1.py`
+- Run analyzer via `python analyze_exampleSim_w1.py`
+- Inspect `simulation_outputs` to see generated simulation results (csv file)
 - Done!
-
 
 <details><summary><span>Terminal output after successful submission of experiment</span></summary>
 <p>
@@ -30,134 +37,243 @@ Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app
 </details>
 
 
-<details><summary><span>Terminal output after successful submission of analyzer</span></summary>
+<details><summary><span>Check results</span></summary>
 <p>
+Terminal output after successful submission of analyzer
 
 ![img](../static/w1.1._console_analyzer.png)
+
 </p>
 </details>
 
-
-
-
-### Week 2: Basic building blocks of EMOD
+## Week 2: Basic building blocks of EMOD
 
 [Lesson Week 2](https://faculty-enrich-2022.netlify.app/lessons/week-2/)
 
 EMOD How To's:
 
-- [Create a demographics file](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-a-demographics-file)
-- Create a climate file 
 - [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
+- [Create a demographics file](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-a-demographics-file)
+- [Create climate files](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-climate-files)
 
+### Instructions
 
-#### Instructions:
-
-- Save copy of `simtools.ini` to Week-2 directory and adjust paths `<USERNAME>` with your username
-- Copy the `run_example_sim.py` and `analyze_example_sim.py` from Week-1 to this folder (Week-2)
 - Create _demographics_ and _climate_ files via `generate_input_files.py`
-- Update default parameters in `python run_example_sim.py`:
-    - _Demographics_Filenames_: 
-      ```
-      cb.update_params({'Demographics_Filenames': ['my_demographics.json'],
-              'Age_Initialization_Distribution_Type': 'DISTRIBUTION_COMPLEX'})
-      ```
-    - _Climate_Model_ and Filenames: 
-      ```
-        cb.update_params({
-            "Vector_Species_Names": [],
-            'x_temporary_Larval_Habitat': 0,
-            'Air_Temperature_Filename': 'Ghana_30arcsec_air_temperature_daily.bin',
-            'Land_Temperature_Filename':  'Ghana_30arcsec_air_temperature_daily.bin',
-            'Rainfall_Filename':  'Ghana_30arcsec_rainfall_daily.bin',
-            'Relative_Humidity_Filename': 'Ghana_30arcsec_relative_humidity_daily.bin',
-            'Climate_Model': 'CLIMATE_BY_DATA'
-        })
-      ```
-- Run simulation via `python run_example_sim.py`
-- Wait simulation to finish (~20 minutes)
-- Update expt_id in `analyze_example_sim.py`
-- Run analyzer via `python analyze_example_sim.py`
-- Inspect `simulation_outputs` to see generated simulation results
+- Update default parameters in `python run_exampleSim.py`:
+
+    ```py
+    cb.update_params({
+        'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
+        "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_single_node_air_temperature_daily.bin'),
+        "Land_Temperature_Filename": os.path.join('Ghana', 'Ghana_single_node_land_temperature_daily.bin'),
+        "Rainfall_Filename": os.path.join('Ghana', 'Ghana_single_node_rainfall_daily.bin'),
+        "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_single_node_relative_humidity_daily.bin')
+    })
+    ```
+
+- Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
+- Run simulation as learned in Week 1 and wait for simulation to finish (~5 minutes)
+- Run analyzer script for Week 2 `analyze_exampleSim_w2.py` (don't forget to update expt_id!)
+- Inspect `simulation_outputs` to see additional generated plot
+    - Optional: rerun analyzer with plot for week 1 and compare.
+    - _Note that EMOD is a stochastic model and any changes at low population size and few repetitions might be at
+      random and not necessarily due to the parameter change!_
 - Done!
 
-
-<details><summary><span>Generated files after successful execution of scripts</span></summary>
+<details><summary><span>Check results</span></summary>
 <p>
 
+Generated simulation files
+
 ![img](../static/w2.1_directories_files.png)
+
+Generated plot
+
+![img](../static/All_Age_Monthly_Cases.png)
 
 </p>
 </details>
 
-
-
-
-### Week 3: Interventions in EMOD
+## Week 3: Interventions in EMOD
 
 [Lesson Week 3](https://faculty-enrich-2022.netlify.app/lessons/week-3/)
 
 EMOD How To's:
 
-- [Create a demographics file](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-a-demographics-file)
-- Create a climate file
-- [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
+- [Add case management](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-case-management)
+- Add ITN
+- Add IRS
+- [Add larvicides](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-larvicides)
+- [Add drug campaigns](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-drug-campaigns)
+- [Using the model builder to set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
-#### Instructions:
+### Instructions
 
-- Save copy of `simtools.ini` to Week-3 directory and adjust paths `<USERNAME>` with your username
-- Copy the inputs and `run_example_sim.py` and `analyze_example_sim.py` from Week-2 to this folder (Week-3)
-- Update interventions:
-    - [TODO]
-- Run and analyze simulations as you have done in previous weeks.
-- Done!
+#### PART I - customization of the simulation, add interventions and reports
 
-<!--
-<details><summary><span>Generated files after successful execution of scripts</span></summary>
+- Add interventions and create campaign files
+    - add `add_health_seeking` module import and code chunk into the script (see EMOD How To's)
+    - add `add_drug_campaign` module import and code chunk into the script (see EMOD How To's) or below
+      ```py
+      add_drug_campaign(cb, campaign_type='SMC',
+                            coverage=0.8, 
+                            start_days=[30],
+                            repetitions=4, 
+                            tsteps_btwn_repetitions=30,
+                            target_group={'agemin': 0.25, 'agemax': 5},
+                            receiving_drugs_event_name='Received_SMC')
+      ```
+- Add custom reports
+    - add `MalariaSummaryReport` (see EMOD How To's) or below
+      ```py
+      add_summary_report(cb, start=1, interval=30,
+                       age_bins=[0.25,5,100], 
+                       description='Monthly_U5')
+      ```
+- Change _exp_name_  for week 3 `f'{user}_FE_2022_example_w3a'`
+- Run simulation and wait for simulation to finish (~5 minutes)
+- Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) (don't forget to update expt_id!)
+- Inspect `simulation_outputs` and compare against outputs from the previous week.
+    - New output files: `U5_PfPR_ClinicalIncidence.csv` and `U5_PfPR_ClinicalIncidence.png`
+
+<details><summary><span>Check results</span></summary>
 <p>
 
-![img](../static/w2.1_directories_files.png)
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
 
 </p>
 </details>
--->
+
+#### PART II - multi-simulation experiment using ModBuilder
+
+- Further modify the simulation script to run multiple simulations using the detailed steps below
+    - import modules  `from simtools.ModBuilder import ModBuilder, ModFn`
+    - specify number of seeds i.e. `numseeds = 3` (the more seeds the more single simulations run and it takes longer
+      until whole simulation experiment finishes)
+    - modify `run_sim_args` as follows:
+      ```py
+      expt_name =  f'{user}_FE_2022_example_w3b'
+      run_sim_args = {
+          'exp_name': expt_name,
+          'config_builder': cb,
+          'exp_builder' : builder
+      }
+      ```
+    - add ModBuilder
+      ```py
+      builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
+                                      ]
+                                      for x in range(numseeds)
+                                      ])
+      ```
+- modify and extend ModBuilder to allow running different parameter sweeps
+    ```py
+    builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
+                                     ModFn(smc_intervention, coverage_level=smc_cov), 
+                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
+                                    ]
+                                    for cm_cov_U5 in [0.4, 0.6] 
+                                    for smc_cov in [0, 0.6] 
+                                    for x in range(numseeds)
+                                    ])
+    ```
+
+- In order for case management and SMC campaigns to take different coverage parameters as specified above, they need to
+  be changed into a function that takes cb as input as shows below:
+    - wrap `add_health_seeking` into `case_management` function:
+
+      ```py
+      def case_management(cb, cm_cov_U5,cm_cov_adults=0.5): 
+          add_health_seeking(cb, start_day=0,
+                         targets=[{'trigger': 'NewClinicalCase',
+                                   'coverage': cm_cov_U5,
+                                   'agemin': 0,
+                                   'agemax': 5,
+                                   'seek': 1,
+                                   'rate': 0.3},
+                                  {'trigger': 'NewClinicalCase',
+                                   'coverage': cm_cov_adults,
+                                   'agemin': 5,
+                                   'agemax': 100,
+                                   'seek': 1,
+                                   'rate': 0.3},
+                                  {'trigger': 'NewSevereCase',
+                                   'coverage': 0.85,
+                                   'agemin': 0,
+                                   'agemax': 100,
+                                   'seek': 1,
+                                   'rate': 0.5}],
+                         drug=['Artemether', 'Lumefantrine'])
+      
+          return {'cm_cov_U5': cm_cov_U5,
+                  'cm_cov_adults': cm_cov_adults}
+  
+      ```
+    - wrap `add_drug_campaign` into `smc_intervention` function:
+      ```py
+      def smc_intervention(cb, coverage_level , day=30, cycles=4):
+        add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
+                          coverage=coverage_level,
+                          start_days=[day],
+                          repetitions=cycles,
+                          tsteps_btwn_repetitions=30,
+                          target_group={'agemin': 0.25, 'agemax': 5},
+                          receiving_drugs_event_name='Received_SMC')
+  
+        return {'smc_coverage': coverage_level,
+               'smc_seasonalstart_day': day}
+  
+      ```
+
+- Now change _exp_name_  to `f'{user}_FE_2022_example_w3b'` and the simulation is ready to go!
+- Run simulation and wait for simulation to finish (~10 minutes)
+- Run second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) (don't forget to update expt_id!)
+- Inspect `simulation_outputs` and compare against outputs from the previous week.
+
+<details><summary><span>Check results</span></summary>
+<p>
+
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 
-### Week 4: Analyzers and plotters
+## Week 4: Analyzers and plotters
 
 [Lesson Week 4](https://faculty-enrich-2022.netlify.app/lessons/week-4/)
 
 EMOD How To's:
 
--  Analyzers and plotters
+- Analyzers and plotters
 - [TODO]
 
-#### Instructions:
+### Instructions
 
-- Use the same simulation outputs from previous week (Week 3)
-- Update analyzer:
-    - [TODO]
-- Update plots:
-    - [TODO]
-- Inspect generated results and figures. 
+-
+- Change _exp_name_  for week 4 `f'{user}_FE_2022_example_w4'`
+- Run simulation and wait for simulation to finish (~10 minutes)
+- Run analyzer script for Week 4 (`analyze_exampleSim_w4.py`)
+- Run plotting scripts:
+    - Using _Python_: `plot_exampleSim.py`
+    - Using _R_: `plot_exampleSim.R`
+- Inspect `simulation_outputs` and compare against outputs from the previous week.
 - Done!
 
-<!--
-<details><summary><span>OUTPUT FILES</span></summary>
+<details><summary><span>Check results</span></summary>
 <p>
 
-![img](../static/w2.1_directories_files.png)
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
 
 </p>
 </details>
--->
-
 
 ### Week 5: no technical curriculum
 
-
-
-### Week 6: Serialization
+## Week 6: Serialization
 
 [Lesson Week 6](https://faculty-enrich-2022.netlify.app/lessons/week-6/)
 
@@ -166,13 +282,20 @@ EMOD How To's:
 - Serialization
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 7: Sweeping and calibration
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
+
+## Week 7: Sweeping and calibration
 
 [Lesson Week 7](https://faculty-enrich-2022.netlify.app/lessons/week-7/)
 
@@ -181,13 +304,20 @@ EMOD How To's:
 - Sweeping and calibration
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 8: Individual properties
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
+
+## Week 8: Individual properties
 
 [Lesson Week 8](https://faculty-enrich-2022.netlify.app/lessons/week-8/)
 
@@ -196,13 +326,20 @@ EMOD How To's:
 - Individual properties
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 9: Infusing simulations with real data
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
+
+## Week 9: Infusing simulations with real data
 
 [Lesson Week 9](https://faculty-enrich-2022.netlify.app/lessons/week-9/)
 
@@ -210,15 +347,22 @@ EMOD How To's:
 
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
+
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
 
 ### Week 10: no technical curriculum
 
-### Week 11: Advanced EMOD: HBHI workflow as a complex example
+## Week 11: Advanced EMOD: HBHI workflow as a complex example
 
 [Lesson Week 11](https://faculty-enrich-2022.netlify.app/lessons/week-11/)
 
@@ -226,13 +370,20 @@ EMOD How To's:
 
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 12: Advanced EMOD: Spatial modeling in EMOD
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
+
+## Week 12: Advanced EMOD: Spatial modeling in EMOD
 
 [Lesson Week 12](https://faculty-enrich-2022.netlify.app/lessons/week-12/)
 
@@ -240,13 +391,20 @@ EMOD How To's:
 
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 13: Advanced EMOD: gene drive and reactive interventions
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
+
+## Week 13: Advanced EMOD: gene drive and reactive interventions
 
 [Lesson Week 13](https://faculty-enrich-2022.netlify.app/lessons/week-13/)
 
@@ -254,13 +412,20 @@ EMOD How To's:
 
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 14: HPC
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
+
+</p>
+</details>
+
+## Week 14: HPC
 
 [Lesson Week 14](https://faculty-enrich-2022.netlify.app/lessons/week-14/)
 
@@ -268,13 +433,26 @@ EMOD How To's:
 
 - [TODO]
 
-
-#### Instructions:
+### Instructions
 
 - [TODO]
 
+<details><summary><span>Check results</span></summary>
+<p>
 
-### Week 15: no technical curriculum
+[To do: add image]
+<!--![img](../static/w2.1_directories_files.png)-->
 
-### Week 16: no technical curriculum
+</p>
+</details>
+
+
+</br>
+</br>
+
+### Congratulations!
+
+#### You reached the end of the example lessons.
+
+
 
