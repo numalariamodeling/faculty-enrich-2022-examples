@@ -12,9 +12,9 @@ from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 SetupParser.default_block = 'LOCAL'
 sim_start_year = 2022
 numseeds = 3
-years = 5
+years = 3
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=365*years)
 cb.update_params({
     'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),

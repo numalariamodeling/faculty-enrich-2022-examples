@@ -106,86 +106,112 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'All_Age_Monthly_Cases.png'))
 
 
-class MonthlyPfPRAnalyzer(BaseAnalyzer):
+class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
 
-    def __init__(self, expt_name, sweep_variables=None, working_dir=".", start_year=2022, end_year=2023):
-        super(MonthlyPfPRAnalyzer, self).__init__(working_dir=working_dir,
-                                                  filenames=["output/MalariaSummaryReport_Monthly_U5.json"]
-                                                  )
+    def __init__(self, expt_name, sweep_variables=None, agebin_name='customagebins', working_dir='./', start_year=2022,
+                 end_year=2025, burnin=None):
+
+        super(AnnualAgebinPfPRAnalyzer, self).__init__(working_dir=working_dir,
+                                                       filenames=[
+                                                           f"output/MalariaSummaryReport_Annual_Agebin.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
         self.expt_name = expt_name
         self.start_year = start_year
         self.end_year = end_year
+        self.burnin = burnin
+
 
     def select_simulation_data(self, data, simulation):
 
         adf = pd.DataFrame()
-        for year, fname in zip(range(self.start_year, self.end_year), self.filenames):
-            d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:12]
-            pfpr = [x[1] for x in d]
-            d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:12]
-            clinical_cases = [x[1] for x in d]
-            d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:12]
-            severe_cases = [x[1] for x in d]
-            d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:12]  # this add pop col in U5
-            pop = [x[1] for x in d]
-            simdata = pd.DataFrame({'Month': range(1, 13),
-                                    'PfPR U5': pfpr,
-                                    'Cases U5': clinical_cases,
-                                    'Severe cases U5': severe_cases,
-                                    'Pop U5': pop})
-            simdata['year'] = year
-            adf = pd.concat([adf, simdata])
+        for fname in self.filenames:
+
+            nyears = (self.end_year - self.start_year)
+            age_bins = data[fname]['Metadata']['Age Bins']
+            pfpr2to10 = data[fname]['DataByTime']['PfPR_2to10'][:nyears]
+
+            for age in list(range(0, len(age_bins))):
+                d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:nyears]
+                pfpr = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:nyears]
+                clinical_cases = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:nyears]
+                severe_cases = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:nyears]
+                pop = [x[age] for x in d]
+
+                simdata = pd.DataFrame({'year': range(self.start_year, self.end_year),
+                                        'PfPR': pfpr,
+                                        'Cases': clinical_cases,
+                                        'Severe cases': severe_cases,
+                                        'Pop': pop})
+                simdata['agebin'] = age_bins[age]
+                simdata['pfpr2to10'] = pfpr2to10
+                adf = pd.concat([adf, simdata])
 
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
-                adf[sweep_var] = simulation.tags[sweep_var]
+                try:
+                    adf[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+
         return adf
 
     def finalize(self, all_data):
 
         selected = [data for sim, data in all_data.items()]
         if len(selected) == 0:
-            print("No data have been returned... Exiting...")
+            print("\nWarning: No data have been returned... Exiting...")
             return
+        adf = pd.concat(selected).reset_index(drop=True)
 
         if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
             os.mkdir(os.path.join(self.working_dir, self.expt_name))
 
-        adf = pd.concat(selected).reset_index(drop=True)
-        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'U5_PfPR_ClinicalIncidence.csv'), index=False,
-                   index_label=False)
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        # Discard early years used as burnin
+        if self.burnin is not None:
+            df = df[df['year'] >= self.start_year + self.burnin]
+        df = df.loc[df['agebin'] <= 100]
+        adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
+
+        # Figure with panel per outcome channel
+
+        # Take mean across multiple years for plots per agebin on the x-axis
+        # Take mean of runs for plotting
+        channels = ['Pop', 'Cases', 'Severe cases', 'PfPR']
+        self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
+        adf = adf.groupby(['agebin'] + self.sweep_variables)[channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: AnnualAgebinPfPRAnalyzer')
+
+        for ai, channel in enumerate(channels):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if channel == 'PfPR':
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            ax.set_xlabel('agebin')
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['agebin'], sdf[channel], '-', color=palette[si], linewidth=0.8,label=scen)
+
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Agebin_PfPR_ClinicalIncidence.png'))
 
         # Take mean of runs for plotting
         channels = ['Pop U5', 'Cases U5', 'Severe cases U5', 'PfPR U5']
         self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
         adf = adf.groupby(['year', 'Month'] + self.sweep_variables)[channels].agg(np.mean).reset_index()
         adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
-
-        # Figure with panel per outcome channel
-        fig = plt.figure(figsize=(6, 5))
-        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
-        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
-        fig.suptitle(f'MonthlyPfPRAnalyzer')
-
-        for ai, channel in enumerate(channels):
-            ax = axes[ai]
-            ax.set_title(channel)
-            ax.set_ylabel(channel)
-            if channel == 'PfPR U5':
-                ax.set_ylim(0, 1)
-            else:
-                ax.set_ylim(0, np.max(adf[channel]))
-            ax.set_xlabel('Month')
-            ax.set_xticks(range(1, 13))
-            ax.set_xticklabels(range(1, 13))
-
-            for si, scen in enumerate(adf['unique_sweep'].unique()):
-                sdf = adf[adf['unique_sweep'] == scen]
-                ax.plot(sdf['Month'], sdf[channel], '-', color=palette[si], linewidth=0.8,label=scen)
-
-        axes[0].legend(title="Unique sweep")
-        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'U5_PfPR_ClinicalIncidence.png'))
 
 
 if __name__ == "__main__":

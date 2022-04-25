@@ -5,22 +5,23 @@
 Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment
 program 2022.
 
-#### Weekly examples
+#### Weekly examples  
+_(include temporary notes for admin)_
 
-- [Go to Week 1](#week1)
-- [Go to Week 2](#week2)
-- [Go to Week 3](#week3)
-- [Go to Week 4](#week4)
+- [Go to Week 1](#week1)    _(MR: setup closed, open for testing)_
+- [Go to Week 2](#week2)    _(MR: setup closed, open for testing)_
+- [Go to Week 3](#week3)    _(MR: setup in progress (+ITN,IRS))_
+- [Go to Week 4](#week4)    _(MR: setup in progress (instructions for analyzer changes))_
 - Week 5: no technical track
-- [Go to Week 6](#week6)
-- [Go to Week 7](#week7)
-- [Go to Week 8](#week8)
-- [Go to Week 9](#week9)
+- [Go to Week 6](#week6)    _(??: setup not started)_
+- [Go to Week 7](#week7)    _(??: setup not started)_
+- [Go to Week 8](#week8)    _(??: setup not started)_
+- [Go to Week 9](#week9)    _(??: setup not started)_
 - Week 10: no technical track
-- [Go to Week 11](#week11)
-- [Go to Week 12](#week12)
-- [Go to Week 13](#week13)
-- [Go to Week 14](#week14)
+- [Go to Week 11](#week11)    _(??: setup not started)_
+- [Go to Week 12](#week12)    _(??: setup not started)_
+- [Go to Week 13](#week13)    _(??: setup not started)_
+- [Go to Week 14](#week14)    _(??: setup not started)_
 
 __Table 1: Overview of scripts used throughout the course__
 
@@ -153,6 +154,7 @@ EMOD How To's:
 - Add IRS
 - [Add larvicides](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-larvicides)
 - [Add drug campaigns](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-drug-campaigns)
+- Add Event Reporters
 - [Using the model builder to set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
 ### Instructions
@@ -174,12 +176,20 @@ EMOD How To's:
                             target_group={'agemin': 0.25, 'agemax': 5},
                             receiving_drugs_event_name='Received_SMC')
       ```
+- Add additional custom reporters to monitor events happening in the simulation
+    -  Report_Event_Recorder... (TODO)
+    -  Individual_Events... (TODO)
 - Change _exp_name_  for week 3 `f'{user}_FE_2022_example_w3a'`
 - Run simulation and wait for simulation to finish (~5 minutes)
 - Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) (don't forget to update expt_id!)
-- Inspect `simulation_outputs` and compare against outputs from the previous week.
-    - New output files: `U5_PfPR_ClinicalIncidence.csv` and `U5_PfPR_ClinicalIncidence.png`
-
+- Inspect the different results generated in `simulation_outputs`.
+    - Are all intervention events happening as expected?
+    - Parameters changes you can explore in further simulations: 
+      - coverage of interventions
+      - age group of receiving an interventions
+      - drug_code or adherent_drug_configuration
+    - Please share your observations with the group 
+    
 <details><summary><span>Check results</span></summary>
 <p>
 

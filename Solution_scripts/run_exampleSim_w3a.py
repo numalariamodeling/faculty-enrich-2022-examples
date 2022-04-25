@@ -9,8 +9,9 @@ from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'LOCAL'
+years = 3
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=365)
 cb.update_params({
     'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
@@ -27,9 +28,21 @@ set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 
                         })
 
 """CUSTOM REPORTS"""
-add_summary_report(cb, start=1, interval=30,
-                   age_bins=[0.25, 5, 100],
-                   description='Monthly_U5')
+#add_filtered_report(cb, start=0, end=years * 365)
+## Summary report per agebin
+add_summary_report(cb, start=1, interval=365,
+                   age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
+                   description='Annual_Agebin')
+
+## Track case management per individuum
+cb.update_params({
+    "Report_Event_Recorder": 1,
+    "Report_Event_Recorder_Individual_Properties": [],
+    "Report_Event_Recorder_Ignore_Events_In_List": 0,
+    "Report_Event_Recorder_Events": ['Received_SMC'],  #TODO 'Received_BedNet', IRS
+    'Custom_Individual_Events': ['Received_Treatment', 'Received_Severe_Treatment']
+})
+
 
 """ADDITIONAL CAMPAIGNS"""
 # health seeeking

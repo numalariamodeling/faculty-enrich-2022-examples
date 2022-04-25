@@ -10,10 +10,10 @@ from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'LOCAL'
-sim_start_year = 2022
 numseeds = 3
+years = 3
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=365)
 cb.update_params({
     'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
@@ -30,11 +30,15 @@ set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 
                         })
 
 """CUSTOM REPORTS"""
-add_summary_report(cb, start=1, interval=30,
-                   age_bins=[0.25, 5, 100],
-                   description='Monthly_U5')
+add_summary_report(cb, start=1, interval=365,
+                   age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
+                   description='Annual_Agebin')
+
+# EVENT REPORTS TODO
 
 """ADDITIONAL CAMPAIGNS"""
+# TODO
+
 # health seeeking
 def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
     add_health_seeking(cb, start_day=0,
@@ -75,10 +79,10 @@ def smc_intervention(cb, coverage_level, day=30, cycles=4):
     return {'smc_coverage': coverage_level,
             'smc_seasonalstart_day': day}
 
+
 # run_sim_args is what the `dtk run` command will look for
 user = os.getlogin()  # user initials
 expt_name = f'{user}_FE_2022_example_w3b'
-
 
 """BUILDER"""
 builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
@@ -89,8 +93,6 @@ builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
                                 for smc_cov in [0, 0.6]
                                 for x in range(numseeds)
                                 ])
-
-
 
 run_sim_args = {
     'exp_name': expt_name,

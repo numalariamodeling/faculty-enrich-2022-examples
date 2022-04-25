@@ -74,6 +74,9 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'All_Age_Monthly_Cases.csv'), index=False)
 
         # Figure with panel per outcome channel
+        # Take mean across multiple years and runs for plots per agebin on the x-axis
+        adf = adf.groupby(['Month'])[self.inset_channels].agg(np.mean).reset_index()
+
         fig = plt.figure(figsize=(6, 5))
         fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
         axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
@@ -161,8 +164,8 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
 
         # Discard early years used as burnin
         if self.burnin is not None:
-            df = df[df['year'] >= self.start_year + self.burnin]
-        df = df.loc[df['agebin'] <= 100]
+            adf = adf[adf['year'] >= self.start_year + self.burnin]
+        adf = adf.loc[adf['agebin'] <= 100]
         adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
 
         # Figure with panel per outcome channel
