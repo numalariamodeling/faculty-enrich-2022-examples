@@ -24,7 +24,7 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         else:
             return datetime.datetime.strptime(str(x), '%j').month
 
-    def __init__(self, expt_name, working_dir=".", start_year=1, end_year=2):
+    def __init__(self, expt_name, working_dir=".", start_year=2022, end_year=2023):
         super(MonthlyInsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
         self.sweep_variables = ["Run_Number"]
         self.inset_channels = ['Statistical Population', 'New Clinical Cases', 'New Severe Cases', 'PfHRP2 Prevalence']
