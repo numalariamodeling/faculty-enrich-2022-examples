@@ -3,17 +3,21 @@ from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
 from dtk.vector.species import set_species, set_larval_habitat
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.SetupParser import SetupParser
+from malaria.reports.MalariaReport import add_summary_report
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'LOCAL'
+years = 3
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=365)
+"""MODIFIED SETTING SPECIFIC FILES"""
 cb.update_params({
     'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
     "Land_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
     "Rainfall_Filename": os.path.join('Ghana', 'Ghana_30arcsec_rainfall_daily.bin'),
-    "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin')
+    "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin'),
+    "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
 })
 
 set_species(cb, ["arabiensis", "funestus", "gambiae"])
@@ -22,6 +26,10 @@ set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 
                         "gambiae": {'TEMPORARY_RAINFALL': 8.3e8, 'CONSTANT': 1e7}
                         })
 
+"""CUSTOM REPORTS"""
+add_summary_report(cb, start=1, interval=365,
+                   age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
+                   description='Annual_Agebin')
 
 # run_sim_args is what the `dtk run` command will look for
 user = os.getlogin()  # user initials

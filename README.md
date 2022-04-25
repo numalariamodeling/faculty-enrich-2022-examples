@@ -31,6 +31,8 @@ __Table 1: Overview of scripts used throughout the course__
 |generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
 |plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R | 
 |analyzer_collection.py | collection of different analyzers used| 
+|run_burnin_exampleSim.py |  <TODO: or similar when introducing serialization>  | 
+
 
 ## Week 1: Overview of EMOD <a name="week1"></a>
 
@@ -71,6 +73,7 @@ EMOD How To's:
 - [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
 - [Create a demographics file](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-a-demographics-file)
 - [Create climate files](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-climate-files)
+- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports)
 
 ### Instructions
 
@@ -86,10 +89,25 @@ EMOD How To's:
         "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
         "Land_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
         "Rainfall_Filename": os.path.join('Ghana', 'Ghana_30arcsec_rainfall_daily.bin'),
-        "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin')
+        "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin'),
+        "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
     })
     ```
-
+- Add custom reporter with annual summary for different age groups
+    - add `add_summary_report` (see EMOD How To's) or below
+      ```py
+      from malaria.reports.MalariaReport import add_summary_report
+      
+      add_summary_report(cb, start=1, interval=365,
+                       age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120], 
+                       description='Annual_Agebin')
+      ```
+- Increase simulation duration from 1 to 3 years by modifying DTKConfigBuilder as below:
+  ```py 
+    years = 3
+    cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years*365)
+  ```
+  
 - Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
 - Run simulation as learned in Week 1 and wait for simulation to finish (~5 minutes)
 - Run analyzer script for Week 2 `analyze_exampleSim_w2.py` (don't forget to update expt_id!)
@@ -97,7 +115,9 @@ EMOD How To's:
     - Optional: rerun analyzer with plot for week 1 and compare.
     - _Note that EMOD is a stochastic model and any changes at low population size and few repetitions might be at
       random and not necessarily due to the parameter change!_
-- Done!
+- Rerun simulations for different durations, and or for different agebins (change exp_name to keep track of your simulations) :
+  - How do the outcomes change? 
+  - What do you recognize about running time?
 
 <details><summary><span>Check results</span></summary>
 <p>
@@ -106,9 +126,15 @@ Generated simulation files
 
 ![img](static/w2.1_directories_files.png)
 
-Generated plot
+Generated plot from InsetChart
 
-![img](static/All_Age_Monthly_Cases.png)
+![img](static/w2_All_Age_Monthly_Cases.png)
+
+Generated plot from annual summmary report
+
+![img](static/w2_Agebin_PfPR_ClinicalIncidence.png)
+
+View suggested [solution script for week 2](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w2.py)
 
 </p>
 </details>
@@ -127,7 +153,6 @@ EMOD How To's:
 - Add IRS
 - [Add larvicides](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-larvicides)
 - [Add drug campaigns](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-drug-campaigns)
-- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports)
 - [Using the model builder to set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
 ### Instructions
@@ -149,13 +174,6 @@ EMOD How To's:
                             target_group={'agemin': 0.25, 'agemax': 5},
                             receiving_drugs_event_name='Received_SMC')
       ```
-- Add custom reports
-    - add `MalariaSummaryReport` (see EMOD How To's) or below
-      ```py
-      add_summary_report(cb, start=1, interval=30,
-                       age_bins=[0.25,5,100], 
-                       description='Monthly_U5')
-      ```
 - Change _exp_name_  for week 3 `f'{user}_FE_2022_example_w3a'`
 - Run simulation and wait for simulation to finish (~5 minutes)
 - Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) (don't forget to update expt_id!)
@@ -168,6 +186,9 @@ EMOD How To's:
 [To do: complete result screenshots]
 
 ![img](static/U5_PfPR_ClinicalIncidence_3a.png)
+
+View suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3a.py)
+
 
 </p>
 </details>
@@ -270,6 +291,8 @@ EMOD How To's:
 [To do: complete result screenshots]
 ![img](static/U5_PfPR_ClinicalIncidence_3b.png)
 
+View suggested [solution script for week 3 (b)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3b.py)
+
 </p>
 </details>
 
@@ -329,6 +352,7 @@ EMOD How To's:
 
 [To do: add image]
 <!--![img](static/w2.1_directories_files.png)-->
+View suggested [solution script for week 4](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w4.py)
 
 </p>
 </details>
