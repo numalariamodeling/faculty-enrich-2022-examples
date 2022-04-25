@@ -148,8 +148,9 @@ EMOD How To's:
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+[To do: complete result screenshots]
+
+![img](static/U5_PfPR_ClinicalIncidence_3a.png)
 
 </p>
 </details>
@@ -243,8 +244,8 @@ EMOD How To's:
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+[To do: complete result screenshots]
+![img](static/U5_PfPR_ClinicalIncidence_3b.png)
 
 </p>
 </details>
