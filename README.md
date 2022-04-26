@@ -631,15 +631,17 @@ suggested [solution script for week 4](https://github.com/numalariamodeling/facu
 
 EMOD How To's:
 
-- Serialization
-- [TODO]
+- [Serialization](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#serialization)
 
 ### Instructions
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- [TODO]
+**Part 1: Create Burn-in**
+    - 
+    
+**Part 2: Pick-up & run simulations from burn-in** 
 
 <details><summary><span>Check results</span></summary>
 <p>
