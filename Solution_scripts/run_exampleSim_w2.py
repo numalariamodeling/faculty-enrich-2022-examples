@@ -1,8 +1,11 @@
+## Import basic python functions
 import os
+## Import dtk and EMOD basics functionalities
 from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
 from dtk.vector.species import set_species, set_larval_habitat
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.SetupParser import SetupParser
+## Import custom reporters
 from malaria.reports.MalariaReport import add_summary_report
 
 # This block will be used unless overridden on the command-line
@@ -18,6 +21,13 @@ cb.update_params({
     "Rainfall_Filename": os.path.join('Ghana', 'Ghana_30arcsec_rainfall_daily.bin'),
     "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin'),
     "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
+})
+
+"""Optional update other parameters (explorative)"""
+cb.update_params({
+    'x_Base_Population': 1,
+    'x_Birth': 1,
+    'x_Temporary_Larval_Habitat': 1
 })
 
 set_species(cb, ["arabiensis", "funestus", "gambiae"])

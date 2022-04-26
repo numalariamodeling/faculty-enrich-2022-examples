@@ -1,11 +1,13 @@
+## Import basic python functions
 import os
 import datetime
 import pandas as pd
 import numpy as np
+## Import dtk and EMOD basics functionalities
 from simtools.Analysis.AnalyzeManager import AnalyzeManager
 from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
 from simtools.SetupParser import SetupParser
-
+## For plotting
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 

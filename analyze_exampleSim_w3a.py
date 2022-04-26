@@ -8,6 +8,7 @@ from simtools.SetupParser import SetupParser
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.dates as mdates
 
 mpl.rcParams['pdf.fonttype'] = 42
 
@@ -16,7 +17,7 @@ SetupParser.default_block = 'LOCAL'
 
 user = os.getlogin()  # user initials
 expt_name = f'{user}_FE_2022_example_w3a'
-expt_id = '2022_04_25_05_14_08_922198'  ## change expt_id
+expt_id = '2022_04_26_01_31_14_904003'  ## change expt_id
 working_dir = os.path.join('simulation_outputs')
 
 
@@ -111,7 +112,6 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         self.end_year = end_year
         self.burnin = burnin
 
-
     def select_simulation_data(self, data, simulation):
 
         adf = pd.DataFrame()
@@ -169,8 +169,7 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
 
         # Figure with panel per outcome channel
-
-        # Take mean across multiple years for plots per agebin on the x-axis
+        # Take mean across multiple years and Run_Numbers for plots per agebin on the x-axis
         channels = ['Pop', 'Cases', 'Severe cases', 'PfPR']
         self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
         adf = adf.groupby(['agebin'] + self.sweep_variables)[channels].agg(np.mean).reset_index()
@@ -193,16 +192,250 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Agebin_PfPR_ClinicalIncidence.png'))
 
 
-#TODO add event analyzer
+class IndividualEventsAnalyzer(BaseAnalyzer):
+
+    @classmethod
+    def monthparser(self, x):
+        if x == 0:
+            return 12
+        else:
+            return datetime.datetime.strptime(str(x), '%j').month
+
+    def __init__(self, expt_name, sweep_variables=None, working_dir='./', start_year=2010,
+                 end_year=2022, filter_exists=False):
+        super(IndividualEventsAnalyzer, self).__init__(working_dir=working_dir,
+                                                       filenames=["output/ReportEventRecorder.csv"]
+                                                       )
+        self.sweep_variables = sweep_variables or ["Run_Number"]
+        self.expt_name = expt_name
+        self.start_year = start_year
+        self.end_year = end_year
+        self.filter_exists = filter_exists
+
+    def filter(self, simulation):
+        if self.filter_exists:
+            file = os.path.join(simulation.get_path(), self.filenames[0])
+            return os.path.exists(file)
+        else:
+            return True
+
+    def select_simulation_data(self, data, simulation):
+
+        simdata = pd.DataFrame(data[self.filenames[0]])
+        simdata['Day'] = simdata['Time'] % 365
+        simdata['Month'] = simdata['Day'].apply(lambda x: self.monthparser((x + 1) % 365))
+        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + self.start_year)
+        simdata = simdata[simdata['Year'].between(2020, 2021)]
+
+        for sweep_var in self.sweep_variables:
+            if sweep_var in simulation.tags.keys():
+                try:
+                    simdata[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+        return simdata
+
+    def finalize(self, all_data):
+
+        selected = [data for sim, data in all_data.items()]
+        if len(selected) == 0:
+            print("\nWarning: No data have been returned... Exiting...")
+            return
+
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
+
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        adf = pd.concat(selected).reset_index(drop=True)
+        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'IndividualEvents.csv'), index=False)
+
+
+class TransmissionReport(BaseAnalyzer):
+
+    @classmethod
+    def monthparser(self, x):
+        if x == 0:
+            return 12
+        else:
+            return datetime.datetime.strptime(str(x), '%j').month
+
+    def __init__(self, expt_name, channels=None, sweep_variables=None, working_dir='./', start_year=2022,
+                 selected_year=None, daily_report=False, monthly_report=False, filter_exists=False):
+        super(TransmissionReport, self).__init__(working_dir=working_dir,
+                                                 filenames=["output/InsetChart.json"])
+        self.sweep_variables = sweep_variables or ["Run_Number"]
+        self.channels = channels or ['Daily Bites per Human', 'Daily EIR', 'Mean Parasitemia', 'PfHRP2 Prevalence',
+                                     'Rainfall']
+        self.start_year = start_year
+        self.selected_year = selected_year
+        self.daily_report = daily_report
+        self.monthly_report = monthly_report
+        self.expt_name = expt_name
+        self.filter_exists = filter_exists
+
+    def filter(self, simulation):
+        if self.filter_exists:
+            file = os.path.join(simulation.get_path(), self.filenames[0])
+            return os.path.exists(file)
+        else:
+            return True
+
+    def select_simulation_data(self, data, simulation):
+        simdata = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.channels})
+        # simdata = simdata[-365:]
+        simdata['Time'] = simdata.index
+        simdata['Day'] = simdata['Time'] % 365
+        simdata['Month'] = simdata['Day'].apply(lambda x: self.monthparser((x + 1) % 365))
+        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + self.start_year)
+        simdata['date'] = simdata.apply(lambda x: datetime.date(int(x['Year']), int(x['Month']), 1), axis=1)
+        if self.selected_year is not None:
+            simdata = simdata.loc[(simdata['Year'] == self.selected_year)]
+
+        simdata = simdata.groupby(['Time', 'date', 'Day', 'Month', 'Year'])[self.channels].agg(np.mean).reset_index()
+
+        for sweep_var in self.sweep_variables:
+            if sweep_var in simulation.tags.keys():
+                try:
+                    simdata[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+        return simdata
+
+    def finalize(self, all_data):
+
+        selected = [data for sim, data in all_data.items()]
+        if len(selected) == 0:
+            print("\nWarning: No data have been returned... Exiting...")
+            return
+
+        adf = pd.concat(selected).reset_index(drop=True)
+
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        if self.selected_year is not None:
+            selected_year_suffix = f'_{self.selected_year}'
+        else:
+            selected_year_suffix = '_all_years'
+
+        ## Aggregate Run_Number
+        grp_channels = [x for x in self.sweep_variables if x != "Run_Number"]
+        adf = adf.groupby(['Time', 'date', 'Day', 'Month', 'Year'] + grp_channels)[self.channels].agg(
+            np.mean).reset_index()
+
+        sum_channels = ['Daily Bites per Human', 'Daily EIR', 'Rainfall']
+        mean_channels = ['Mean Parasitemia', 'PfHRP2 Prevalence']
+        ### DAILY TRANSMISSION
+        if self.daily_report:
+            adf.to_csv(os.path.join(self.working_dir, self.expt_name,
+                                    f'daily_transmission_report{selected_year_suffix}.csv'), index=False)
+
+            # Figure with panel per outcome channel
+            channels = sum_channels + ['PfHRP2 Prevalence']  # + mean_channels
+            fig = plt.figure(figsize=(6, 5))
+            fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+            axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+            fig.suptitle(f'Analyzer: TransmissionReport')
+
+            for ai, channel in enumerate(channels):
+                ax = axes[ai]
+                ax.set_title(channel)
+                ax.set_ylabel(channel)
+                if channel == 'PfHRP2 Prevalence':
+                    ax.set_ylim(0, 1)
+                else:
+                    ax.set_ylim(0, np.max(adf[channel]))
+                ax.set_xlabel('Time (days)')
+                ax.plot(adf['Time'], adf[channel], '-', color='black', linewidth=0.8)
+            fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_daily.png'))
+
+        ### MONTHLY TRANSMISSION
+        if self.monthly_report:
+            df = adf.groupby(['date', 'Year', 'Month'] + grp_channels)[sum_channels].agg(np.sum).reset_index()
+            pdf = adf.groupby(['date', 'Year', 'Month'] + grp_channels)[mean_channels].agg(np.mean).reset_index()
+            mdf = pd.merge(left=pdf, right=df, on=['date', 'Year', 'Month'] + grp_channels)
+            mdf = mdf.rename(columns={'Daily Bites per Human': 'Monthly Bites per Human', 'Daily EIR': 'Monthly EIR'})
+            mdf.to_csv(os.path.join(self.working_dir, self.expt_name,
+                                    f'monthly_transmission_report{selected_year_suffix}.csv'), index=False)
+
+            # Figure with panel per outcome channel
+            channels = sum_channels + ['PfHRP2 Prevalence']  # + mean_channels
+            channels = [x.replace('Daily ', 'Monthly ') for x in channels]
+
+            fig = plt.figure(figsize=(6, 5))
+            fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+            axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+            fig.suptitle(f'Analyzer: TransmissionReport')
+
+            for ai, channel in enumerate(channels):
+                ax = axes[ai]
+                ax.set_title(channel)
+                ax.set_ylabel(channel)
+                if channel == 'PfHRP2 Prevalence':
+                    ax.set_ylim(0, 1)
+                else:
+                    ax.set_ylim(0, np.max(mdf[channel]))
+                # ax.set_xlabel('Time (months)')   #FIXME use continuous months for visualization
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%m\n%y'))
+                ax.plot(mdf['date'], mdf[channel], '-', color='black', linewidth=0.8)
+            fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_monthly.png'))
+
+        ### ANNUAL TRANSMISSION
+        df = adf.groupby(['Year'] + grp_channels)[sum_channels].agg(np.sum).reset_index()
+        pdf = adf.groupby(['Year'] + grp_channels)[mean_channels].agg(np.mean).reset_index()
+        adf = pd.merge(left=pdf, right=df, on=['Year'] + grp_channels)
+        adf = adf.rename(columns={'Daily Bites per Human': 'Annual Bites per Human', 'Daily EIR': 'Annual EIR'})
+        adf.to_csv(
+            os.path.join(self.working_dir, self.expt_name, f'annual_transmission_report{selected_year_suffix}.csv'),
+            index=False)
+
+        # Figure with panel per outcome channel
+        channels = sum_channels + ['PfHRP2 Prevalence']  # + mean_channels
+        channels = [x.replace('Daily ', 'Annual ') for x in channels]
+
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: TransmissionReport')
+
+        for ai, channel in enumerate(channels):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if channel == 'PfHRP2 Prevalence':
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            ax.set_xlabel('Time (years)')
+            ax.set_xticks(adf['Year'].unique())
+            ax.set_xticklabels(adf['Year'].unique())
+            ax.plot(adf['Year'], adf[channel], '-', color='black', linewidth=0.8)
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_annual.png'))
+
+
+# TODO add event analyzer
 
 if __name__ == "__main__":
     SetupParser.init()
 
-    analyzers = [MonthlyInsetChartAnalyzer(expt_name=expt_name,
-                                           working_dir=working_dir),
-                 MonthlyPfPRAnalyzer(expt_name=expt_name,
-                                     working_dir=working_dir)
-                 ]
+    analyzers = [
+        MonthlyInsetChartAnalyzer(expt_name=expt_name,
+                                  working_dir=working_dir),
+        AnnualAgebinPfPRAnalyzer(expt_name=expt_name,
+                                 working_dir=working_dir,
+                                 start_year=2022,
+                                 end_year=2025),
+        IndividualEventsAnalyzer(expt_name=expt_name,
+                                 working_dir=working_dir),
+        TransmissionReport(expt_name=expt_name,
+                           working_dir=working_dir,
+                           start_year=2022,
+                           selected_year=None,
+                           monthly_report=True,
+                           daily_report=True)
+    ]
 
     am = AnalyzeManager(expt_id, analyzers=analyzers)
     am.analyze()
