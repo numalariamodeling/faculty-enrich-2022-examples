@@ -12,6 +12,7 @@ SetupParser.default_block = 'HPC'
 burnin_id = "ad725a6c-a9c5-ec11-a9f6-9440c9be2c51"  # UPDATE with burn-in experiment id
 pull_year = 10  # year of burn-in to pick-up from
 pickup_years = 2  # years of pick-up to run
+n_seeds = 5       # number of runs
 
 if __name__ == "__main__":
     SetupParser.init()
@@ -33,7 +34,7 @@ if __name__ == "__main__":
         # Pull last day of <pull_year> to be used as a starting point.
         'Enable_Random_Generator_From_Serialized_Population': 0,
         'Serialization_Mask_Node_Read': 0,
-        'Enable_Default_Reporting': 0
+        'Enable_Default_Reporting': 1
     })
 
     set_species(cb, ["arabiensis", "funestus", "gambiae"])
@@ -43,9 +44,11 @@ if __name__ == "__main__":
                             })
 
     builder = ModBuilder.from_list(
-        [[ModFn(DTKConfigBuilder.set_param, 'Serialized_Population_Path', os.path.join(row['outpath'], 'output'))]
+        [[ModFn(DTKConfigBuilder.set_param, 'Serialized_Population_Path', os.path.join(row['outpath'], 'output')),
+          ModFn(DTKConfigBuilder.set_param, 'Run_Number', seed)]
          # Run pick-up from each unique burn-in scenario
          for r, row in ser_df.iterrows()
+         for seed in range(n_seeds)
          ])
 
     # run_sim_args is what the `dtk run` command will look for
