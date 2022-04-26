@@ -11,18 +11,18 @@ _(include temporary notes for admin)_
 
 - [Go to Week 1](#week1)    _(MR: setup closed, open for testing)_
 - [Go to Week 2](#week2)    _(MR: setup closed, open for testing)_
-- [Go to Week 3](#week3)    _(MR: setup in progress (+ITN,IRS))_
-- [Go to Week 4](#week4)    _(MR: setup in progress (instructions for analyzer changes))_
+- [Go to Week 3](#week3)    _(MR: setup closed, open for testing)_
+- [Go to Week 4](#week4)    _(MR: setup in progress)_
 - Week 5: no technical track
-- [Go to Week 6](#week6)    _(??: setup not started)_
-- [Go to Week 7](#week7)    _(??: setup not started)_
-- [Go to Week 8](#week8)    _(??: setup not started)_
-- [Go to Week 9](#week9)    _(??: setup not started)_
+- [Go to Week 6](#week6)    _(TH: setup not started)_
+- [Go to Week 7](#week7)    _(BT: setup not started)_
+- [Go to Week 8](#week8)    _(MR: setup not started)_
+- [Go to Week 9](#week9)    _(JG?: setup not started)_
 - Week 10: no technical track
-- [Go to Week 11](#week11)    _(??: setup not started)_
-- [Go to Week 12](#week12)    _(??: setup not started)_
-- [Go to Week 13](#week13)    _(??: setup not started)_
-- [Go to Week 14](#week14)    _(??: setup not started)_
+- [Go to Week 11](#week11)    _(BT: setup not started)_
+- [Go to Week 12](#week12)    _(TH: setup not started)_
+- [Go to Week 13](#week13)    _(tbd)_
+- [Go to Week 14](#week14)    _(BT: setup not started)_
 
 __Table 1: Overview of scripts used throughout the course__
 
@@ -566,38 +566,48 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Change _exp_name_  for week 4 `f'{user}_FE_2022_example_w4'`
-- Customize simulation experiment:
-    - extend the simulation duration to >1 year, modify your simulation script as shown below
+#### PART I - Analyzer  
+- Add a monthly summary report as shown below to the simulation script
        ```py
-          cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
-          years = 5
-          sim_start = 2022
-          cb.update_params({'Simulation_Duration': years*365 })
+          sim_start_year = 2022  # add sim_start_year
           
           for year in range(years):
             start_day = 365 + 365 * year
             sim_year = sim_start_year + year
             add_summary_report(cb, start=start_day, interval=30,
-                               age_bins=[0.25, 5, 100],
-                               description=f'Monthly_U5_{sim_year}')
-          
-          # Optional, add additional age group
-          for year in range(years):
-            start_day = 365 + 365 * year
-            sim_year = sim_start_year + year
-            add_summary_report(cb, start=start_day, interval=30,
-                               age_bins=[0.25, 2,10, 100],
-                               description=f'Monthly_2to10_{sim_year}')
+                               age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
+                               description=f'Monthly_Agebin_{sim_year}')
        ```
-    - select campaigns and coverage levels to your choosing
+- Add MalariaFilteredReport - a simple oneliner (+module import)!.
+  ```py
+  from malaria.reports.MalariaReport import add_filtered_report, add_event_counter_report
+  add_filtered_report(cb, start=0, end=years * 365)
+  ```
+  - MalariaFilteredReport a subset of InsetChart hence reduced output files generated.
+- Optional: adjust coverage levels in ModBuilder to select/deselct interventions to include or change number of simulations to run
+- Again, change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulation and wait for simulation to finish (~10 minutes)
 - Run analyzer script for Week 4 (`analyze_exampleSim_w4.py`)
+- This time, the analyzer generated csv files instead of plots! 
+  This allows more flexible plotting for your project and 
+  to look up values in the csv or do additional postprocessing steps as needed.  
+- Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the reports used in the simulation.
+- Run additional simulations and change the reports, for instance the agebins or reporting interval, and edit the analyzer accordingly!
+  - Some tips:
+    - Children under the age of five is an age group often used and monitored in malaria studies, whereas current agebins include 2 years and don't allow U5 aggregation.
+    Therefore common age_bins used are `[0.25, 5, 100]` for only the U5 age group! Suggested reporter name:    `f'Monthly_Agebin_{sim_year}'`
+      
+    
+#### PART II - Plotting  
+
 - Run plotting scripts:
     - Using _Python_: `plot_exampleSim.py`
     - Using _R_: `plot_exampleSim.R`
-- Inspect `simulation_outputs` and compare against outputs from the previous week.
-- Done!
+- Look at the figures more critically, anything you would like to change? 
+  Open the plotting scripts and adjust axis titles, colors or even add your own plot!
+- Use monthly summary report outcomes to get more detailed figures that show seasonal trends in malaria burden and intervention impact.
+- ...
+
 
 <details><summary><span>Check results</span></summary>
 <p>

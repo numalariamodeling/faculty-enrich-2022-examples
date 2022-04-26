@@ -581,7 +581,7 @@ class BednetUsageAnalyzer(BaseAnalyzer):
                 ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
         axes[0].legend(title="Unique sweep")
-        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'BednetUsage.png'))
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Bednet_Usage.png'))
 
 
 class ReceivedCampaignAnalyzer(BaseAnalyzer):
@@ -697,7 +697,7 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
                 ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
         axes[0].legend(title="Unique sweep")
-        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'ReceivedCampaignAnalyzer.png'))
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Received_Campaigns.png'))
 
 
 if __name__ == "__main__":
