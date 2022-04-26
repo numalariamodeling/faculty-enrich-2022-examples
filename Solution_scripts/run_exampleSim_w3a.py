@@ -57,7 +57,7 @@ add_vaccine(cb,
                                  "Decay_Time_Constant": 592.4066512,
                                  "class": 'WaningEffectExponential'}},
             start_days=[366],
-            coverage=0.2,
+            coverage=1,
             repetitions=1,
             tsteps_btwn_repetitions=-1,
             target_group={'agemin': 274, 'agemax': 275})  # children 9 months of age
@@ -95,7 +95,7 @@ add_ITN_age_season(cb, start=366,
                    )
 event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
 
-# IRS, start after 1 year
+# IRS, start after 1 year - single campaign
 add_IRS(cb, start=366,
         coverage_by_ages=[{"coverage": 0.8, "min": 0, "max": 100}],
         killing_config={

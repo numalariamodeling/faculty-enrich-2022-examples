@@ -115,8 +115,8 @@ EMOD How To's:
     - Optional: rerun analyzer with plot for week 1 and compare.
     - _Note that EMOD is a stochastic model and any changes at low population size and few repetitions might be at
       random and not necessarily due to the parameter change!_
-- Run additional simulations with different durations, population sizes or for different agebins _(Tip: change exp_name to keep track of your
-  simulations)_ 
+- Run additional simulations with different durations, population sizes or for different agebins _(Tip: change exp_name
+  to keep track of your simulations)_
   ```py 
   # Example of how to change additional parameters from the config file
   cb.update_params({
@@ -125,7 +125,7 @@ EMOD How To's:
         'x_Temporary_Larval_Habitat': 1
     })
   ```
-- Again, inspect the simulation outputs and compare them against each other:  
+- Again, inspect the simulation outputs and compare them against each other:
     - How do the outcomes change?
     - What do you recognize about running time?
 
@@ -190,8 +190,7 @@ EMOD How To's:
                                         {'trigger': 'NewSevereCase', 'coverage': 0.85,
                                          'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
                                drug=['Artemether', 'Lumefantrine'])
-            event_list = event_list + ['Received_Treatment', 'Received_Severe_Treatment']
-           ```
+            ```
              </p>
              </details>
         - <details><summary><span style="color: blue";">add_drug_campaign </span></summary>
@@ -274,9 +273,10 @@ EMOD How To's:
             </details>
 - To keep track of the campaign events in the simulations, add `event_list = []` and expand as needed
   via  `event_list = event_list + [<new_event_name>]`
-    - Event names:  `'Received_Treatment', 'Received_Severe_Treatment','Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded','Received_IRS', 'Received_SMC', 'Received_Vaccine' `
+    - Event
+      names:  `'Received_Treatment', 'Received_Severe_Treatment','Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded','Received_IRS', 'Received_SMC', 'Received_Vaccine' `
 - Next, add additional custom reporters to monitor events happening in the simulation
-    - Report_Event_Recorder and Report_Event_Counter: 
+    - Report_Event_Recorder and Report_Event_Counter:
       ``` py
       from malaria.reports.MalariaReport import add_event_counter_report
        cb.update_params({
@@ -318,12 +318,27 @@ _Tip: Notepad ++ offers helpful json plugins._
 
 ReportEventRecorder with campaign events, for each individual in the population. Some individuals get multiple
 interventions, some none and so on - age is given in days.
-![img](static/3a_ReportEventRecorder.png)
+![img](static/w3a_ReportEventRecorder.png)
 __Fig: ReportEventRecorder__ </br>
 _Tip: When running simulations with large populations, this csv file can get very large and should be disabled, while
 for testing it is very useful._
 
 Generated results after running analyzer:
+
+![img](static/w3a_TransmissionReport_daily.png)
+__Fig: Aggregated transmission report (daily)__
+
+![img](static/w3a_TransmissionReport_monthly.png)
+__Fig: Aggregated transmission report (monthly)__
+
+![img](static/w3a_TransmissionReport_annual.png)
+__Fig: Aggregated transmission report (annual)__
+
+![img](static/w3a_BednetUsage.png)
+__Fig: Aggregated event report (ITN, Bed nets)__
+
+![img](static/w3a_ReceivedCampaignAnalyzer.png)
+__Fig: Aggregated event report (other campaigns)__
 
 View
 suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3a.py)
@@ -374,61 +389,158 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 
 - In order for case management and SMC campaigns to take different coverage parameters as specified above, they need to
   be changed into a function that takes cb as input as shows below:
-    - wrap `add_health_seeking` into `case_management` function:
-
-      ```py
-      def case_management(cb, cm_cov_U5,cm_cov_adults=0.5): 
-          add_health_seeking(cb, start_day=0,
-                         targets=[{'trigger': 'NewClinicalCase',
-                                   'coverage': cm_cov_U5,
-                                   'agemin': 0,
-                                   'agemax': 5,
-                                   'seek': 1,
-                                   'rate': 0.3},
-                                  {'trigger': 'NewClinicalCase',
-                                   'coverage': cm_cov_adults,
-                                   'agemin': 5,
-                                   'agemax': 100,
-                                   'seek': 1,
-                                   'rate': 0.3},
-                                  {'trigger': 'NewSevereCase',
-                                   'coverage': 0.85,
-                                   'agemin': 0,
-                                   'agemax': 100,
-                                   'seek': 1,
-                                   'rate': 0.5}],
-                         drug=['Artemether', 'Lumefantrine'])
+    - wrap `add_health_seeking` into `case_management` and others into functions:
       
-          return {'cm_cov_U5': cm_cov_U5,
-                  'cm_cov_adults': cm_cov_adults}
-  
-      ```
-    - wrap `add_drug_campaign` into `smc_intervention` function:
-      ```py
-      def smc_intervention(cb, coverage_level , day=30, cycles=4):
-        add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
-                          coverage=coverage_level,
-                          start_days=[day],
-                          repetitions=cycles,
-                          tsteps_btwn_repetitions=30,
-                          target_group={'agemin': 0.25, 'agemax': 5},
-                          receiving_drugs_event_name='Received_SMC')
-  
-        return {'smc_coverage': coverage_level,
-               'smc_seasonalstart_day': day}
-  
-      ```
+        - <details><summary><span style="color: blue";">case_management </span></summary>
+           <p>
+           ```py
+            def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
+                add_health_seeking(cb, start_day=0,
+                                   targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
+                                             'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                            {'trigger': 'NewClinicalCase', 'coverage': 0.5,
+                                             'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                            {'trigger': 'NewSevereCase', 'coverage': 0.85,
+                                             'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                                   drug=['Artemether', 'Lumefantrine'])
+            
+                return {'cm_cov_U5': cm_cov_U5,
+                        'cm_cov_adults': cm_cov_adults}
+            ```
+             </p>
+             </details>
+        - <details><summary><span style="color: blue";">smc_intervention </span></summary>
+            <p>
 
+           ```py
+            def smc_intervention(cb, coverage_level, day=366, cycles=4):
+                add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
+                                  coverage=coverage_level,
+                                  start_days=[day],
+                                  repetitions=cycles,
+                                  tsteps_btwn_repetitions=30,
+                                  target_group={'agemin': 0.25, 'agemax': 5},
+                                  receiving_drugs_event_name='Received_SMC')
+            
+                return {'smc_start': day,
+                        'smc_coverage': coverage_level}
+ 
+           ```
+          
+             </p>
+             </details>
+        - <details><summary><span style="color: blue";">itn_intervention </span></summary>
+            <p>
+
+           ```py  
+            def itn_intervention(cb, coverage_level, day=366):
+                add_ITN_age_season(cb, start=day,
+                                   demographic_coverage=coverage_level,
+                                   killing_config={
+                                       "Initial_Effect": 0.520249973,  # LLIN Burkina
+                                       "Decay_Time_Constant": 1460,
+                                       "class": "WaningEffectExponential"},
+                                   blocking_config={
+                                       "Initial_Effect": 0.53,
+                                       "Decay_Time_Constant": 730,
+                                       "class": "WaningEffectExponential"},
+                                   discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+                                                  "Expiration_Period_Proportion_1": 0.9,
+                                                  "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+                                                  "Expiration_Period_Mean_2": 3650},
+                                   age_dependence={'Times': [0, 100],
+                                                   'Values': [0.9, 0.9]},
+                                   duration=-1, birth_triggered=False
+                                   )
+            
+                return {'itn_start': day,
+                        'itn_coverage': coverage_level}
+           ```
+            </p>
+            </details>
+          
+        - <details><summary><span style="color: blue";">irs_intervention </span></summary>
+            <p>
+
+           ```py
+            # IRS, start after 1 year - single campaign
+            def irs_intervention(cb, coverage_level, day=366):
+                add_IRS(cb, start=day,
+                        coverage_by_ages=[{"coverage": coverage_level, "min": 0, "max": 100}],
+                        killing_config={
+                            "class": "WaningEffectBoxExponential",
+                            "Box_Duration": 180,  # based on PMI data from Burkina
+                            "Decay_Time_Constant": 90,  # Sumishield from Benin
+                            "Initial_Effect": 0.7},
+                        )
+            
+                return {'irs_start': day,
+                        'irs_coverage': coverage_level}
+
+           ```
+            </p>
+            </details>
+        - <details><summary><span style="color: blue";">rtss_intervention </span></summary>
+            <p>
+
+           ```py
+            # malaria vaccine (RTS,S), no booster start after 1 year
+            def rtss_intervention(cb, coverage_level, day=366, agemin=274, agemax=275, initial_efficacy=0.8):
+                add_vaccine(cb,
+                            vaccine_type='RTSS',
+                            vaccine_params={"Waning_Config":
+                                                {"Initial_Effect": initial_efficacy,
+                                                 "Decay_Time_Constant": 592.4066512,
+                                                 "class": 'WaningEffectExponential'}},
+                            start_days=[day],
+                            coverage=coverage_level,
+                            repetitions=1,
+                            tsteps_btwn_repetitions=-1,
+                            target_group={'agemin': agemin, 'agemax': agemax})  # children 9 months of age
+            
+                return {'rtss_start': day,
+                        'rtss_coverage': coverage_level,
+                        'rtss_initial_effect': initial_efficacy}
+           ```
+            </p>
+            </details>
+    
 - Now change _exp_name_  to `f'{user}_FE_2022_example_w3b'` and the simulation is ready to go!
 - Run simulation and wait for simulation to finish (~10 minutes)
-- Run second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) (don't forget to update expt_id!)
+    - While waiting, check out the generated experiment folder, that now includes many more subfolders for each of the single simulations.
+    Open two campaign files and compare, do you find the difference? (If there is none, these might be two different run numbers for same simulation)
+      _(Tip: Many text editors allow side by side comparison of two scripts, automatically highlighting differences)_
+- Run second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) (don't forget to update _expt_id_!)
 - Inspect `simulation_outputs` and compare against outputs from the previous week.
+- Change intervention parameters in the `ModBuilder` and repeat the simulation process to become more familar with the process.
 
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: complete result screenshots]
-![img](static/U5_PfPR_ClinicalIncidence_3b.png)
+The generated result figures include separate lines. 
+The Run_Numbers were aggregated using the mean and the intervention coverage levels are used as additional 
+grouping variables when aggregating simulation outputs.
+An additional variable 'unique_sweep' was generaetd to simplify automated plotting for different sweep variabels (the parameters defined in `ModBuilder`)
+In the example below 'unique_sweep' is in the order of cm, smc, itn, irs, and rtss (rtss not included below).
+
+
+Aggregated malaria outcomes by agebin for no SMC (blue) compared to SMC (orange).
+![img](static/w3b_smc_Agebin_PfPR_ClinicalIncidence.png)
+__Fig: Agebin_PfPR_ClinicalIncidence__
+
+
+All age monthly cases showing no SMC (blue) compared to SMC (orange).
+![img](static/w3b_smc_All_Age_Monthly_Cases.png)
+__Fig: All_Age_Monthly_Cases__
+
+
+Monthly transmission report showing no SMC (blue) compared to SMC (orange).
+![img](static/w3b_smc_TransmissionReport_monthly.png)
+__Fig: TransmissionReport_monthly (SMC)__
+
+Note, if too many parameters changed at once without clear labelling, the results can become difficult to interpret!
+![img](static/w3b_TransmissionReport_monthly.png)
+__Fig: TransmissionReport_monthly (multiple interventions)__
 
 View
 suggested [solution script for week 3 (b)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3b.py)
