@@ -487,6 +487,323 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
 
 
 ##TODO OTHER (to be tested on example sim with intructions
+
+class MonthlyPfPRAnalyzer(BaseAnalyzer):
+
+    def __init__(self, expt_name, sweep_variables=None, working_dir='./', start_year=2020, end_year=2023,
+                 burnin=None, filter_exists=False):
+
+        super(MonthlyPfPRAnalyzer, self).__init__(working_dir=working_dir,
+                                                  filenames=[
+                                                      f"output/MalariaSummaryReport_monthly_U5_{x}.json"
+                                                      for x in range(start_year, end_year)]
+                                                  )
+        self.sweep_variables = sweep_variables or ["Run_Number"]
+        self.expt_name = expt_name
+        self.start_year = start_year
+        self.end_year = end_year
+        self.burnin = burnin
+        self.filter_exists = filter_exists
+
+    def filter(self, simulation):
+        if self.filter_exists:
+            file = os.path.join(simulation.get_path(), self.filenames[0])
+            return os.path.exists(file)
+        else:
+            return True
+
+    def select_simulation_data(self, data, simulation):
+
+        adf = pd.DataFrame()
+        for year, fname in zip(range(self.start_year, self.end_year), self.filenames):
+            d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:12]
+            pfpr = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:12]
+            clinical_cases = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:12]
+            severe_cases = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:12]
+            pop = [x[1] for x in d]
+            d = data[fname]['DataByTime']['PfPR_2to10'][:12]
+            PfPR_2to10 = d
+            d = data[fname]['DataByTime']['Annual EIR'][:12]
+            annualeir = d
+            simdata = pd.DataFrame({'month': range(1, 13),
+                                    'PfPR U5': pfpr,
+                                    'Cases U5': clinical_cases,
+                                    'Severe cases U5': severe_cases,
+                                    'Pop U5': pop,
+                                    'PfPR_2to10': PfPR_2to10,
+                                    'annualeir': annualeir})
+            simdata['year'] = year
+            adf = pd.concat([adf, simdata])
+
+        for sweep_var in self.sweep_variables:
+            if sweep_var in simulation.tags.keys():
+                try:
+                    adf[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+
+        return adf
+
+    def finalize(self, all_data):
+
+        selected = [data for sim, data in all_data.items()]
+        if len(selected) == 0:
+            print("\nWarning: No data have been returned... Exiting...")
+            return
+
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
+
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        adf = pd.concat(selected).reset_index(drop=True)
+        if self.burnin is not None:
+            adf = adf[adf['year'] > self.start_year + self.burnin]
+        adf.to_csv((os.path.join(self.working_dir, self.expt_name, 'U5_PfPR_ClinicalIncidence.csv')), index=False)
+
+
+class MonthlyPfPRAnalyzerU1(BaseAnalyzer):
+
+    def __init__(self, expt_name, sweep_variables=None, working_dir='./', start_year=2020, end_year=2023,
+                 burnin=None, filter_exists=False):
+
+        super(MonthlyPfPRAnalyzerU1, self).__init__(working_dir=working_dir,
+                                                    filenames=[
+                                                        f"output/MalariaSummaryReport_monthly_U1_{x}.json"
+                                                        for x in range(start_year, end_year)]
+                                                    )
+        self.sweep_variables = sweep_variables or ["Run_Number"]
+        self.expt_name = expt_name
+        self.start_year = start_year
+        self.end_year = end_year
+        self.burnin = burnin
+        self.filter_exists = filter_exists
+
+    def filter(self, simulation):
+        if self.filter_exists:
+            file = os.path.join(simulation.get_path(), self.filenames[0])
+            return os.path.exists(file)
+        else:
+            return True
+
+    def select_simulation_data(self, data, simulation):
+
+        adf = pd.DataFrame()
+        for year, fname in zip(range(self.start_year, self.end_year), self.filenames):
+            d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:12]
+            pfpr = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:12]
+            clinical_cases = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:12]
+            severe_cases = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:12]
+            pop = [x[1] for x in d]
+            simdata = pd.DataFrame({'month': range(1, 13),
+                                    'PfPR U1': pfpr,
+                                    'Cases U1': clinical_cases,
+                                    'Severe cases U1': severe_cases,
+                                    'Pop U1': pop})
+            simdata['year'] = year
+            adf = pd.concat([adf, simdata])
+
+        for sweep_var in self.sweep_variables:
+            if sweep_var in simulation.tags.keys():
+                try:
+                    adf[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+
+        return adf
+
+    def finalize(self, all_data):
+
+        selected = [data for sim, data in all_data.items()]
+        if len(selected) == 0:
+            print("\nWarning: No data have been returned... Exiting...")
+            return
+
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
+
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        adf = pd.concat(selected).reset_index(drop=True)
+        if self.burnin is not None:
+            adf = adf[adf['year'] > self.start_year + self.burnin]
+        adf.to_csv((os.path.join(self.working_dir, self.expt_name, 'U1_PfPR_ClinicalIncidence.csv')), index=False)
+
+
+class MonthlyPfPRAnalyzerU2(BaseAnalyzer):
+
+    def __init__(self, expt_name, sweep_variables=None, working_dir='./', start_year=2020, end_year=2023,
+                 burnin=None, filter_exists=False):
+
+        super(MonthlyPfPRAnalyzerU2, self).__init__(working_dir=working_dir,
+                                                    filenames=[
+                                                        f"output/MalariaSummaryReport_monthly_U2_{x}.json"
+                                                        for x in range(start_year, end_year)]
+                                                    )
+        self.sweep_variables = sweep_variables or ["Run_Number"]
+        self.expt_name = expt_name
+        self.start_year = start_year
+        self.end_year = end_year
+        self.burnin = burnin
+        self.filter_exists = filter_exists
+
+    def filter(self, simulation):
+        if self.filter_exists:
+            file = os.path.join(simulation.get_path(), self.filenames[0])
+            return os.path.exists(file)
+        else:
+            return True
+
+    def select_simulation_data(self, data, simulation):
+
+        adf = pd.DataFrame()
+        for year, fname in zip(range(self.start_year, self.end_year), self.filenames):
+            d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:12]
+            pfpr = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:12]
+            clinical_cases = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:12]
+            severe_cases = [x[1] for x in d]
+            d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:12]
+            pop = [x[1] for x in d]
+            simdata = pd.DataFrame({'month': range(1, 13),
+                                    'PfPR U2': pfpr,
+                                    'Cases U2': clinical_cases,
+                                    'Severe cases U2': severe_cases,
+                                    'Pop U2': pop})
+            simdata['year'] = year
+            adf = pd.concat([adf, simdata])
+
+        for sweep_var in self.sweep_variables:
+            if sweep_var in simulation.tags.keys():
+                try:
+                    adf[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+
+        return adf
+
+    def finalize(self, all_data):
+
+        selected = [data for sim, data in all_data.items()]
+        if len(selected) == 0:
+            print("\nWarning: No data have been returned... Exiting...")
+            return
+
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
+
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        adf = pd.concat(selected).reset_index(drop=True)
+        if self.burnin is not None:
+            adf = adf[adf['year'] > self.start_year + self.burnin]
+        adf.to_csv((os.path.join(self.working_dir, self.expt_name, 'U2_PfPR_ClinicalIncidence.csv')), index=False)
+
+
+class MonthlyAgebinPfPRAnalyzer(BaseAnalyzer):
+
+    def __init__(self, expt_name, sweep_variables=None, agebin_name='fineagebins', working_dir='./', start_year=2020,
+                 end_year=2023,
+                 burnin=None, filter_exists=False):
+
+        super(MonthlyAgebinPfPRAnalyzer, self).__init__(working_dir=working_dir,
+                                                        filenames=[
+                                                            f"output/MalariaSummaryReport_monthly_{agebin_name}_{x}.json"
+                                                            for x in range(start_year, end_year)]
+                                                        )
+        self.sweep_variables = sweep_variables or ["Run_Number"]
+        self.expt_name = expt_name
+        self.start_year = start_year
+        self.end_year = end_year
+        self.burnin = burnin
+        self.agebin_name = agebin_name
+        self.filter_exists = filter_exists
+
+    def filter(self, simulation):
+        if self.filter_exists:
+            file = os.path.join(simulation.get_path(), self.filenames[0])
+            return os.path.exists(file)
+        else:
+            return True
+
+    def select_simulation_data(self, data, simulation):
+
+        adf = pd.DataFrame()
+        for year, fname in zip(range(self.start_year, self.end_year), self.filenames):
+
+            age_bins = data[fname]['Metadata']['Age Bins']
+            parasite_bins = data[fname]['Metadata']['Parasitemia Bins']
+
+            for age in list(range(0, len(age_bins))):
+                d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:12]
+                pfpr = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:12]
+                clinical_cases = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:12]
+                severe_cases = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Mild Anemia by Age Bin'][:12]
+                mild_anaemia = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Moderate Anemia by Age Bin'][:12]
+                moderate_anaemia = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Anemia by Age Bin'][:12]
+                severe_anaemia = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:12]
+                pop = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['New Infections by Age Bin'][:12]
+                new_infect = [x[age] for x in d]
+                d = data[fname]['DataByTimeAndAgeBins']['Mean Log Parasite Density by Age Bin'][:12]
+                log_parasite_density = [x[age] for x in d]
+
+                simdata = pd.DataFrame({'month': range(1, 13),
+                                        'PfPR': pfpr,
+                                        'Cases': clinical_cases,
+                                        'Severe cases': severe_cases,
+                                        'Mild anaemia': mild_anaemia,
+                                        'Moderate anaemia': moderate_anaemia,
+                                        'Severe anaemia': severe_anaemia,
+                                        'New infections': new_infect,
+                                        'Mean Log Parasite Density': log_parasite_density,
+                                        'Pop': pop})
+                simdata['year'] = year
+                simdata['agebin'] = age_bins[age]
+                adf = pd.concat([adf, simdata])
+
+        for sweep_var in self.sweep_variables:
+            if sweep_var in simulation.tags.keys():
+                try:
+                    adf[sweep_var] = simulation.tags[sweep_var]
+                except:
+                    adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+
+        return adf
+
+    def finalize(self, all_data):
+
+        selected = [data for sim, data in all_data.items()]
+        if len(selected) == 0:
+            print("\nWarning: No data have been returned... Exiting...")
+            return
+        df = pd.concat(selected).reset_index(drop=True)
+
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
+
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
+
+        if self.burnin is not None:
+            df = df[df['year'] > self.start_year + self.burnin]
+        df = df.loc[df['agebin'] < 100]  # less than 100 years
+        df.to_csv((os.path.join(self.working_dir, self.expt_name, f'{self.agebin_name}_PfPR_ClinicalIncidence.csv')),
+                  index=False)
+
+
 class MonthlyTreatedCasesAnalyzer(BaseAnalyzer):
 
     @classmethod
@@ -534,7 +851,8 @@ class MonthlyTreatedCasesAnalyzer(BaseAnalyzer):
             simdata['date'] = simdata["Year"].astype(str) + '-' + simdata["Month"].astype(str) + '-' + simdata[
                 "Day"].astype(str)
 
-        sum_channels = self.channels + ['New Clinical Cases', 'New Severe Cases']
+        sum_channels = self.channels + ['New Clinical Cases',
+                                        'New Severe Cases']  # 'New Infections', 'Newly Symptomatic',
         mean_channels = ['Statistical Population', 'PfHRP2 Prevalence']
         for x in [y for y in sum_channels if y not in simdata.columns.values]:
             simdata[x] = 0
@@ -560,13 +878,13 @@ class MonthlyTreatedCasesAnalyzer(BaseAnalyzer):
             print("No data have been returned... Exiting...")
             return
 
-        if not os.path.exists(os.path.join(self.working_dir)):
-            os.mkdir(os.path.join(self.working_dir))
+        if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
+            os.mkdir(os.path.join(self.working_dir, self.expt_name))
 
-        print(f'\nSaving outputs to: {os.path.join(self.working_dir)}')
+        print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
 
         adf = pd.concat(selected).reset_index(drop=True)
-        adf.to_csv(os.path.join(self.working_dir, 'All_Age_Monthly_Cases.csv'), index=False)
+        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'All_Age_Monthly_Cases.csv'), index=False)
 
 
 class MonthlyAgebinSevereTreatedAnalyzer(BaseAnalyzer):
