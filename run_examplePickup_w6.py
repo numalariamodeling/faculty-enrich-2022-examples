@@ -4,7 +4,7 @@ from dtk.vector.species import set_species, set_larval_habitat
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.SetupParser import SetupParser
 from simtools.Utilities.Experiments import retrieve_experiment
-
+from simtools.ModBuilder import ModBuilder, ModFn
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'HPC'
 burnin_id = <ExperimentID> # UPDATE with burn-in experiment

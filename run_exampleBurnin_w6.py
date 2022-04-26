@@ -13,8 +13,6 @@ if __name__=="main":
 
   cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
 
-
-
   cb.update_params({
     'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_air_temperature_daily.bin'),
@@ -40,9 +38,8 @@ if __name__=="main":
   user = os.getlogin()  # user initials
   run_sim_args = {
       'exp_name': f'{user}_FE_2022_exampleBurnin_w6',
-      'config_builder': cb,
-      'exp_builder': builder
+      'config_builder': cb
     }
 
-    exp_manager = ExperimentManagerFactory.init()
-    exp_manager.run_simulations(**run_sim_args)
+  exp_manager = ExperimentManagerFactory.init()
+  exp_manager.run_simulations(**run_sim_args)
