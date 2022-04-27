@@ -635,13 +635,34 @@ EMOD How To's:
 
 ### Instructions
 
+
+**Part 1: Set-Up Serialization & Run Burn-in**
+
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-**Part 1: Create Burn-in**
-    - 
+- Add a variable 'serialize_year' to the run_exampleSim.py script (without any interventions), and set it equal to 50.
+- Update the configuration parameters as shown below to enable serialization
+- Update simtools.ini to reflect your paths
+- Change the value of `SetupParser.default_block` from 'LOCAL' to **'HPC'**
+    - This is to run the longer simulation on COMPS, as opposed to your local machine
+- Run simulation
+- Copy the experimentID ('expID') from the simulation metadata to pick-up from later.
+    
+</p></details>
+
     
 **Part 2: Pick-up & run simulations from burn-in** 
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
+- Add a variable 'pull_year' and set it equal to 50
+- Add a variable 'burnin_id' and set it equal to the experimentID copied from Part 1.
+- Update configuration parameters to pick-up from the end of your burn-in simulation
+- Import retreive_experiment from dtk-tools
+- Use retreive_experiment to load the burn-in and group by tags
+- Pick-up the simulations and run for 2 years with some intervention, and at least 10 random seeds
 
 <details><summary><span>Check results</span></summary>
 <p>
