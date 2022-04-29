@@ -243,9 +243,7 @@ EMOD How To's:
             <p>
 
            ```py
-            # from dtk.interventions.itn import add_ITN
             from dtk.interventions.itn_age_season import add_ITN_age_season
-            # add_ITN(cb, start=0, coverage_by_ages=[{'min': 0, 'max': 100, 'coverage': 0.6}])
             add_ITN_age_season(cb, start=366,
                                demographic_coverage=0.8,
                                killing_config={
@@ -264,6 +262,21 @@ EMOD How To's:
                                                'Values': [0.9, 0.9]},
                                duration=-1, birth_triggered=False
                                )
+           ```
+           ```py                    
+            ### Or alternatiively 
+            from dtk.interventions.itn import add_ITN
+            add_ITN(cb,
+                    start=366,  # starts on first day of second year
+                    coverage_by_ages=[
+                        {"coverage": 1, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                        {"coverage": 0.75, "min": 10, "max": 50}, # 25% lower than for children for 10-50 years old
+                        {"coverage":  0.6, "min": 50, "max": 125} # 40% lower than for children for everyone else
+                    ],
+                    repetitions=5,  # ITN will be distributed 5 times
+                    tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
+                    )
+        
            ```
             </p>
             </details>
@@ -318,7 +331,8 @@ EMOD How To's:
 - To keep track of the campaign events in the simulations, add `event_list = []` and expand as needed
   via  `event_list = event_list + [<new_event_name>]`
     - Event
-      names:  `'Received_Treatment', 'Received_Severe_Treatment','Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded','Received_IRS', 'Received_SMC', 'Received_Vaccine' `
+      names:  `'Received_Treatment', 'Received_Severe_Treatment','Received_IRS', 'Received_SMC', 'Received_Vaccine' `
+      and either 'Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded' for `add_ITN_age_season`  or 'Received_ITN' for `add_ITN`
 - Next, add additional custom reporters to monitor events happening in the simulation
     - Report_Event_Recorder and Report_Event_Counter:
       ``` py
@@ -496,9 +510,26 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
                                                    'Values': [0.9, 0.9]},
                                    duration=-1, birth_triggered=False
                                    )
+          event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
+
+           ```
+           ```py                    
+            ### Or alternatiively 
+            def itn_intervention(cb, coverage_level, day=366):
+                add_ITN(cb,
+                        start=366,  # starts on first day of second year
+                        coverage_by_ages=[
+                            {"coverage": coverage_level, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                            {"coverage": coverage_level * 0.75, "min": 10, "max": 50}, # 25% lower than for children for 10-50 years old
+                            {"coverage": coverage_level * 0.6, "min": 50, "max": 125} # 40% lower than for children for everyone else
+                        ],
+                        repetitions=5,  # ITN will be distributed 5 times
+                        tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
+                        )
             
                 return {'itn_start': day,
                         'itn_coverage': coverage_level}
+           event_list = event_list + ['Received_ITN']
            ```
             </p>
             </details>

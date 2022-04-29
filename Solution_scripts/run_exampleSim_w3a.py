@@ -10,14 +10,14 @@ from malaria.reports.MalariaReport import add_summary_report
 from malaria.reports.MalariaReport import add_event_counter_report
 ## Import campaign functions
 from dtk.interventions.itn import add_ITN
+from dtk.interventions.itn_age_season import add_ITN_age_season
 from dtk.interventions.irs import add_IRS
 from dtk.interventions.novel_vector_control import add_larvicides
 from malaria.interventions.health_seeking import add_health_seeking
 from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 from malaria.interventions.malaria_vaccine import add_vaccine
-
 # This block will be used unless overridden on the command-line
-SetupParser.default_block = 'LOCAL'
+SetupParser.default_block = 'HPC'
 years = 3
 cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
@@ -67,7 +67,19 @@ add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
 event_list = event_list + ['Received_SMC']
 
 # ITN, start after 1 year
-# add_ITN(cb, start=0, coverage_by_ages=[{'min': 0, 'max': 100, 'coverage': 0.6}])
+"""Select either add_ITN or add_ITN_age_season"""
+# add_ITN(cb,
+#         start=366,  # starts on first day of second year
+#         coverage_by_ages=[
+#             {"coverage": 1, "min": 0, "max": 10},  # 100% for 0-10 years old
+#             {"coverage": 0.75, "min": 10, "max": 50},  # 75% for 10-50 years old
+#             {"coverage": 0.6, "min": 50, "max": 125}  # 60% for everyone else
+#         ],
+#         repetitions=5,  # ITN will be distributed 5 times
+#         tsteps_btwn_repetitions=365 * 1  # assume annual ITN distributions instead of 1 year in example
+#         )
+# event_list = event_list + ['Received_ITN']
+
 add_ITN_age_season(cb, start=366,
                    demographic_coverage=0.8,
                    killing_config={

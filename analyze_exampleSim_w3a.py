@@ -423,7 +423,7 @@ class TransmissionReport(BaseAnalyzer):
             ax.plot(adf['Year'], adf[channel], '-', color='black', linewidth=0.8)
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_annual.png'))
 
-
+## when using add_ITN_age_season
 class BednetUsageAnalyzer(BaseAnalyzer):
 
     @classmethod
@@ -650,13 +650,13 @@ if __name__ == "__main__":
                                  working_dir=working_dir,
                                  start_year=2022,
                                  selected_year=None),
-        BednetUsageAnalyzer(expt_name=expt_name,
-                            working_dir=working_dir,
-                            start_year=2022),
+        # BednetUsageAnalyzer(expt_name=expt_name,
+        #                     working_dir=working_dir,
+        #                     start_year=2022),   # only if using add_ITN_age_season instead of add_ITN
         ReceivedCampaignAnalyzer(expt_name=expt_name,
                                  working_dir=working_dir,
                                  channels=['Received_Treatment', 'Received_IRS',
-                                           'Received_SMC', 'Received_Vaccine'],
+                                           'Received_SMC', 'Received_Vaccine'], #Received_ITN  if using add_ITN
                                  start_year=2022),
         TransmissionReport(expt_name=expt_name,
                            working_dir=working_dir,

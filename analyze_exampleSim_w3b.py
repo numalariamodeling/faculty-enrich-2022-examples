@@ -468,7 +468,7 @@ class TransmissionReport(BaseAnalyzer):
         axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_annual.png'))
 
-
+## when using add_ITN_age_season
 class BednetUsageAnalyzer(BaseAnalyzer):
 
     @classmethod
@@ -714,14 +714,14 @@ if __name__ == "__main__":
                                           start_year=2022,
                                           end_year=2025,
                                           sweep_variables=sweep_variables),
-                 BednetUsageAnalyzer(expt_name=expt_name,
-                                     working_dir=working_dir,
-                                     start_year=2022,
-                                     sweep_variables=sweep_variables),
+                 # BednetUsageAnalyzer(expt_name=expt_name,
+                 #                     working_dir=working_dir,
+                 #                     start_year=2022,
+                 #                     sweep_variables=sweep_variables),  # only if using add_ITN_age_season instead of add_ITN
                  ReceivedCampaignAnalyzer(expt_name=expt_name,
                                           working_dir=working_dir,
                                           channels=['Received_Treatment', 'Received_IRS',
-                                                    'Received_SMC', 'Received_Vaccine'],
+                                                    'Received_SMC', 'Received_Vaccine'], #Received_ITN  if using add_ITN
                                           start_year=2022,
                                           sweep_variables=sweep_variables),
                  TransmissionReport(expt_name=expt_name,
