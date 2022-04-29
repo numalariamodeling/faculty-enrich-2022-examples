@@ -13,7 +13,7 @@ and [cloned repository](https://docs.github.com/en/repositories/creating-and-man
 - [Go to Week 1](#week1)    _(MR: ready for testing)_
 - [Go to Week 2](#week2)    _(MR: ready for testing)_
 - [Go to Week 3](#week3)    _(MR: ready for testing)_
-- [Go to Week 4](#week4)    _(MR: setup in progress)_
+- [Go to Week 4](#week4)    _(MR: ready for testing)_
 - Week 5: no technical track
 - [Go to Week 6](#week6)    _(TH: setup in progress)_
 - [Go to Week 7](#week7)    _(BT)_
@@ -740,22 +740,53 @@ suggested solution scripts for week 4 [simulation file](https://github.com/numal
 
 #### PART II - Plotting  
 
-- Run plotting scripts:
-    - Using _Python_: `plot_exampleSim.py`
-    - Using _R_: `plot_exampleSim.R`
+- Run plotting scripts either using Python or R:
+    - _Python_: `plot_exampleSim_w4.py`
+    - _R_: `plot_exampleSim_w4.R`
 - Look at the figures more critically, anything you would like to change? 
-  Open the plotting scripts and adjust axis titles, colors or even add your own plot!
-- Use monthly summary report outcomes to get more detailed figures that show seasonal trends in malaria burden and intervention impact.
-- ...
+   - Given the interventions implemented does the curves look as expected?
+- Open the plotting script of your choice (python or R) and adjust axis titles, colors or even add your own plot!
+  - The plots generate an 'ugly' `unique_sweep` variable automatically to be generic and independent of number and name of sweep variables defined.
+    However, the final output is difficult to interpret. These plots are good for diagnostic and yourself, but not for presenting to others. 
+    In the script you can pass on a `scen_channel` variable which is used to color the lines, try it out for a single intervention coverage variable.
+  - Note that all other columns that are not specifed in scen_channels (except date and outcome variables) will automatically be averaged using the mean. If you do not want this behaviour you need to adjust the plotting script.
+- look at  `plot_Agebin_PfPR_ClinicalIncidence`, which aggregated all years to plot agebins at the x-axis, and has several panels of seletced channels.
+  - when calling the function specify 1 channel of choice i.e. `plot_Agebin_PfPR_ClinicalIncidence(sim_dir, channels= 'Cases')`
+    - a) modify the figure to have years as panels (facets) instead of channel (requires annual summary report csv)
+    - b) modify the figure to have agebin as panels (facets) and years on the x-axis (annual or monthly summary report csv)
+    - c) modify the figure to have agebin as color and unique_scen as panels, with years as x axis (annual or monthly summary report csv)
+  - Note in python you will need to modify `for ai, channel in enumerate(channels):` as well as ` axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]`; and in R `facet_wrap(~name, scales = 'free')`
 
 
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
-View
-suggested [solution script for week 4](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w4.py)
+Default example Agebin_PfPR_ClinicalIncidence figure generated in Python  
+![img](static/w4_Agebin_PfPR_ClinicalIncidence_py.png)  
+
+Default example Agebin_PfPR_ClinicalIncidence figure generated in R  
+![img](static/w4_Agebin_PfPR_ClinicalIncidence_R.png)  
+
+Default example All_Age_Monthly_Cases figure generated in Python  
+![img](static/w4_All_Age_Monthly_Cases_py.png)  
+
+Default example All_Age_Monthly_Cases figure generated in R  
+![img](static/w4_All_Age_Monthly_Cases_R.png)  
+
+
+Default example TransmissionReport_monthly figure generated in Python  
+![img](static/w4_TransmissionReport_monthly_py.png)  
+
+Default example All_Age_Monthly_Cases figure generated in R  
+![img](static/w4_TransmissionReport_monthly_R.png)  
+
+Default example Received_Campaigns figure generated in Python  
+![img](static/w4_Received_Campaigns_py.png)  
+_Note: in this example simulation only case management and SMC were included, no IRS and no vaccine_
+
+Default example All_Age_Monthly_Cases figure generated in R
+![img](static/w4_Received_Campaigns_R.png)  
+_Note: in this example simulation only case management and SMC were included, no IRS and no vaccine_
 
 </p>
 </details>

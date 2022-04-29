@@ -22,6 +22,10 @@ SetupParser.default_block = 'LOCAL'
 sim_start_year = 2022
 numseeds = 3
 years = 3
+
+user = os.getlogin()  # user initials
+expt_name = f'{user}_FE_2022_example_w4'
+
 cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
 cb.update_params({
@@ -87,7 +91,7 @@ event_list = event_list + ['Received_Vaccine']
 def smc_intervention(cb, coverage_level, day=366, cycles=4):
     add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
                       coverage=coverage_level,
-                      start_days=[day],
+                      start_days=[day,day+365,day+365*2,day+365*3],
                       repetitions=cycles,
                       tsteps_btwn_repetitions=30,
                       target_group={'agemin': 0.25, 'agemax': 5},
@@ -195,9 +199,6 @@ cb.update_params({
 ## Event_counter_report
 add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
 
-# run_sim_args is what the `dtk run` command will look for
-user = os.getlogin()  # user initials
-expt_name = f'{user}_FE_2022_example_w4'
 
 """BUILDER"""
 builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
@@ -215,6 +216,7 @@ builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
                                 for x in range(numseeds)
                                 ])
 
+# run_sim_args is what the `dtk run` command will look for
 run_sim_args = {
     'exp_name': expt_name,
     'config_builder': cb,
