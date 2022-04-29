@@ -46,7 +46,7 @@ plot_All_Age_Monthly_Cases <- function(sim_dir, channels = NULL, scen_channels =
 
   print(fig)
   ggsave("Agebin_PfPR_ClinicalIncidence.png", plot = fig, path = sim_dir,
-         width = 8, height = 8, device = "png")
+         width = 6, height = 6, device = "png")
 }
 
 
@@ -91,7 +91,7 @@ plot_Agebin_PfPR_ClinicalIncidence <- function(sim_dir, channels = NULL, scen_ch
 
   print(fig)
   ggsave("Agebin_PfPR_ClinicalIncidence.png", plot = fig, path = sim_dir,
-         width = 8, height = 8, device = "png")
+         width = 6, height = 6, device = "png")
 }
 
 
@@ -159,8 +159,8 @@ plot_TransmissionReport <- function(sim_dir, scen_channels = NULL, time_res = 'm
   }
 
   print(fig)
-  ggsave(paste0("TransmissionReport_",time_res,".png"), plot = fig, path = sim_dir,
-         width = 8, height = 8, device = "png")
+  ggsave(paste0("TransmissionReport_", time_res, ".png"), plot = fig, path = sim_dir,
+         width = 6, height = 6, device = "png")
 }
 
 
@@ -210,7 +210,7 @@ plot_ReceivedCampaigns <- function(sim_dir, channels = NULL, scen_channels = NUL
 
   print(fig)
   ggsave("Received_Campaigns.png", plot = fig, path = sim_dir,
-         width = 8, height = 8, device = "png")
+         width = 6, height = 6, device = "png")
 }
 
 
