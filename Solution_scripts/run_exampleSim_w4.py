@@ -157,6 +157,12 @@ add_summary_report(cb, start=1, interval=365,
                    age_bins=[0.25, 5, 100],
                    description='Annual_U5')
 
+add_summary_report(cb, start=1, interval=365,
+                   age_bins=[0.25, 10, 100],
+                   description='Annual_U10')
+
+
+
 for year in range(years):
     start_day = 365 + 365 * year
     sim_year = sim_start_year + year
@@ -167,6 +173,15 @@ for year in range(years):
     add_summary_report(cb, start=start_day, interval=30,
                        age_bins=[0.25, 5, 100],
                        description=f'Monthly_U5_{sim_year}')
+
+    add_summary_report(cb, start=start_day, interval=30,
+                       age_bins=[0.25, 10, 100],
+                       description=f'Monthly_U10_{sim_year}')
+
+    ## For exercise, weekly reporting
+    add_summary_report(cb, start=start_day, interval=7,
+                       age_bins=[0.25, 5, 100],
+                       description=f'Weekly_U5_{sim_year}')
 
 ## Enable reporters
 cb.update_params({

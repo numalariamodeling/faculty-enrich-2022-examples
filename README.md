@@ -163,17 +163,16 @@ EMOD How To's:
 <details><summary><span>Check results</span></summary>
 <p>
 
-Generated simulation files
+Generated simulation files  
+![img](static/w2_directories_files.png)   
 
-![img](static/w2_directories_files.png)
 
-Generated plot from InsetChart
+Generated plot from InsetChart  
+![img](static/w2_All_Age_Monthly_Cases.png)  
 
-![img](static/w2_All_Age_Monthly_Cases.png)
+Generated plot from annual summmary report  
+![img](static/w2_Agebin_PfPR_ClinicalIncidence.png)  
 
-Generated plot from annual summmary report
-
-![img](static/w2_Agebin_PfPR_ClinicalIncidence.png)
 
 View
 suggested [solution script for week 2](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w2.py)
@@ -334,7 +333,7 @@ EMOD How To's:
         # Report_Event_Counter
         add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
       ```
-- Change _exp_name_  for week 3 `f'{user}_FE_2022_example_w3a'`
+- Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
 - Now, run the simulation and wait for it to finish (~5 minutes)
 - While simulations runs, familarize yourself with the generated campaign file, does it include all interventions
   specified?
@@ -353,38 +352,36 @@ EMOD How To's:
 
 Raw output files in the experiment folder under outputs.
 ![img](static/w3a_outputfiles.png)  
-__Fig: Generated raw output files__
 
-ReportEventCounter with campaign events, aggregated for total population. Most Interventions were set to start after day
+
+**ReportEventCounter** with campaign events, aggregated for total population. Most Interventions were set to start after day
 366, hence there are 365 zeros in the `"Data": [0, 0, ...]`
 ![img](static/w3a_ReportEventCounter.png)  
-__Fig: ReportEventCounter__ </br>
 _Tip: Notepad ++ offers helpful json plugins._
 
-ReportEventRecorder with campaign events, for each individual in the population. Some individuals get multiple
+**ReportEventRecorder** with campaign events, for each individual in the population. Some individuals get multiple
 interventions, some none and so on - age is given in days.
 ![img](static/w3a_ReportEventRecorder.png)  
-__Fig: ReportEventRecorder__ </br>
 _Tip: When running simulations with large populations, this csv file can get very large and should be disabled, while
 for testing it is very useful._
 
-Generated results after running analyzer:
-![img](static/w3a_simulationoutputfiles.png)  
+Generated results after running analyzer in simulation_outputs/<.exp_name>:
+![img](static/w3a_simulationoutputfiles.png)   
 
+Aggregated transmission report (daily)  
 ![img](static/w3a_TransmissionReport_daily.png)  
-__Fig: Aggregated transmission report (daily)__
 
+Aggregated transmission report (monthly)  
 ![img](static/w3a_TransmissionReport_monthly.png)  
-__Fig: Aggregated transmission report (monthly)__
 
+Aggregated transmission report (annually)  
 ![img](static/w3a_TransmissionReport_annual.png)  
-__Fig: Aggregated transmission report (annual)__
 
+Aggregated event report (ITN, Bed nets)
 ![img](static/w3a_BednetUsage.png)  
-__Fig: Aggregated event report (ITN, Bed nets)__
 
+Aggregated event report (other campaigns)  
 ![img](static/w3a_ReceivedCampaignAnalyzer.png)  
-__Fig: Aggregated event report (other campaigns)__
 
 
 View
@@ -557,7 +554,12 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
     - While waiting, check out the generated experiment folder, that now includes many more subfolders for each of the single simulations.
     Open two campaign files and compare, do you find the difference? (If there is none, these might be two different run numbers for same simulation)
       _(Tip: Many text editors allow side by side comparison of two scripts, automatically highlighting differences)_
-- Run second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) (don't forget to update _expt_id_!)
+- Run second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) (don't forget to update _expt_id_ : ))
+  - While having the analyzer script open, also check that all the relevant sweep variables are included. 
+    Note that the sweep_variables need to change according to the `ModBuilder` and custom functions used to define scenarios, depending on which ones uniquely define each simulation and are required in the analysis.
+  ```py
+      sweep_variables = ['cm_cov_U5', 'smc_coverage', 'itn_coverage', 'irs_coverage', 'rtss_coverage', 'Run_Number']
+  ```
 - Inspect `simulation_outputs` and compare against outputs from the previous week.
 - Change intervention parameters in the `ModBuilder` and repeat the simulation process to become more familar with the process.
 
@@ -613,38 +615,98 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-#### PART I - Analyzer  
-- Add a monthly summary report as shown below to the simulation script
-       ```py
-          sim_start_year = 2022  # add sim_start_year
-          
-          for year in range(years):
-            start_day = 365 + 365 * year
-            sim_year = sim_start_year + year
-            add_summary_report(cb, start=start_day, interval=30,
-                               age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
-                               description=f'Monthly_Agebin_{sim_year}')
-       ```
-- Add MalariaFilteredReport - a simple oneliner (+module import)!.
+#### PART I - Analyzer
+- Cleanup your simulation script of any unwanted interventions that were explored during the previous week (keep a copy!)
+    - Adjust coverage levels in `ModBuilder` to select/deselct interventions to include or change number of simulations to run (optional)
+- Add a new summary report with monthly monitoring to the simulation script as shown below  
+  ```py
+  sim_start_year = 2022  # add sim_start_year
+  
+  for year in range(years):
+    start_day = 365 + 365 * year
+    sim_year = sim_start_year + year
+    add_summary_report(cb, start=start_day, interval=30,
+                       age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
+                       description=f'Monthly_Agebin_{sim_year}')
+    ```
+- Add another summary report with monthly monitoring for _children under the age of 5 years_ only (keep min age 0.25)   
+  ```py
+  for year in range(years):
+    start_day = 365 + 365 * year
+    sim_year = sim_start_year + year
+    add_summary_report(cb, start=start_day, interval=30,
+                       age_bins=[0.25, 5, 100],
+                       description=f'Monthly_U5_{sim_year}')
+    ```  
+- Add `MalariaFilteredReport` - a simple oneliner (+module import)!.
   ```py
   from malaria.reports.MalariaReport import add_filtered_report, add_event_counter_report
   add_filtered_report(cb, start=0, end=years * 365)
   ```
-  - MalariaFilteredReport a subset of InsetChart hence reduced output files generated.
-- Optional: adjust coverage levels in ModBuilder to select/deselct interventions to include or change number of simulations to run
-- Again, change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
+- MalariaFilteredReport a subset of InsetChart hence reduced output files generated.
+- Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulation and wait for simulation to finish (~10 minutes)
-- Run analyzer script for Week 4 (`analyze_exampleSim_w4.py`)
-- This time, the analyzer generated csv files instead of plots! 
-  This allows more flexible plotting for your project and 
-  to look up values in the csv or do additional postprocessing steps as needed.  
+  - While the simulation is running, take a look at the analyzer file, which analyzers are new, which ones already recognized form previous weeks?
+- Run analyzer script `analyze_exampleSim_w4.py` (_remember to change exp_id :)_ )
+  - This time, the analyzer generated csv files instead of plots! 
+    This allows more flexible plotting for your project and 
+    to look up values in the csv or do additional postprocessing steps as needed.  
 - Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the reports used in the simulation.
 - Run additional simulations and change the reports, for instance the agebins or reporting interval, and edit the analyzer accordingly!
-  - Some tips:
-    - Children under the age of five is an age group often used and monitored in malaria studies, whereas current agebins include 2 years and don't allow U5 aggregation.
-    Therefore common age_bins used are `[0.25, 5, 100]` for only the U5 age group! Suggested reporter name:    `f'Monthly_Agebin_{sim_year}'`
-      
+  - Change age group:
+    - Add summary report for children under the age of 10 (U10) in your simulation script.
+    - In the analyzer script, copy the analyzer _MonthlyPfPRAnalyzerU5_ and replace U5 with U10 
+      - _voilà_  a new analyzer for malaria outcomes aggregated for children under the age of 10 
+        has been created! 
+      - The principle of the MonthlyPfPRAnalyzers is the same for any age group as long as the indexing and number of agebins are matched correctly!
+    - Change monitoring interval:
+      - Add summary report for weekly reporting in your simulation script.
+      - Note: In practice a monitoring intervals of either 365 or 30 days are easiest to interpret and collected data is also often per months or year.
+        But in some occassions and also for exercise, weekly agebins might be of interest too (for shorter total simulation period). 
+    - Analyze additional outcome measures to look at (no new simulation needed)    
+      - Look at the json file under `DataByTimeAndAgeBins` (in COMPS or Notepadd++)
+        - additional outcome examples 'New Infections by Age Bin', 'Annual Moderate Anemia by Age Bin', 'Mean Log Parasite Density by Age Bin'
+      - Add additional lines for new outcome measure, i.e. New Infections 
+        ```py 
+          d = data[fname]['DataByTimeAndAgeBins']['New Infections by Age Bin'][:12]
+          new_infect = [x[age] for x in d] 
+        ```
+        ```py 
+        simdata = pd.DataFrame({'month': range(1, 13),
+                                'PfPR': pfpr,
+                                'Cases': clinical_cases,
+                                'Severe cases': severe_cases,
+                                'New infections': new_infect, ## newly added
+                                'Pop': pop})
+        ```    
     
+
+<details><summary><span>Check results</span></summary>
+<p>
+
+Example of EMOD generated simulation outputs  
+![img](static/w4_experimentfiles.png)   
+
+
+Example of a summary report json file, MalariaSummaryReport_Annual_Agebin.json  
+![img](static/w4_json_summary_report.png)   
+
+
+Example of simulation results, after running analyzer (only csv files, see Part II for plots)
+![img](static/w4_simulationoutputfiles.png)    
+
+
+View
+suggested solution scripts for week 4 [simulation file](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w4.py)
+, and [edited analyzer file](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/analyze_exampleSim_w4_edited.py).
+
+
+</p>
+</details>
+
+
+
+
 #### PART II - Plotting  
 
 - Run plotting scripts:

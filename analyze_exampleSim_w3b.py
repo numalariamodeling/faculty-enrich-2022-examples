@@ -668,7 +668,7 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         adf['Vaccine_Coverage'] = adf['Received_Vaccine'] / adf['Statistical Population']
 
         # Dont save csv
-        # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'BednetUsageAnalyzer.csv'), index=False)
+        # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'monthly_Event_Count.csv'), index=False)
 
         # Figure with panel per outcome channel
         ##Aggregate runs
