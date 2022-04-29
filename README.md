@@ -643,10 +643,13 @@ EMOD How To's:
 
 ### Instructions
 
+
+
+#### PART I - Analyzer
+
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-#### PART I - Analyzer
 - Cleanup your simulation script of any unwanted interventions that were explored during the previous week (keep a copy!)
     - Adjust coverage levels in `ModBuilder` to select/deselct interventions to include or change number of simulations to run (optional)
 - Add a new summary report with monthly monitoring to the simulation script as shown below  
@@ -735,10 +738,14 @@ suggested solution scripts for week 4 [simulation file](https://github.com/numal
 </p>
 </details>
 
-
+</p>
+</details>
 
 
 #### PART II - Plotting  
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
 
 - Run plotting scripts either using Python or R:
     - _Python_: `plot_exampleSim_w4.py`
