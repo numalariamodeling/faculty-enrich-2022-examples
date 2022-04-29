@@ -5,59 +5,89 @@
 Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment
 program 2022.
 
-#### Weekly examples
+**Prerequisites**: successful [installation]((https://faculty-enrich-2022.netlify.app/modules/install-emod/)) of EMOD and dtk
+and [cloned repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to local computer, ideally under _/<.username>/Documents/faculty-enrich-2022-examples_.
 
-_(include temporary notes for admin)_
+#### Weekly example exercises
 
-- [Go to Week 1](#week1)    _(MR: setup closed, open for testing)_
-- [Go to Week 2](#week2)    _(MR: setup closed, open for testing)_
-- [Go to Week 3](#week3)    _(MR: setup closed, open for testing)_
+- [Go to Week 1](#week1)    _(MR: ready for testing)_
+- [Go to Week 2](#week2)    _(MR: ready for testing)_
+- [Go to Week 3](#week3)    _(MR: ready for testing)_
 - [Go to Week 4](#week4)    _(MR: setup in progress)_
 - Week 5: no technical track
-- [Go to Week 6](#week6)    _(TH: setup not started)_
-- [Go to Week 7](#week7)    _(BT: setup not started)_
-- [Go to Week 8](#week8)    _(MR: setup not started)_
-- [Go to Week 9](#week9)    _(JG?: setup not started)_
+- [Go to Week 6](#week6)    _(TH: setup in progress)_
+- [Go to Week 7](#week7)    _(BT)_
+- [Go to Week 8](#week8)    _(MR)_
+- [Go to Week 9](#week9)    _(JG&? )_
 - Week 10: no technical track
-- [Go to Week 11](#week11)    _(BT: setup not started)_
-- [Go to Week 12](#week12)    _(TH: setup not started)_
+- [Go to Week 11](#week11)    _(BT)_
+- [Go to Week 12](#week12)    _(TH)_
 - [Go to Week 13](#week13)    _(tbd)_
-- [Go to Week 14](#week14)    _(BT: setup not started)_
+- [Go to Week 14](#week14)    _(BT)_
 
 __Table 1: Overview of scripts used throughout the course__
 
 |Script |Description | 
 |-------|------------|
-|run_exampleSim.py |the main simulation script which will be expanded and modified throughout the lessons | 
-|analyze_exampleSim_w1.py |the main analyzer script which changes each week (w1, w2,...w5) | 
-|generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
-|plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R | 
 |analyzer_collection.py | collection of different analyzers used| 
-|run_burnin_exampleSim.py |  <TODO: or similar when introducing serialization>  | 
+|analyze_exampleSim_wX.py |the main analyzer script which changes each week (w1, w2,...w5) | 
+|generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
+|plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R |
+|run_exampleSim.py       |the main simulation script which will be expanded and modified throughout the lessons | 
+|run_exampleBurnin_w6.py | first simulation script for week 6 where simulation is splitted into 2 runs (Burnin)  | 
+|run_examplePickup_w6.py | second simulation script for week 6 where simulation is splitted into 2 runs (Pickup)   | 
+|simtools.ini |  Configuration file for main directories required to run simulations (1 single file need in same directory where simulation or analyser script is run) | 
+
+
 
 ## Week 1: Overview of EMOD <a name="week1"></a>
 
 [Lesson Week 1](https://faculty-enrich-2022.netlify.app/lessons/week-1/)
+
+EMOD How To's:
+- Update _simtools.ini_
+- Define _exp_name_ and identify _expt_id_
 
 ### Instructions
 
 <details><summary><span>Click to expand</span></summary>
 <p>
 
-- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username
+- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username in path
 - Run simulation via `python run_exampleSim.py`
 - Wait simulation to finish (~5 minutes)
-- Update expt_id in `analyze_exampleSim_w1.py`
+  - Note, when running locally, the console might return an <span style="color:#ff6666">psutil.AccessDenied text</span>
+    error, however the simulation can still successfully run and finish.
+  - If there are problems with running locally, you can peek into [Week 6](#week6) on how to change `SetupParser` to run on _COMPS_ (requires login)!  
+- Go to the experiment folder to notice the generated simulation experiment named 'username_FE_2022_example_w1___2022_04_29_02_14_46_106520' The last part after the '___' is the experiment id and changes with each simulation.
+- Update expt_id in `analyze_exampleSim_w1.py` Line 14 (copy number sequence after ___, also printed to console)
 - Run analyzer via `python analyze_exampleSim_w1.py`
-- Inspect `simulation_outputs` to see generated simulation results (csv file)
+- Inspect `simulation_outputs` to see generated simulation results (csv files)
 - Done!
 
 <details><summary><span>Check results</span></summary>
 <p>
 
-Terminal output after successful submission of analyzer
+Terminal output after running run_exampleSim.py
+![img](static/w1_local_console run_exampleSim.png)
 
-![img](static/w1.1._console_analyzer.png)
+Once finished
+![img](static/w1_local_console run_exampleSim_finished.png)
+
+Generated experiment files 
+![img](static/w1_experimentfiles.png)
+
+Terminal output after running analyze_exampleSim_w1.py
+![img](static/w1_console_analyzer.png)
+
+Generated simulation output files 
+
+![img](static/w1_simulationoutputsfiles.png)
+
+**All_Age_Monthly_Cases.csv** shows selected monitored malaria outcomes for the total population in the simulation aggregated per month for the simulation duration, in this example 1 year.
+![img](static/w1_All_Age_Monthly_Cases_excel.png)
+
+
 
 </p>
 </details>
@@ -74,7 +104,7 @@ EMOD How To's:
 - [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
 - [Create a demographics file](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-a-demographics-file)
 - [Create climate files](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-climate-files)
-- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports)
+- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports) (annual)
 
 ### Instructions
 
@@ -110,6 +140,7 @@ EMOD How To's:
 
 - Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
 - Run simulation as learned in Week 1 and wait for simulation to finish (~5 minutes)
+    - Note, if there are problems with running locally, you can peek into [Week 6](#week6) on how to change `SetupParser` to run on _COMPS_ (requires login)!
 - Run analyzer script for Week 2 `analyze_exampleSim_w2.py` (don't forget to update expt_id!)
 - Inspect `simulation_outputs` to see additional generated plot
     - Optional: rerun analyzer with plot for week 1 and compare.
@@ -160,11 +191,12 @@ suggested [solution script for week 2](https://github.com/numalariamodeling/facu
 EMOD How To's:
 
 - [Add case management](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-case-management)
-- Add ITN
-- Add IRS
+- [Add ITN](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-itn)
+- [Add IRS](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-irs)
 - [Add larvicides](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-larvicides)
 - [Add drug campaigns](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-drug-campaigns)
-- Add event reporters
+- [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports) (monthly)
+- [Add event reporters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#event-reporting)
 - [Using the model builder to set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
 ### Instructions
@@ -252,6 +284,19 @@ EMOD How To's:
            ```
             </p>
             </details>
+        - <details><summary><span style="color: blue";">add_larvicides </span></summary>
+            <p>
+
+           ```py
+            from dtk.interventions.novel_vector_control import add_larvicides
+            add_larvicides(cb, start_day=0, 
+                           habitat_target='CONSTANT',  
+                           killing_initial=0.6,        
+                           killing_decay=150          
+                           )
+           ```
+            </p>
+            </details>          
         - <details><summary><span style="color: blue";">add_vaccine </span></summary>
             <p>
 
@@ -307,38 +352,40 @@ EMOD How To's:
 <p>
 
 Raw output files in the experiment folder under outputs.
-![img](static/w3a_outputfiles.png)
+![img](static/w3a_outputfiles.png)  
 __Fig: Generated raw output files__
 
 ReportEventCounter with campaign events, aggregated for total population. Most Interventions were set to start after day
 366, hence there are 365 zeros in the `"Data": [0, 0, ...]`
-![img](static/w3a_ReportEventCounter.png)
+![img](static/w3a_ReportEventCounter.png)  
 __Fig: ReportEventCounter__ </br>
 _Tip: Notepad ++ offers helpful json plugins._
 
 ReportEventRecorder with campaign events, for each individual in the population. Some individuals get multiple
 interventions, some none and so on - age is given in days.
-![img](static/w3a_ReportEventRecorder.png)
+![img](static/w3a_ReportEventRecorder.png)  
 __Fig: ReportEventRecorder__ </br>
 _Tip: When running simulations with large populations, this csv file can get very large and should be disabled, while
 for testing it is very useful._
 
 Generated results after running analyzer:
+![img](static/w3a_simulationoutputfiles.png)  
 
-![img](static/w3a_TransmissionReport_daily.png)
+![img](static/w3a_TransmissionReport_daily.png)  
 __Fig: Aggregated transmission report (daily)__
 
-![img](static/w3a_TransmissionReport_monthly.png)
+![img](static/w3a_TransmissionReport_monthly.png)  
 __Fig: Aggregated transmission report (monthly)__
 
-![img](static/w3a_TransmissionReport_annual.png)
+![img](static/w3a_TransmissionReport_annual.png)  
 __Fig: Aggregated transmission report (annual)__
 
-![img](static/w3a_BednetUsage.png)
+![img](static/w3a_BednetUsage.png)  
 __Fig: Aggregated event report (ITN, Bed nets)__
 
-![img](static/w3a_ReceivedCampaignAnalyzer.png)
+![img](static/w3a_ReceivedCampaignAnalyzer.png)  
 __Fig: Aggregated event report (other campaigns)__
+
 
 View
 suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3a.py)
@@ -641,11 +688,10 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Add a variable 'serialize_year' to the run_exampleSim.py script (without any interventions), and set it equal to 50.
-- Update the configuration parameters as shown below to enable serialization
-- Update simtools.ini to reflect your paths
 - Change the value of `SetupParser.default_block` from 'LOCAL' to **'HPC'**
     - This is to run the longer simulation on COMPS, as opposed to your local machine
+- Add a variable 'serialize_year' to the run_exampleSim.py script (without any interventions), and set it equal to 50.
+- Update the configuration parameters as shown below to enable serialization
 - Run simulation
 - Copy the experimentID ('expID') from the simulation metadata to pick-up from later.
     

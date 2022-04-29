@@ -17,7 +17,7 @@ SetupParser.default_block = 'LOCAL'
 
 user = os.getlogin()  # user initials
 expt_name = f'{user}_FE_2022_example_w3a'
-expt_id = '2022_04_26_01_31_14_904003'  ## change expt_id
+expt_id = '2022_04_29_04_26_46_512944'  ## change expt_id
 working_dir = os.path.join('simulation_outputs')
 
 

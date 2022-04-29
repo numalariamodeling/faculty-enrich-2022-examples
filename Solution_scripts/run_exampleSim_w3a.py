@@ -9,9 +9,9 @@ from simtools.SetupParser import SetupParser
 from malaria.reports.MalariaReport import add_summary_report
 from malaria.reports.MalariaReport import add_event_counter_report
 ## Import campaign functions
-# from dtk.interventions.itn import add_ITN
-from dtk.interventions.itn_age_season import add_ITN_age_season
+from dtk.interventions.itn import add_ITN
 from dtk.interventions.irs import add_IRS
+from dtk.interventions.novel_vector_control import add_larvicides
 from malaria.interventions.health_seeking import add_health_seeking
 from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 from malaria.interventions.malaria_vaccine import add_vaccine
@@ -49,18 +49,11 @@ add_health_seeking(cb, start_day=0,
                    drug=['Artemether', 'Lumefantrine'])
 event_list = event_list + ['Received_Treatment', 'Received_Severe_Treatment']
 
-# malaria vaccine (RTS,S), no booster start after 1 year
+# malaria vaccine (RTS,S), as mass campaign at 80% at a single day (hypothetical example only!)
 add_vaccine(cb,
             vaccine_type='RTSS',
-            vaccine_params={"Waning_Config":
-                                {"Initial_Effect": 0.8,
-                                 "Decay_Time_Constant": 592.4066512,
-                                 "class": 'WaningEffectExponential'}},
             start_days=[366],
-            coverage=1,
-            repetitions=1,
-            tsteps_btwn_repetitions=-1,
-            target_group={'agemin': 274, 'agemax': 275})  # children 9 months of age
+            coverage=0.1)
 event_list = event_list + ['Received_Vaccine']
 
 # seasonal malaria chemoprevention, start after 1 year
@@ -96,15 +89,28 @@ add_ITN_age_season(cb, start=366,
 event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
 
 # IRS, start after 1 year - single campaign
-add_IRS(cb, start=366,
-        coverage_by_ages=[{"coverage": 0.8, "min": 0, "max": 100}],
+add_IRS(cb,
+        start=366,  # IRS occurs on first day of second year
+        coverage_by_ages=[
+            {"coverage": 1, "min": 0, "max": 10},  # 100% for 0-10 years old
+            {"coverage": 0.75, "min": 11, "max": 50},  # 75% for 11-50 years old
+            {"coverage": 0.6, "min": 51, "max": 125}  # 60% for everyone else
+        ],
         killing_config={
             "class": "WaningEffectBoxExponential",
-            "Box_Duration": 180,  # based on PMI data from Burkina
-            "Decay_Time_Constant": 90,  # Sumishield from Benin
-            "Initial_Effect": 0.7},
+            "Box_Duration": 60,
+            "Decay_Time_Constant": 120,
+            "Initial_Effect": 0.6
+        }
         )
 event_list = event_list + ['Received_IRS']
+
+# Larviciding, start after 1 year - single campaign
+add_larvicides(cb, start_day=366,
+               habitat_target='CONSTANT',
+               killing_initial=0.4,
+               killing_decay=150)
+
 
 """CUSTOM REPORTS"""
 # add_filtered_report(cb, start=0, end=years * 365)
