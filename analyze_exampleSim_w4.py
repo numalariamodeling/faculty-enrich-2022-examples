@@ -668,9 +668,8 @@ class MonthlyAgebinPfPRAnalyzer(BaseAnalyzer):
 
 """FOR EXERCISE, WEEKLY REPORTING"""
 
-
-class WeeklyPfPRAnalyzerU5(
-    BaseAnalyzer):  ### <---- HERE add weekly  (copy from MonthlyPfPRAnalyzerU5 and adapt indexing)
+#class WeeklyPfPRAnalyzerU5(
+#    BaseAnalyzer):  ### <---- HERE add weekly  (copy from MonthlyPfPRAnalyzerU5 and adapt indexing)
 
 
 """TREATED CASES ANALYZERS"""
@@ -1070,14 +1069,14 @@ if __name__ == "__main__":
     sweep_variables = ['cm_cov_U5', 'smc_coverage', 'itn_coverage',
                        'irs_coverage', 'rtss_coverage', 'Run_Number']
 
-    event_analyzers = [BednetUsageAnalyzer(expt_name=expt_name,
-                                           working_dir=working_dir,
-                                           start_year=2022,
-                                           sweep_variables=sweep_variables),
+    event_analyzers = [#BednetUsageAnalyzer(expt_name=expt_name,
+                       #                    working_dir=working_dir,
+                       #                    start_year=2022,
+                       #                    sweep_variables=sweep_variables), ### FOR EXERCISE, enable if using add_itn_age_season
                        ReceivedCampaignAnalyzer(expt_name=expt_name,
                                                 working_dir=working_dir,
                                                 channels=['Received_Treatment', 'Received_IRS',
-                                                          'Received_SMC', 'Received_Vaccine'],
+                                                          'Received_SMC', 'Received_Vaccine'], ## Optionally, Received_ITN, depending on ITN function used (see instructions)
                                                 start_year=2022,
                                                 sweep_variables=sweep_variables),
                        TransmissionReport(expt_name=expt_name,
