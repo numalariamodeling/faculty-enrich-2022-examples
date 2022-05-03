@@ -451,6 +451,7 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
       
         - <details><summary><span style="color: blue";">case_management </span></summary>
            <p>
+          
            ```py
             def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
                 add_health_seeking(cb, start_day=0,
