@@ -15,10 +15,10 @@ It also needs dtk virtual environment loaded and assumes files are run from a wo
 
 #### Weekly example exercises
 
-- [Go to Week 1](#week1)    _(MR: revision in progress)_
-- [Go to Week 2](#week2)    _(MR: revision in progress)_
-- [Go to Week 3](#week3)    _(MR: revision in progress)_
-- [Go to Week 4](#week4)    _(MR: revision in progress)_
+- [Go to Week 1](#week1)    _(MR: ready for testing)_
+- [Go to Week 2](#week2)    _(MR: ready for testing)_
+- [Go to Week 3](#week3)    _(MR: ready for testing)_
+- [Go to Week 4](#week4)    _(MR: ready for testing)_
 - Week 5: no technical track
 - [Go to Week 6](#week6)    _(TH: setup in progress)_
 - [Go to Week 7](#week7)    _(BT)_
