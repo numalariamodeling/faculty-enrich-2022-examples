@@ -12,19 +12,19 @@ mpl.rcParams['pdf.fonttype'] = 42
 palette = sns.color_palette("tab10")
 
 
-def plot_All_Age_Monthly_Cases(sim_dir, channels=None, scen_channels=None):
-    df = pd.read_csv(os.path.join(sim_dir, 'All_Age_Monthly_Cases.csv'))
+def plot_All_Age_Cases(sim_dir, channels=None, scen_channels=None):
+    df = pd.read_csv(os.path.join(sim_dir, 'All_Age_InsetChart.csv'))
     df['date'] = pd.to_datetime(df['date'])
 
-    output_channels = ['Statistical Population', 'New Clinical Cases', 'New Severe Cases', 'PfHRP2 Prevalence',
-                       'Received_Treatment', 'Received_Severe_Treatment']
+    output_channels = ['Statistical Population', 'New Clinical Cases', 'New Severe Cases', 'PfHRP2 Prevalence']
 
     if channels is None:
         channels = ['Statistical Population', 'New Clinical Cases', 'New Severe Cases', 'PfHRP2 Prevalence']
 
     ## Automatically set variable to color by
     if scen_channels is None or len(scen_channels) > 1:
-        scen_channels = [x for x in df.columns if x not in output_channels + ['date', 'Run_Number']]
+        scen_channels = [x for x in df.columns if
+                         x not in output_channels + ['date', 'Time', 'Day', 'Year', 'Run_Number']]
         df['unique_sweep'] = df[scen_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
         scen_channel = 'unique_sweep'
     else:
@@ -55,7 +55,7 @@ def plot_All_Age_Monthly_Cases(sim_dir, channels=None, scen_channels=None):
             ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
     axes[0].legend(title="Unique sweep")
-    fig.savefig(os.path.join(working_dir, expt_name, 'All_Age_Monthly_Cases.png'))
+    fig.savefig(os.path.join(working_dir, expt_name, 'All_Age_InsetChart.png'))
 
 
 def plot_Agebin_PfPR_ClinicalIncidence(sim_dir, scen_channels=None, channels=None):
@@ -224,12 +224,15 @@ if __name__ == "__main__":
     sim_dir = os.path.join(working_dir, expt_name)
 
     ## Select which plots to generate
-    """Malaria Burden over time"""
-    plot_All_Age_Monthly_Cases(sim_dir)
+    """Malaria Burden over time  (InsetChart)"""
+    plot_All_Age_Cases(sim_dir)
 
-    """Malaria Burden over age"""
+    ##  Malaria Burden over time (MalariaSummaryReport)
+    # TO ADD
+    
+    """Malaria Burden over age (SummaryReport)"""
     plot_Agebin_PfPR_ClinicalIncidence(sim_dir)
 
     """Event campaign and transmission plots"""
-    plot_TransmissionReport(sim_dir)
-    plot_ReceivedCampaigns(sim_dir)
+    # plot_TransmissionReport(sim_dir)
+    # plot_ReceivedCampaigns(sim_dir)
