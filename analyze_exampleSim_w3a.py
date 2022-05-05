@@ -423,6 +423,7 @@ class TransmissionReport(BaseAnalyzer):
             ax.plot(adf['Year'], adf[channel], '-', color='black', linewidth=0.8)
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_annual.png'))
 
+
 ## when using add_ITN_age_season
 class BednetUsageAnalyzer(BaseAnalyzer):
 
@@ -540,7 +541,7 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
             return datetime.datetime.strptime(str(x), '%j').month
 
     def __init__(self, expt_name, channels=None, sweep_variables=None, working_dir='./', start_year=2022,
-                 selected_year=None, daily_report=False, monthly_report=False, filter_exists=False):
+                 selected_year=None):
         super(ReceivedCampaignAnalyzer, self).__init__(working_dir=working_dir,
                                                        filenames=["output/ReportEventCounter.json",
                                                                   "output/InsetChart.json"])  # or ReportMalariaFiltered.json
@@ -550,25 +551,20 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         self.start_year = start_year
         self.selected_year = selected_year
         self.expt_name = expt_name
-        self.filter_exists = filter_exists
-
-    def filter(self, simulation):
-        if self.filter_exists:
-            file = os.path.join(simulation.get_path(), self.filenames[0])
-            return os.path.exists(file)
-        else:
-            return True
 
     def select_simulation_data(self, data, simulation):
 
         simdata = pd.DataFrame({x: data[self.filenames[1]]['Channels'][x]['Data'] for x in self.inset_channels})
         simdata['Time'] = simdata.index
 
-        if self.channels:
-            d = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.channels})
-            # d = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'][:len(simdata)] for x in self.channels})
-            d['Time'] = d.index
-            simdata = pd.merge(left=simdata, right=d, on='Time')
+        ## remove selected channels not in data
+        json_channels = list(data[self.filenames[0]]['Channels'].keys())
+        self.channels =  [ch for ch in self.channels if ch in json_channels]
+
+        d = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.channels})
+        # d = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'][:len(simdata)] for x in self.channels})
+        d['Time'] = d.index
+        simdata = pd.merge(left=simdata, right=d, on='Time')
 
         simdata['Day'] = simdata['Time'] % 365
         simdata['Month'] = simdata['Day'].apply(lambda x: self.monthparser((x + 1) % 365))
@@ -608,13 +604,13 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         pdf = adf.groupby(['date'])[mean_channels].agg(np.mean).reset_index()
 
         adf = pd.merge(left=pdf, right=df, on=['date'])
-        adf['Treatment_Coverage'] = adf['Received_Treatment'] / adf['Statistical Population']
-        adf['SMC_Coverage'] = adf['Received_SMC'] / adf['Statistical Population']
-        adf['IRS_Coverage'] = adf['Received_IRS'] / adf['Statistical Population']
-        adf['Vaccine_Coverage'] = adf['Received_Vaccine'] / adf['Statistical Population']
+
+        events = [ch.replace('Received_','') for ch in self.channels if 'Received' in ch]
+        for event in events:
+            adf[f'{event}_Coverage'] = adf[f'Received_{event}'] / adf['Statistical Population']
 
         # Dont save csv
-        # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'BednetUsageAnalyzer.csv'), index=False)
+        # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'monthly_Event_Count.csv'), index=False)
 
         # Figure with panel per outcome channel
         fig = plt.figure(figsize=(6, 5))
@@ -622,7 +618,7 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
         fig.suptitle(f'Analyzer: ReceivedCampaignAnalyzer')
 
-        for ai, channel in enumerate(self.channels):
+        for ai, channel in enumerate(self.channels[:4]):
             ax = axes[ai]
             ax.set_title(channel)
             ax.set_ylabel(channel)
@@ -655,8 +651,8 @@ if __name__ == "__main__":
         #                     start_year=2022),   # only if using add_ITN_age_season instead of add_ITN
         ReceivedCampaignAnalyzer(expt_name=expt_name,
                                  working_dir=working_dir,
-                                 channels=['Received_Treatment', 'Received_IRS',
-                                           'Received_SMC', 'Received_Vaccine'], #Received_ITN  if using add_ITN
+                                 channels=['Received_Treatment', 'Received_Severe_Treatment', 'Received_ITN',
+                                           'Received_IRS', 'Received_SMC', 'Received_Vaccine'],
                                  start_year=2022),
         TransmissionReport(expt_name=expt_name,
                            working_dir=working_dir,
