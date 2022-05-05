@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     # analyzers to run
     analyzers = [
-                    # MonthlyInsetChartAnalyzer(expt_name=expt_name,
-                    #                           working_dir=working_dir,
-                    #                           sweep_variables=sweep_variables),  ### Usually not needed anymore
+                    InsetChartAnalyzer(expt_name=expt_name,
+                                              working_dir=working_dir,
+                                              sweep_variables=sweep_variables), 
                     AnnualAgebinPfPRAnalyzer(expt_name=expt_name,
                                              working_dir=working_dir,
                                              start_year=2022,

@@ -27,7 +27,7 @@ InsetChart Analyzer
 """
 
 
-class MonthlyInsetChartAnalyzer(BaseAnalyzer):
+class InsetChartAnalyzer(BaseAnalyzer):
 
     @classmethod
     def monthparser(self, x):
@@ -36,10 +36,11 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         else:
             return datetime.datetime.strptime(str(x), '%j').month
 
-    def __init__(self, expt_name, sweep_variables=None, working_dir=".", start_year=2022, end_year=2023):
-        super(MonthlyInsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
+    def __init__(self, expt_name, sweep_variables=None, channels=None, working_dir=".", start_year=2022, end_year=2023):
+        super(InsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
-        self.inset_channels = ['Statistical Population', 'New Clinical Cases', 'New Severe Cases', 'PfHRP2 Prevalence']
+        self.inset_channels = channels or ['Statistical Population', 'New Clinical Cases', 'New Severe Cases',
+                                           'PfHRP2 Prevalence']
         self.expt_name = expt_name
         self.start_year = start_year
         self.end_year = end_year
@@ -48,19 +49,9 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
         simdata = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.inset_channels})
         simdata['Time'] = simdata.index
         simdata['Day'] = simdata['Time'] % 365
-        simdata['Month'] = simdata['Day'].apply(lambda x: self.monthparser((x + 1) % 365))
-        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + self.start_year)
-        simdata['date'] = simdata.apply(lambda x: datetime.date(int(x['Year']), int(x['Month']), 1), axis=1)
-
-        sum_channels = ['New Clinical Cases', 'New Severe Cases']
-        for x in [y for y in sum_channels if y not in simdata.columns.values]:
-            simdata[x] = 0
-        mean_channels = ['Statistical Population', 'PfHRP2 Prevalence']
-
-        df = simdata.groupby(['date', 'Month'])[sum_channels].agg(np.sum).reset_index()
-        pdf = simdata.groupby(['date', 'Month'])[mean_channels].agg(np.mean).reset_index()
-
-        simdata = pd.merge(left=pdf, right=df, on=['date', 'Month'])
+        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + 2022)
+        simdata['date'] = simdata.apply(
+            lambda x: datetime.date(int(x['Year']), 1, 1) + datetime.timedelta(x['Day'] - 1), axis=1)
 
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
@@ -78,7 +69,7 @@ class MonthlyInsetChartAnalyzer(BaseAnalyzer):
             os.mkdir(os.path.join(self.working_dir, self.expt_name))
 
         adf = pd.concat(selected).reset_index(drop=True)
-        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'All_Age_Monthly_Cases.csv'), index=False)
+        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'All_Age_InsetChart.csv'), index=False)
 
 
 """
@@ -242,9 +233,9 @@ if __name__ == "__main__":
 
     # analyzers to run
     analyzers = [
-        MonthlyInsetChartAnalyzer(expt_name=expt_name,
-                                  working_dir=working_dir,
-                                  sweep_variables=sweep_variables),
+        InsetChartAnalyzer(expt_name=expt_name,
+                           working_dir=working_dir,
+                           sweep_variables=sweep_variables),
         MonthlyPfPRAnalyzerU5(expt_name=expt_name,
                               working_dir=working_dir,
                               start_year=2022,

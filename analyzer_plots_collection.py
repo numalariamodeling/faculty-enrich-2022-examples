@@ -6,19 +6,20 @@ from simtools.Analysis.AnalyzeManager import AnalyzeManager
 from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
 from simtools.SetupParser import SetupParser
 
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.dates as mdates
+import seaborn as sns
+
+mpl.rcParams['pdf.fonttype'] = 42
+palette = sns.color_palette("tab10")
+
 """
 InsetChart Analyzer
 """
 
 
 class InsetChartAnalyzer(BaseAnalyzer):
-
-    @classmethod
-    def monthparser(self, x):
-        if x == 0:
-            return 12
-        else:
-            return datetime.datetime.strptime(str(x), '%j').month
 
     def __init__(self, expt_name, sweep_variables=None, channels=None, working_dir=".", start_year=2022, end_year=2023):
         super(InsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
@@ -53,7 +54,38 @@ class InsetChartAnalyzer(BaseAnalyzer):
             os.mkdir(os.path.join(self.working_dir, self.expt_name))
 
         adf = pd.concat(selected).reset_index(drop=True)
+        # Dont save csv
         adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'All_Age_InsetChart.csv'), index=False)
+
+        # Take mean of years and runs for plotting
+        self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
+        adf = adf.groupby(['date'] + self.sweep_variables)[self.inset_channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+        # Figure with panel per outcome channel
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: InsetChartAnalyzer')
+
+        for ai, channel in enumerate(self.inset_channels):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if channel == 'PfHRP2 Prevalence':
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            ax.set_xlabel('')
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%m\n'%y"))
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+        if len(self.sweep_variables) > 1:
+            axes[0].legend(title="Unique sweep")
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'All_Age_InsetChart.png'))
 
 
 """
@@ -131,7 +163,37 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         if self.burnin is not None:
             adf = adf[adf['year'] >= self.start_year + self.burnin]
         adf = adf.loc[adf['agebin'] <= 100]
-        adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
+        # Dont save csv
+        # adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
+
+        # Figure with panel per outcome channel
+        # Take mean across multiple years and Run_Numbers for plots per agebin on the x-axis
+        channels = ['Pop', 'Cases', 'Severe cases', 'PfPR']
+        self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
+        adf = adf.groupby(['agebin'] + self.sweep_variables)[channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: AnnualAgebinPfPRAnalyzer')
+
+        for ai, channel in enumerate(channels):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if channel == 'PfPR':
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            ax.set_xlabel('agebin')
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['agebin'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+        axes[0].legend(title="Unique sweep")
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Agebin_PfPR_ClinicalIncidence.png'))
 
 
 # MonthlyAgebinPfPRAnalyzer
@@ -607,9 +669,38 @@ class TransmissionReport(BaseAnalyzer):
         mean_channels = ['Mean Parasitemia', 'PfHRP2 Prevalence']
         ### DAILY TRANSMISSION
         if self.daily_report:
-            adf.to_csv(
-                os.path.join(self.working_dir, self.expt_name, f'daily_transmission_report{selected_year_suffix}.csv'),
-                index=False)
+            # Dont save csv
+            # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'daily_transmission_report{selected_year_suffix}.csv'), index=False)
+
+            # Figure with panel per outcome channel
+            channels = sum_channels + ['PfHRP2 Prevalence']  # + mean_channels
+
+            ##Aggregate runs
+            grp_channels = [x for x in self.sweep_variables if x != "Run_Number"]
+            tdf = adf.groupby(['date', 'Year', 'Month'] + grp_channels)[channels].agg(np.mean).reset_index()
+            tdf['unique_sweep'] = tdf[grp_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+            fig = plt.figure(figsize=(6, 5))
+            fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+            axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+            fig.suptitle(f'Analyzer: TransmissionReport')
+
+            for ai, channel in enumerate(channels):
+                ax = axes[ai]
+                ax.set_title(channel)
+                ax.set_ylabel(channel)
+                if channel == 'PfHRP2 Prevalence':
+                    ax.set_ylim(0, 1)
+                else:
+                    ax.set_ylim(0, np.max(adf[channel]))
+                ax.set_xlabel('Time (days)')
+
+                for si, scen in enumerate(tdf['unique_sweep'].unique()):
+                    sdf = tdf[tdf['unique_sweep'] == scen]
+                    ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+            axes[0].legend(title="Unique sweep")
+            fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_daily.png'))
 
         ### MONTHLY TRANSMISSION
         if self.monthly_report:
@@ -617,17 +708,81 @@ class TransmissionReport(BaseAnalyzer):
             pdf = adf.groupby(['date', 'Year', 'Month'] + grp_channels)[mean_channels].agg(np.mean).reset_index()
             mdf = pd.merge(left=pdf, right=df, on=['date', 'Year', 'Month'] + grp_channels)
             mdf = mdf.rename(columns={'Daily Bites per Human': 'Monthly Bites per Human', 'Daily EIR': 'Monthly EIR'})
-            mdf.to_csv(os.path.join(self.working_dir, self.expt_name,
-                                    f'monthly_transmission_report{selected_year_suffix}.csv'), index=False)
+            # Dont save csv
+            # mdf.to_csv(os.path.join(self.working_dir, self.expt_name, f'monthly_transmission_report{selected_year_suffix}.csv'), index=False)
+
+            # Figure with panel per outcome channel
+            channels = sum_channels + ['PfHRP2 Prevalence']  # + mean_channels
+            channels = [x.replace('Daily ', 'Monthly ') for x in channels]
+
+            ##Aggregate runs
+            grp_channels = [x for x in self.sweep_variables if x != "Run_Number"]
+            mdf = mdf.groupby(['date'] + grp_channels)[channels].agg(np.mean).reset_index()
+            mdf['unique_sweep'] = mdf[grp_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+            fig = plt.figure(figsize=(6, 5))
+            fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+            axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+            fig.suptitle(f'Analyzer: TransmissionReport')
+
+            for ai, channel in enumerate(channels):
+                ax = axes[ai]
+                ax.set_title(channel)
+                ax.set_ylabel(channel)
+                if channel == 'PfHRP2 Prevalence':
+                    ax.set_ylim(0, 1)
+                else:
+                    ax.set_ylim(0, np.max(mdf[channel]))
+                # ax.set_xlabel('Time (months)')   #FIXME use continuous months for visualization
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%m\n'%y"))
+
+                for si, scen in enumerate(mdf['unique_sweep'].unique()):
+                    sdf = mdf[mdf['unique_sweep'] == scen]
+                    ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+            axes[0].legend(title="Unique sweep")
+            fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_monthly.png'))
 
         ### ANNUAL TRANSMISSION
         df = adf.groupby(['Year'] + grp_channels)[sum_channels].agg(np.sum).reset_index()
         pdf = adf.groupby(['Year'] + grp_channels)[mean_channels].agg(np.mean).reset_index()
         adf = pd.merge(left=pdf, right=df, on=['Year'] + grp_channels)
         adf = adf.rename(columns={'Daily Bites per Human': 'Annual Bites per Human', 'Daily EIR': 'Annual EIR'})
-        adf.to_csv(
-            os.path.join(self.working_dir, self.expt_name, f'annual_transmission_report{selected_year_suffix}.csv'),
-            index=False)
+
+        # Dont save csv
+        # adf.to_csv( os.path.join(self.working_dir, self.expt_name, f'annual_transmission_report{selected_year_suffix}.csv'),index=False)
+
+        # Figure with panel per outcome channel
+        channels = sum_channels + ['PfHRP2 Prevalence']  # + mean_channels
+        channels = [x.replace('Daily ', 'Annual ') for x in channels]
+
+        ##Aggregate runs
+        grp_channels = [x for x in self.sweep_variables if x != "Run_Number"]
+        adf = adf.groupby(['Year'] + grp_channels)[channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[grp_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: TransmissionReport')
+
+        for ai, channel in enumerate(channels):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if channel == 'PfHRP2 Prevalence':
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            ax.set_xlabel('Time (years)')
+            ax.set_xticks(adf['Year'].unique())
+            ax.set_xticklabels(adf['Year'].unique())
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['Year'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+        axes[0].legend(title="Unique sweep")
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_annual.png'))
 
 
 class BednetUsageAnalyzer(BaseAnalyzer):
@@ -710,7 +865,38 @@ class BednetUsageAnalyzer(BaseAnalyzer):
         adf = pd.merge(left=pdf, right=df, on=['date'] + self.sweep_variables)
         adf['mean_usage'] = adf['Bednet_Using'] / adf['Statistical Population']
         adf['new_net_coverage'] = adf['Bednet_Got_New_One'] / adf['Statistical Population']
-        adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'BednetUsageAnalyzer.csv'), index=False)
+
+        # Dont save csv
+        # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'BednetUsageAnalyzer.csv'), index=False)
+
+        # Figure with panel per outcome channel
+        channels = ['Bednet_Using', 'Bednet_Got_New_One', 'mean_usage', 'new_net_coverage']
+        ##Aggregate runs
+        grp_channels = [x for x in self.sweep_variables if x != "Run_Number"]
+        adf = adf.groupby(['date'] + grp_channels)[channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[grp_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: BednetUsageAnalyzer')
+
+        for ai, channel in enumerate(channels):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if channel == 'mean_usage' or channel == 'new_net_coverage':
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%m\n'%y"))
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+        axes[0].legend(title="Unique sweep")
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Bednet_Usage.png'))
 
 
 class ReceivedCampaignAnalyzer(BaseAnalyzer):
@@ -798,7 +984,38 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         events = [ch.replace('Received_', '') for ch in self.channels if 'Received' in ch]
         for event in events:
             adf[f'{event}_Coverage'] = adf[f'Received_{event}'] / adf['Statistical Population']
-        adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'monthly_Event_Count.csv'), index=False)
+
+        # Dont save csv
+        # adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'monthly_Event_Count.csv'), index=False)
+
+        # Figure with panel per outcome channel
+        ##Aggregate runs
+        grp_channels = [x for x in self.sweep_variables if x != "Run_Number"]
+        adf = adf.groupby(['date'] + grp_channels)[self.channels].agg(np.mean).reset_index()
+        adf['unique_sweep'] = adf[grp_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+        fig = plt.figure(figsize=(6, 5))
+        fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+        axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+        fig.suptitle(f'Analyzer: ReceivedCampaignAnalyzer')
+
+        for ai, channel in enumerate(self.channels[:4]):
+            ax = axes[ai]
+            ax.set_title(channel)
+            ax.set_ylabel(channel)
+            if 'Coverage' in channel:
+                ax.set_ylim(0, 1)
+            else:
+                ax.set_ylim(0, np.max(adf[channel]))
+            # ax.set_xlabel('Time (months)')   #FIXME use continuous months for visualization
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%m\n%y'))
+
+            for si, scen in enumerate(adf['unique_sweep'].unique()):
+                sdf = adf[adf['unique_sweep'] == scen]
+                ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+        axes[0].legend(title="Unique sweep")
+        fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Received_Campaigns.png'))
 
 
 """
