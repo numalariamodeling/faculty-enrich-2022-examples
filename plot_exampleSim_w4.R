@@ -16,7 +16,7 @@ plot_All_Age_Cases <- function(sim_dir, channels = NULL, scen_channels = NULL) {
 
   ## Automatically sset variable to color by
   if (is.null(scen_channels) | length(scen_channels) > 1) {
-    scen_channels = colnames(dat)[!(colnames(dat)) %in% c(output_channels, 'date','Time','Day','Year', 'Run_Number')]
+    scen_channels = colnames(dat)[!(colnames(dat)) %in% c(output_channels, 'date', 'Time', 'Day', 'Year', 'Run_Number')]
     dat = unite(dat, 'unique_sweep', scen_channels, sep = "_", remove = TRUE, na.rm = FALSE)
     scen_channel = 'unique_sweep'
   }else {
@@ -49,12 +49,61 @@ plot_All_Age_Cases <- function(sim_dir, channels = NULL, scen_channels = NULL) {
 }
 
 
+plot_PfPR_ClinicalIncidence <- function(sim_dir, Uage = 'U5', channels = NULL, scen_channels = NULL) {
+  dat <- fread(file.path(sim_dir, paste0(Uage, '_PfPR_ClinicalIncidence.csv'))) %>%
+    rename_with(~gsub(paste0(" ", Uage), "", .x)) %>%
+    mutate(date = make_date(year, month, '01'))
+
+  output_channels = c('PfPR', 'Cases', 'Severe cases', 'Mild anaemia',
+                      'Moderate anaemia', 'Severe anaemia', 'New infections',
+                      'Mean Log Parasite Density', 'Pop')
+  output_channels = output_channels[(output_channels %in% colnames(dat))]
+
+  if (is.null(channels)) {
+    channels = c('Pop', 'Cases', 'Severe cases', 'PfPR')
+  }
+
+  ## Automatically sset variable to color by
+  if (is.null(scen_channels) | length(scen_channels) > 1) {
+    scen_channels = colnames(dat)[!(colnames(dat)) %in% c(output_channels, 'date', 'year', 'month', 'Run_Number')]
+    dat = unite(dat, 'unique_sweep', scen_channels, sep = "_", remove = TRUE, na.rm = FALSE)
+    scen_channel = 'unique_sweep'
+  }else {
+    scen_channel = scen_channels[0]
+  }
+
+  ## Aggregate runs
+  dat <- dat %>%
+    group_by_at(.vars = c('date', 'year', scen_channel)) %>%
+    summarize_at(output_channels, .funs = 'mean')
+
+  fig <- dat %>%
+    pivot_longer(cols = -c('date', 'year', scen_channel)) %>%
+    filter(name %in% channels) %>%
+    ggplot() +
+    geom_hline(yintercept = 0) +
+    geom_line(aes(x = date, y = value, col = as.factor(scen_channel))) +
+    facet_wrap(~name, scales = 'free') +
+    labs(x = 'Year', y = 'value', color = 'agebin') +
+    theme_minimal() +
+    theme(panel.border = element_rect(color = 'black', fill = NA),
+          plot.background = element_rect(, fill = 'white'),
+          panel.background = element_rect(, fill = 'white'),
+          panel.grid = element_blank())
+
+  print(fig)
+  ggsave(paste0("PfPR_ClinicalIncidence_", Uage, ".png"), plot = fig, path = sim_dir,
+         width = 5, height = 5, device = "png")
+}
+
+
 plot_Agebin_PfPR_ClinicalIncidence <- function(sim_dir, channels = NULL, scen_channels = NULL) {
   dat <- fread(file.path(sim_dir, 'Agebin_PfPR_ClinicalIncidence.csv'))
 
   output_channels = c('PfPR', 'Cases', 'Severe cases', 'Mild anaemia',
                       'Moderate anaemia', 'Severe anaemia', 'New infections',
                       'Mean Log Parasite Density', 'Pop')
+  output_channels = output_channels[(output_channels %in% colnames(dat))]
 
   if (is.null(channels)) {
     channels = c('Pop', 'Cases', 'Severe cases', 'PfPR')
@@ -71,17 +120,17 @@ plot_Agebin_PfPR_ClinicalIncidence <- function(sim_dir, channels = NULL, scen_ch
 
   ## Aggregate runs
   dat <- dat %>%
-    group_by_at(.vars = c('agebin', 'year', scen_channel)) %>%
+    group_by_at(.vars = c('agebin', scen_channel)) %>%
     summarize_at(output_channels, .funs = 'mean')
 
   fig <- dat %>%
-    pivot_longer(cols = -c('agebin', 'year', scen_channel)) %>%
-    filter(name %in% channels[2] ) %>%
+    pivot_longer(cols = -c('agebin', scen_channel)) %>%
+    filter(name %in% channels) %>%
     ggplot() +
     geom_hline(yintercept = 0) +
-    geom_line(aes(x = year, y = value, col = as.factor(agebin))) +
-    facet_wrap(~get(scen_channel), scales = 'free') +
-    labs(x = 'Year', y = channels[2], color = 'agebin') +
+    geom_line(aes(x = agebin, y = value, col = get(scen_channel))) +
+    facet_wrap(~name, scales = 'free') +
+    labs(x = 'Agebin', color = scen_channel) +
     theme_minimal() +
     theme(panel.border = element_rect(color = 'black', fill = NA),
           plot.background = element_rect(, fill = 'white'),
@@ -90,7 +139,7 @@ plot_Agebin_PfPR_ClinicalIncidence <- function(sim_dir, channels = NULL, scen_ch
 
   print(fig)
   ggsave("Agebin_PfPR_ClinicalIncidence.png", plot = fig, path = sim_dir,
-         width = 6, height = 6, device = "png")
+         width = 5, height = 5, device = "png")
 }
 
 
@@ -159,7 +208,7 @@ plot_TransmissionReport <- function(sim_dir, scen_channels = NULL, time_res = 'm
 
   print(fig)
   ggsave(paste0("TransmissionReport_", time_res, ".png"), plot = fig, path = sim_dir,
-         width = 6, height = 6, device = "png")
+         width = 5, height = 5, device = "png")
 }
 
 
@@ -209,7 +258,7 @@ plot_ReceivedCampaigns <- function(sim_dir, channels = NULL, scen_channels = NUL
 
   print(fig)
   ggsave("Received_Campaigns.png", plot = fig, path = sim_dir,
-         width = 6, height = 6, device = "png")
+         width = 5, height = 5, device = "png")
 }
 
 
@@ -226,7 +275,7 @@ sim_dir = file.path(working_dir, expt_name)
 plot_All_Age_Cases(sim_dir)
 
 ##  Malaria Burden over time (MalariaSummaryReport)
-# TO ADD
+plot_PfPR_ClinicalIncidence(sim_dir, Uage = 'U5')
 
 ##  Malaria Burden over age (MalariaSummaryReport)
 plot_Agebin_PfPR_ClinicalIncidence(sim_dir)

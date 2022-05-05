@@ -821,18 +821,19 @@ Default example Agebin_PfPR_ClinicalIncidence figure generated in R
 ![img](static/w4_Agebin_PfPR_ClinicalIncidence_R.png)
 
 Default example All_Age_Monthly_Cases figure generated in Python  
-![img](static/w4_All_Age_Monthly_Cases_py.png)
+![img](static/w4_All_Age_Cases_py.png)
 
 Default example All_Age_Monthly_Cases figure generated in R  
-![img](static/w4_All_Age_Monthly_Cases_R.png)
+![img](static/w4_All_Age_Cases_R.png)
 
 <!--
 Default example TransmissionReport_monthly figure generated in Python  
 ![img](static/w4_TransmissionReport_monthly_py.png)
--->
+
 
 Default example All_Age_Monthly_Cases figure generated in R  
 ![img](static/w4_TransmissionReport_monthly_R.png)
+-->
 
 Default example Received_Campaigns figure generated in Python  
 ![img](static/w4_Received_Campaigns_py.png)  

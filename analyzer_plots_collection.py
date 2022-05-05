@@ -97,7 +97,7 @@ MalariaSummaryReport Analyzer
 # AnnualAgebinPfPRAnalyzer
 class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
 
-    def __init__(self, expt_name, sweep_variables=None, agebin_name='customagebins', working_dir='./', start_year=2022,
+    def __init__(self, expt_name, sweep_variables=None,  working_dir='./', start_year=2022,
                  end_year=2025, burnin=None):
 
         super(AnnualAgebinPfPRAnalyzer, self).__init__(working_dir=working_dir,

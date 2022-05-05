@@ -58,6 +58,55 @@ def plot_All_Age_Cases(sim_dir, channels=None, scen_channels=None):
     fig.savefig(os.path.join(working_dir, expt_name, 'All_Age_InsetChart.png'))
 
 
+def plot_PfPR_ClinicalIncidence(sim_dir, Uage = 'U5', scen_channels=None, channels=None):
+    df = pd.read_csv(os.path.join(sim_dir, f'{Uage}_PfPR_ClinicalIncidence.csv'))
+    df['date'] = df.apply(lambda x: datetime.date(int(x['year']), int(x['month']), 1), axis=1)
+    df.columns = [x.replace(f' {Uage}','') for x in df.columns]
+
+    output_channels = ['PfPR', 'Cases', 'Severe cases', 'Mild anaemia',
+                       'Moderate anaemia', 'Severe anaemia', 'New infections',
+                       'Mean Log Parasite Density', 'Pop']
+    output_channels = [x for x in output_channels if x in df.columns]
+
+    if channels is None:
+        channels = ['Pop', 'Cases', 'Severe cases', 'PfPR']
+
+    ## Automatically set variable to color by
+    if scen_channels is None or len(scen_channels) > 1:
+        scen_channels = [x for x in df.columns if
+                         x not in output_channels + ['date','year', 'month', 'Run_Number']]
+        df['unique_sweep'] = df[scen_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+        scen_channel = 'unique_sweep'
+    else:
+        scen_channel = scen_channels[0]
+    df['unique_sweep'] = df[scen_channels].apply(lambda x: ",".join(x.astype(str)), axis=1)
+
+    ## Aggregate runs and time (for simplicity take mean across all)!
+    df = df.groupby(['date', scen_channel])[channels].agg(np.mean).reset_index()
+
+    fig = plt.figure(figsize=(6, 5))
+    fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
+    axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]
+    fig.suptitle(f'Analyzer: MalariaSummaryReport')
+
+    for ai, channel in enumerate(channels):
+        ax = axes[ai]
+        ax.set_title(channel)
+        ax.set_ylabel(channel)
+        if channel == 'PfPR':
+            ax.set_ylim(0, 1)
+        else:
+            ax.set_ylim(0, np.max(df[channel]))
+        ax.set_xlabel('')
+
+        for si, scen in enumerate(df['unique_sweep'].unique()):
+            sdf = df[df['unique_sweep'] == scen]
+            ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
+
+    axes[0].legend(title="Unique sweep")
+    fig.savefig(os.path.join(working_dir, expt_name, f'PfPR_ClinicalIncidence_{Uage}.png'))
+
+
 def plot_Agebin_PfPR_ClinicalIncidence(sim_dir, scen_channels=None, channels=None):
     df = pd.read_csv(os.path.join(sim_dir, 'Agebin_PfPR_ClinicalIncidence.csv'))
     df['date'] = df.apply(lambda x: datetime.date(int(x['year']), int(x['month']), 1), axis=1)
@@ -228,8 +277,8 @@ if __name__ == "__main__":
     plot_All_Age_Cases(sim_dir)
 
     ##  Malaria Burden over time (MalariaSummaryReport)
-    # TO ADD
-    
+    plot_PfPR_ClinicalIncidence(sim_dir, Uage='U5')
+
     """Malaria Burden over age (SummaryReport)"""
     plot_Agebin_PfPR_ClinicalIncidence(sim_dir)
 
