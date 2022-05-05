@@ -5,10 +5,13 @@
 Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment
 program 2022.
 
-**Prerequisites**: successful [installation]((https://faculty-enrich-2022.netlify.app/modules/install-emod/)) of EMOD
-and dtk
-and [cloned repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-to local computer, ideally under _/<.username>/Documents/faculty-enrich-2022-examples_.
+**Prerequisites**: 
+Before running the weekly example scripts, please ensure that EMOD and dtk have been successfully [installed]((https://faculty-enrich-2022.netlify.app/modules/install-emod/))
+and that the [repository has been cloned](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+to your local computer, ideally under _/<.username>/Documents/faculty-enrich-2022-examples_.
+It also needs dtk virtual environment loaded and assumes files are run from a working directory set to where the script is located.
+
+
 
 #### Weekly example exercises
 
@@ -31,7 +34,8 @@ __Table 1: Overview of scripts used throughout the course__
 
 |Script |Description | 
 |-------|------------|
-|analyzer_collection.py | collection of different analyzers used| 
+|analyzer_collection.py | collection of different analyzers used returning csv files| 
+|analyzer_plots_collection.py | collection of different analyzers used returning plots instead of csv| 
 |analyze_exampleSim_wX.py |the main analyzer script which changes each week (w1, w2,...w5) | 
 |generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
 |plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R |
@@ -175,7 +179,7 @@ Generated simulation files
 ![img](static/w2_directories_files.png)
 
 Generated plot from InsetChart  
-![img](static/w2_All_Age_Monthly_Cases.png)
+![img](static/w2_All_Age_InsetChart.png)
 
 Generated plot from annual summmary report  
 ![img](static/w2_Agebin_PfPR_ClinicalIncidence.png)
@@ -441,14 +445,14 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
           'exp_builder' : builder
       }
       ```
-    - add ModBuilder
+    - add `ModBuilder`
       ```py
       builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
                                       ]
                                       for x in range(numseeds)
                                       ])
       ```
-- modify and extend ModBuilder to allow running different parameter sweeps
+- Modify and extend ModBuilder to allow running different parameter sweeps
     ```py
     builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
                                      ModFn(smc_intervention, coverage_level=smc_cov), 
@@ -460,163 +464,168 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
                                     ])
     ```
 
-- In order for case management and SMC campaigns to take different coverage parameters as specified above, they need to
-  be changed into a function that takes cb as input as shows below:
-    - wrap `add_health_seeking` into `case_management` and others into functions:
+- Now, for the interventions to take different coverage values as shown in the example above, 
+  the previously added intervention campaigns  need to be wrapped into a function as shown below:  
+    - <details><summary><span style="color: blue";">case_management </span></summary>
+       <p>
 
-        - <details><summary><span style="color: blue";">case_management </span></summary>
-           <p>
+       ```py
+        def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
+            add_health_seeking(cb, start_day=0,
+                               targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
+                                         'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                        {'trigger': 'NewClinicalCase', 'coverage': 0.5,
+                                         'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                        {'trigger': 'NewSevereCase', 'coverage': 0.85,
+                                         'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                               drug=['Artemether', 'Lumefantrine'])
+        
+            return {'cm_cov_U5': cm_cov_U5,
+                    'cm_cov_adults': cm_cov_adults}
+        ```
+         </p>
+         </details>
+    - <details><summary><span style="color: blue";">smc_intervention </span></summary>  
+        <p>
 
-           ```py
-            def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
-                add_health_seeking(cb, start_day=0,
-                                   targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
-                                             'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                            {'trigger': 'NewClinicalCase', 'coverage': 0.5,
-                                             'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                            {'trigger': 'NewSevereCase', 'coverage': 0.85,
-                                             'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                                   drug=['Artemether', 'Lumefantrine'])
-            
-                return {'cm_cov_U5': cm_cov_U5,
-                        'cm_cov_adults': cm_cov_adults}
-            ```
-             </p>
-             </details>
-        - <details><summary><span style="color: blue";">smc_intervention </span></summary>
-            <p>
+       ```py
+        def smc_intervention(cb, coverage_level, day=366, cycles=4):
+            add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
+                              coverage=coverage_level,
+                              start_days=[day],
+                              repetitions=cycles,
+                              tsteps_btwn_repetitions=30,
+                              target_group={'agemin': 0.25, 'agemax': 5},
+                              receiving_drugs_event_name='Received_SMC')
+        
+            return {'smc_start': day,
+                    'smc_coverage': coverage_level}
 
-           ```py
-            def smc_intervention(cb, coverage_level, day=366, cycles=4):
-                add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
-                                  coverage=coverage_level,
-                                  start_days=[day],
-                                  repetitions=cycles,
-                                  tsteps_btwn_repetitions=30,
-                                  target_group={'agemin': 0.25, 'agemax': 5},
-                                  receiving_drugs_event_name='Received_SMC')
-            
-                return {'smc_start': day,
-                        'smc_coverage': coverage_level}
- 
-           ```
+       ```
 
-             </p>
-             </details>
-        - <details><summary><span style="color: blue";">itn_intervention </span></summary>
-            <p>
+         </p>
+         </details>
+    - <details><summary><span style="color: blue";">itn_intervention </span></summary>
+        <p>
 
-           ```py  
-            def itn_intervention(cb, coverage_level, day=366):
-                add_ITN_age_season(cb, start=day,
-                                   demographic_coverage=coverage_level,
-                                   killing_config={
-                                       "Initial_Effect": 0.520249973,  # LLIN Burkina
-                                       "Decay_Time_Constant": 1460,
-                                       "class": "WaningEffectExponential"},
-                                   blocking_config={
-                                       "Initial_Effect": 0.53,
-                                       "Decay_Time_Constant": 730,
-                                       "class": "WaningEffectExponential"},
-                                   discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
-                                                  "Expiration_Period_Proportion_1": 0.9,
-                                                  "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
-                                                  "Expiration_Period_Mean_2": 3650},
-                                   age_dependence={'Times': [0, 100],
-                                                   'Values': [0.9, 0.9]},
-                                   duration=-1, birth_triggered=False
-                                   )
-          event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
+       ```py  
+        def itn_intervention(cb, coverage_level, day=366):
+            add_ITN(cb,
+                    start=day,  # starts on first day of second year
+                    coverage_by_ages=[
+                        {"coverage": coverage_level, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                        {"coverage": coverage_level * 0.75, "min": 10, "max": 50},
+                        # 25% lower than for children for 10-50 years old
+                        {"coverage": coverage_level * 0.6, "min": 50, "max": 125}
+                        # 40% lower than for children for everyone else
+                    ],
+                    repetitions=5,  # ITN will be distributed 5 times
+                    tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
+                    )
+          return {'itn_start': day, 'itn_coverage': coverage_level}
+      
+      event_list = event_list + ['Received_ITN']
 
-           ```
-           ```py                    
-            ### Or alternatiively 
-            def itn_intervention(cb, coverage_level, day=366):
-                add_ITN(cb,
-                        start=366,  # starts on first day of second year
-                        coverage_by_ages=[
-                            {"coverage": coverage_level, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
-                            {"coverage": coverage_level * 0.75, "min": 10, "max": 50}, # 25% lower than for children for 10-50 years old
-                            {"coverage": coverage_level * 0.6, "min": 50, "max": 125} # 40% lower than for children for everyone else
-                        ],
-                        repetitions=5,  # ITN will be distributed 5 times
-                        tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
-                        )
-            
-                return {'itn_start': day,
-                        'itn_coverage': coverage_level}
-           event_list = event_list + ['Received_ITN']
-           ```
-            </p>
-            </details>
+       ```
+       ```py                    
+        ### Or alternatiively 
+        add_ITN_age_season(cb, start=day,
+                           demographic_coverage=coverage_level,
+                           killing_config={
+                               "Initial_Effect": 0.520249973,  # LLIN Burkina
+                               "Decay_Time_Constant": 1460,
+                               "class": "WaningEffectExponential"},
+                           blocking_config={
+                               "Initial_Effect": 0.53,
+                               "Decay_Time_Constant": 730,
+                               "class": "WaningEffectExponential"},
+                           discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+                                          "Expiration_Period_Proportion_1": 0.9,
+                                          "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+                                          "Expiration_Period_Mean_2": 3650},
+                           age_dependence={'Times': [0, 100],
+                                           'Values': [0.9, 0.9]},
+                           duration=-1, birth_triggered=False
+                           )
+    
+        return {'itn_start': day,
+                'itn_coverage': coverage_level}
+      
+       event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
 
-        - <details><summary><span style="color: blue";">irs_intervention </span></summary>
-            <p>
+       ```
+        </p>
+        </details>
+    - <details><summary><span style="color: blue";">irs_intervention </span></summary>
+        <p>
 
-           ```py
-            # IRS, start after 1 year - single campaign
-            def irs_intervention(cb, coverage_level, day=366):
-                add_IRS(cb, start=day,
-                        coverage_by_ages=[{"coverage": coverage_level, "min": 0, "max": 100}],
-                        killing_config={
-                            "class": "WaningEffectBoxExponential",
-                            "Box_Duration": 180,  # based on PMI data from Burkina
-                            "Decay_Time_Constant": 90,  # Sumishield from Benin
-                            "Initial_Effect": 0.7},
-                        )
-            
-                return {'irs_start': day,
-                        'irs_coverage': coverage_level}
+       ```py
+        # IRS, start after 1 year - single campaign
+        def irs_intervention(cb, coverage_level, day=366):
+            add_IRS(cb, start=day,
+                    coverage_by_ages=[{"coverage": coverage_level, "min": 0, "max": 100}],
+                    killing_config={
+                        "class": "WaningEffectBoxExponential",
+                        "Box_Duration": 180,  # based on PMI data from Burkina
+                        "Decay_Time_Constant": 90,  # Sumishield from Benin
+                        "Initial_Effect": 0.7},
+                    )
+        
+            return {'irs_start': day,
+                    'irs_coverage': coverage_level}
 
-           ```
-            </p>
-            </details>
-        - <details><summary><span style="color: blue";">rtss_intervention </span></summary>
-            <p>
+       ```
+        </p>
+        </details>
+    - <details><summary><span style="color: blue";">rtss_intervention </span></summary>  
+        <p>
 
-           ```py
-            # malaria vaccine (RTS,S), no booster start after 1 year
-            def rtss_intervention(cb, coverage_level, day=366, agemin=274, agemax=275, initial_efficacy=0.8):
-                add_vaccine(cb,
-                            vaccine_type='RTSS',
-                            vaccine_params={"Waning_Config":
-                                                {"Initial_Effect": initial_efficacy,
-                                                 "Decay_Time_Constant": 592.4066512,
-                                                 "class": 'WaningEffectExponential'}},
-                            start_days=[day],
-                            coverage=coverage_level,
-                            repetitions=1,
-                            tsteps_btwn_repetitions=-1,
-                            target_group={'agemin': agemin, 'agemax': agemax})  # children 9 months of age
-            
-                return {'rtss_start': day,
-                        'rtss_coverage': coverage_level,
-                        'rtss_initial_effect': initial_efficacy}
-           ```
-            </p>
-            </details>
+       ```py
+        # malaria vaccine (RTS,S), no booster start after 1 year
+        def rtss_intervention(cb, coverage_level, day=366, agemin=274, agemax=275, initial_efficacy=0.8):
+            add_vaccine(cb,
+                        vaccine_type='RTSS',
+                        vaccine_params={"Waning_Config":
+                                            {"Initial_Effect": initial_efficacy,
+                                             "Decay_Time_Constant": 592.4066512,
+                                             "class": 'WaningEffectExponential'}},
+                        start_days=[day],
+                        coverage=coverage_level,
+                        repetitions=1,
+                        tsteps_btwn_repetitions=-1,
+                        target_group={'agemin': agemin, 'agemax': agemax})  # children 9 months of age
+        
+            return {'rtss_start': day,
+                    'rtss_coverage': coverage_level,
+                    'rtss_initial_effect': initial_efficacy}
+       ```
+        </p>
+        </details>  
 
-- Now change _exp_name_  to `f'{user}_FE_2022_example_w3b'` and the simulation is ready to go!
-- Run simulation and wait for simulation to finish (~10 minutes)
-    - While waiting, check out the generated experiment folder, that now includes many more subfolders for each of the
-      single simulations. Open two campaign files and compare, do you find the difference? (If there is none, these
-      might be two different run numbers for same simulation)
+- change _exp_name_  to `f'{user}_FE_2022_example_w3b'` and the simulation is ready to go!
+  
+- Run simulations 
+    - While waiting, check out the generated experiment folder, that now includes more subfolders for each of the
+      single simulations. Open two campaign files and compare, do you see any differences?   
       _(Tip: Many text editors allow side by side comparison of two scripts, automatically highlighting differences)_
-- Run second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) (don't forget to update _expt_id_ : ))
-    - While having the analyzer script open, also check that all the relevant sweep variables are included. Note that
-      the sweep_variables need to change according to the `ModBuilder` and custom functions used to define scenarios,
-      depending on which ones uniquely define each simulation and are required in the analysis.
+
+- Open second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) to update the _exp_id_ as usual, but now also check 
+  that all the relevant sweep variables are included in _sweep_variables_. 
+  The sweep_variables need to change according to the `ModBuilder` and custom functions that return parameters, which
+  uniquely define single simulations.
   ```py
+      ## Example of sweep_variables in analyzer (customize to your simulation)  
       sweep_variables = ['cm_cov_U5', 'smc_coverage', 'itn_coverage', 'irs_coverage', 'rtss_coverage', 'Run_Number']
   ```
-- Inspect `simulation_outputs` and compare against outputs from the previous week.
-- Change intervention parameters in the `ModBuilder` and repeat the simulation process to become more familar with the
-  process.
+- Inspect `simulation_outputs` and compare against outputs from the previous week.  
+  
+- Change intervention parameters in the `ModBuilder` and repeat the simulation process to become more familiar with the
+  whole process.  
 
 <details><summary><span>Check results</span></summary>
 <p>
 
-The generated result figures include separate lines. The Run_Numbers were aggregated using the mean and the intervention
+The generated result figures include separate lines. The `Run_Numbers` were aggregated using the mean and the intervention
 coverage levels are used as additional grouping variables when aggregating simulation outputs. An additional variable '
 unique_sweep' was generaetd to simplify automated plotting for different sweep variabels (the parameters defined
 in `ModBuilder`)
@@ -626,8 +635,10 @@ Aggregated malaria outcomes by agebin for no SMC (blue) compared to SMC (orange)
 ![img](static/w3b_smc_Agebin_PfPR_ClinicalIncidence.png)
 __Fig: Agebin_PfPR_ClinicalIncidence__
 
+
+
 All age monthly cases showing no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_All_Age_Monthly_Cases.png)
+![img](static/w3b_smc_All_Age_InsetChart.png)
 __Fig: All_Age_Monthly_Cases__
 
 Monthly transmission report showing no SMC (blue) compared to SMC (orange).
@@ -688,38 +699,41 @@ EMOD How To's:
                        age_bins=[0.25, 5, 100],
                        description=f'Monthly_U5_{sim_year}')
     ```  
-- Add `MalariaFilteredReport` - a simple oneliner (+module import)!.
+- Add `MalariaFilteredReport` which is a subset of `InsetChart` with selected outcomes relevant for malaria.
   ```py
   from malaria.reports.MalariaReport import add_filtered_report, add_event_counter_report
   add_filtered_report(cb, start=0, end=years * 365)
   ```
-- `MalariaFilteredReport` is a subset of `InsetChart` with selected outcomes relevant for malaria.
+
 - Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
-- Run simulation and wait for simulation to finish
-    - While the simulation is running, take a look at `analyze_exampleSim_w4.py`, and corresponding EMOD How To's to
+- Run simulations
+    - While simulations are running, take a look at `analyze_exampleSim_w4.py`, and corresponding EMOD How To's to
       familarize yourself with the Analyzer Classes
 - Run the analyzer script `analyze_exampleSim_w4.py` (_remember to change exp_id :)_ )
     - This time, the analyzer generated csv files instead of plots! This allows more flexible result generation.
 - Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the analyer+reports used in
-  the simulation.
+  the simulation
 - Run additional simulations and change the reports, for instance the agebins or reporting interval, and edit the
-  analyzer accordingly!
-    - Change age group:
+  analyzer accordingly!  
+  
+    - __Change age group__:
         - Add summary report for children under the age of 10 (U10) in your simulation script.
         - In the analyzer script, copy the analyzer _MonthlyPfPRAnalyzerU5_ and replace U5 with U10
             - _voilà_  a new analyzer for malaria outcomes aggregated for children under the age of 10 has been created!
             - The principle of the MonthlyPfPRAnalyzers is the same for any age group as long as the indexing and number
-              of agebins are matched correctly!
-        - Change monitoring interval:
-            - Add summary report for weekly reporting in your simulation script.
-            - Note: In practice a monitoring intervals of either 365 or 30 days are easiest to interpret and collected
-              data is also often per months or year. But in some occassions and also for exercise, weekly agebins might
-              be of interest too (for shorter total simulation period).
-        - Analyze additional outcome measures to look at (no new simulation needed)
-            - Look at the json file under `DataByTimeAndAgeBins` (in COMPS or Notepadd++)
-                - additional outcome examples 'New Infections by Age Bin', 'Annual Moderate Anemia by Age Bin', 'Mean
-                  Log Parasite Density by Age Bin'
-            - Add additional lines for new outcome measure, i.e. New Infections
+              of agebins are matched correctly!  
+              
+    - __Change monitoring interval__:
+        - Add summary report for weekly reporting in your simulation script.
+        - Note: In practice a monitoring intervals of either 365 or 30 days are easiest to interpret and collected
+          data is also often per months or year. But in some occassions and also for exercise, weekly agebins might
+          be of interest too (for shorter total simulation period).  
+          
+    - __Analyze additional outcome measures__ to look at (no new simulation needed)
+        - Look at the json file under `DataByTimeAndAgeBins` (in COMPS or Notepadd++)
+            - additional outcome examples 'New Infections by Age Bin', 'Annual Moderate Anemia by Age Bin', 'Mean
+              Log Parasite Density by Age Bin'
+        - Add additional lines for new outcome measure, i.e. New Infections
               ```py 
                 d = data[fname]['DataByTimeAndAgeBins']['New Infections by Age Bin'][:12]
                 new_infect = [x[age] for x in d] 
@@ -731,10 +745,11 @@ EMOD How To's:
                                       'Severe cases': severe_cases,
                                       'New infections': new_infect, ## newly added
                                       'Pop': pop})
-              ```    
+              ``` 
+          
 - __Optional__:
   - Advanced: check the analyzer_collection.py for other analyzers that might be applicable to your simulation.
-  - play around with [json_explorer.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/json_explorer.py) in Pycharm interactively to better understand reading in data from json selectively!  
+  - It time: play around with [json_explorer.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/json_explorer.py) in Pycharm interactively to better understand reading in data from json selectively!  
 
 <details><summary><span>Check results</span></summary>
 <p>
@@ -789,13 +804,12 @@ and [edited analyzer file](https://github.com/numalariamodeling/faculty-enrich-2
   several panels of seletced channels.
     - when calling the function specify 1 channel of choice
       i.e. `plot_Agebin_PfPR_ClinicalIncidence(sim_dir, channels= 'Cases')`
-        - a) modify the figure to have years as panels (facets) instead of channel (requires annual summary report csv)
-        - b) modify the figure to have agebin as panels (facets) and years on the x-axis (annual or monthly summary
+        - a) modify the figure to have agebin as panels (facets) and time on the x-axis(annual or monthly summary
           report csv)
-        - c) modify the figure to have agebin as color and unique_scen as panels, with years as x axis (annual or
+        - b) modify the figure to have agebin as color and unique_scen as panels, with time on the x-axis (annual or
           monthly summary report csv)
-    - Note in python you will need to modify `for ai, channel in enumerate(channels):` as well
-      as ` axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]`; and in R `facet_wrap(~name, scales = 'free')`
+    - Note in python you will need to modify `for ai, channel in enumerate(channels):` 
+      since ` axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]`; and in R `facet_wrap(~name, scales = 'free')`
 
 <details><summary><span>Check results</span></summary>
 <p>
@@ -812,8 +826,10 @@ Default example All_Age_Monthly_Cases figure generated in Python
 Default example All_Age_Monthly_Cases figure generated in R  
 ![img](static/w4_All_Age_Monthly_Cases_R.png)
 
+<!--
 Default example TransmissionReport_monthly figure generated in Python  
 ![img](static/w4_TransmissionReport_monthly_py.png)
+-->
 
 Default example All_Age_Monthly_Cases figure generated in R  
 ![img](static/w4_TransmissionReport_monthly_R.png)

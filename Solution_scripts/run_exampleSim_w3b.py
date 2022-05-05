@@ -101,41 +101,45 @@ event_list = event_list + ['Received_SMC']
 
 # ITN, start after 1 year
 def itn_intervention(cb, coverage_level, day=365):
-    # add_ITN(cb,
-    #         start=day,  # starts on first day of second year
-    #         coverage_by_ages=[
-    #             {"coverage": coverage_level, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
-    #             {"coverage": coverage_level * 0.75, "min": 10, "max": 50}, # 25% lower than for children for 10-50 years old
-    #             {"coverage": coverage_level * 0.6, "min": 50, "max": 125} # 40% lower than for children for everyone else
-    #         ],
-    #         repetitions=5,  # ITN will be distributed 5 times
-    #         tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
-    #         )
-    add_ITN_age_season(cb, start=day,
-                       demographic_coverage=coverage_level,
-                       killing_config={
-                           "Initial_Effect": 0.520249973,  # LLIN Burkina
-                           "Decay_Time_Constant": 1460,
-                           "class": "WaningEffectExponential"},
-                       blocking_config={
-                           "Initial_Effect": 0.53,
-                           "Decay_Time_Constant": 730,
-                           "class": "WaningEffectExponential"},
-                       discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
-                                      "Expiration_Period_Proportion_1": 0.9,
-                                      "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
-                                      "Expiration_Period_Mean_2": 3650},
-                       age_dependence={'Times': [0, 100],
-                                       'Values': [0.9, 0.9]},
-                       duration=-1, birth_triggered=False
-                       )
+    add_ITN(cb,
+            start=day,  # starts on first day of second year
+            coverage_by_ages=[
+                {"coverage": coverage_level, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                {"coverage": coverage_level * 0.75, "min": 10, "max": 50},
+                # 25% lower than for children for 10-50 years old
+                {"coverage": coverage_level * 0.6, "min": 50, "max": 125}
+                # 40% lower than for children for everyone else
+            ],
+            repetitions=5,  # ITN will be distributed 5 times
+            tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
+            )
+    # add_ITN_age_season(cb, start=day,
+    #                    demographic_coverage=coverage_level,
+    #                    killing_config={
+    #                        "Initial_Effect": 0.520249973,  # LLIN Burkina
+    #                        "Decay_Time_Constant": 1460,
+    #                        "class": "WaningEffectExponential"},
+    #                    blocking_config={
+    #                        "Initial_Effect": 0.53,
+    #                        "Decay_Time_Constant": 730,
+    #                        "class": "WaningEffectExponential"},
+    #                    discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+    #                                   "Expiration_Period_Proportion_1": 0.9,
+    #                                   "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+    #                                   "Expiration_Period_Mean_2": 3650},
+    #                    age_dependence={'Times': [0, 100],
+    #                                    'Values': [0.9, 0.9]},
+    #                    duration=-1, birth_triggered=False
+    #                    )
 
     return {'itn_start': day,
             'itn_coverage': coverage_level}
 
 
-# event_list = event_list + ['Received_ITN']  # when using add_ITN
-event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
+event_list = event_list + ['Received_ITN']  # when using add_ITN
+
+
+# event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
 
 
 # IRS, start after 1 year - single campaign
