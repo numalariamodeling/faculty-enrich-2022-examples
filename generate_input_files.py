@@ -49,7 +49,7 @@ def generate_climate(demo_fname):
 if __name__ == '__main__':
     inputs_path = os.path.join('./', 'input/Ghana')
     if not os.path.exists(inputs_path):
-        os.path.create(inputs_path)
+        os.mkdir(inputs_path)
 
     # df = pd.read_csv( os.path.join(os.getcwd(), 'my_node.csv')
     df = pd.DataFrame(data={'nodeid': [1], 'population': [1400], 'Village': ['Obom'],

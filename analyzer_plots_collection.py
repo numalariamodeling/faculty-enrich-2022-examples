@@ -60,7 +60,10 @@ class InsetChartAnalyzer(BaseAnalyzer):
         # Take mean of years and runs for plotting
         self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
         adf = adf.groupby(['date'] + self.sweep_variables)[self.inset_channels].agg(np.mean).reset_index()
-        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+        if len(self.sweep_variables) == 0:
+            adf['unique_sweep'] = '1'
+        else:
+            adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
 
         # Figure with panel per outcome channel
         fig = plt.figure(figsize=(6, 5))
@@ -171,7 +174,10 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         channels = ['Pop', 'Cases', 'Severe cases', 'PfPR']
         self.sweep_variables = [x for x in self.sweep_variables if not x == 'Run_Number']
         adf = adf.groupby(['agebin'] + self.sweep_variables)[channels].agg(np.mean).reset_index()
-        adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
+        if len(self.sweep_variables) == 0:
+            adf['unique_sweep'] = 'unique sweep'
+        else:
+            adf['unique_sweep'] = adf[self.sweep_variables].apply(lambda x: ",".join(x.astype(str)), axis=1)
 
         fig = plt.figure(figsize=(6, 5))
         fig.subplots_adjust(right=0.96, left=0.12, hspace=0.55, wspace=0.35, top=0.83, bottom=0.10)
@@ -977,6 +983,7 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         for x in [y for y in sum_channels if y not in adf.columns.values]:
             adf[x] = 0
         mean_channels = ['Statistical Population']
+        print(self.sweep_variables)
         df = adf.groupby(['date'] + self.sweep_variables)[sum_channels].agg(np.sum).reset_index()
         pdf = adf.groupby(['date'] + self.sweep_variables)[mean_channels].agg(np.mean).reset_index()
 
