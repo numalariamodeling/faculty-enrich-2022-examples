@@ -983,7 +983,6 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         for x in [y for y in sum_channels if y not in adf.columns.values]:
             adf[x] = 0
         mean_channels = ['Statistical Population']
-        print(self.sweep_variables)
         df = adf.groupby(['date'] + self.sweep_variables)[sum_channels].agg(np.sum).reset_index()
         pdf = adf.groupby(['date'] + self.sweep_variables)[mean_channels].agg(np.mean).reset_index()
 
