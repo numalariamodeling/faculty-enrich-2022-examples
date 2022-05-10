@@ -198,7 +198,8 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
                 sdf = adf[adf['unique_sweep'] == scen]
                 ax.plot(sdf['agebin'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
-        axes[0].legend(title="Unique sweep")
+        if len(self.sweep_variables) > 1:
+            axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Agebin_PfPR_ClinicalIncidence.png'))
 
 
@@ -705,7 +706,8 @@ class TransmissionReport(BaseAnalyzer):
                     sdf = tdf[tdf['unique_sweep'] == scen]
                     ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
-            axes[0].legend(title="Unique sweep")
+            if len(self.sweep_variables) > 1:
+                axes[0].legend(title="Unique sweep")
             fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_daily.png'))
 
         ### MONTHLY TRANSMISSION
@@ -745,7 +747,9 @@ class TransmissionReport(BaseAnalyzer):
                 for si, scen in enumerate(mdf['unique_sweep'].unique()):
                     sdf = mdf[mdf['unique_sweep'] == scen]
                     ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
-            axes[0].legend(title="Unique sweep")
+
+            if len(self.sweep_variables) > 1:
+                axes[0].legend(title="Unique sweep")
             fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_monthly.png'))
 
         ### ANNUAL TRANSMISSION
@@ -787,7 +791,8 @@ class TransmissionReport(BaseAnalyzer):
                 sdf = adf[adf['unique_sweep'] == scen]
                 ax.plot(sdf['Year'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
-        axes[0].legend(title="Unique sweep")
+        if len(self.sweep_variables) > 1:
+            axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'TransmissionReport_annual.png'))
 
 
@@ -901,7 +906,8 @@ class BednetUsageAnalyzer(BaseAnalyzer):
                 sdf = adf[adf['unique_sweep'] == scen]
                 ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
-        axes[0].legend(title="Unique sweep")
+        if len(self.sweep_variables) > 1:
+            axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Bednet_Usage.png'))
 
 
@@ -1020,7 +1026,8 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
                 sdf = adf[adf['unique_sweep'] == scen]
                 ax.plot(sdf['date'], sdf[channel], '-', color=palette[si], linewidth=0.8, label=scen)
 
-        axes[0].legend(title="Unique sweep")
+        if len(self.sweep_variables) > 1:
+            axes[0].legend(title="Unique sweep")
         fig.savefig(os.path.join(self.working_dir, self.expt_name, 'Received_Campaigns.png'))
 
 
