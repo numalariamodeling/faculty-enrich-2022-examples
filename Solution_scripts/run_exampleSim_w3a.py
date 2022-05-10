@@ -5,6 +5,7 @@ from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
 from dtk.vector.species import set_species, set_larval_habitat
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.SetupParser import SetupParser
+from simtools.ModBuilder import ModBuilder, ModFn
 ## Import custom reporters
 from malaria.reports.MalariaReport import add_summary_report
 from malaria.reports.MalariaReport import add_event_counter_report
@@ -16,8 +17,9 @@ from dtk.interventions.novel_vector_control import add_larvicides
 from malaria.interventions.health_seeking import add_health_seeking
 from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 from malaria.interventions.malaria_vaccine import add_vaccine
+
 # This block will be used unless overridden on the command-line
-SetupParser.default_block = 'HPC'
+SetupParser.default_block = 'Local'
 years = 3
 cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
@@ -123,7 +125,6 @@ add_larvicides(cb, start_day=366,
                killing_initial=0.4,
                killing_decay=150)
 
-
 """CUSTOM REPORTS"""
 # add_filtered_report(cb, start=0, end=years * 365)
 ## Summary report per agebin
@@ -145,9 +146,17 @@ add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10
 
 # run_sim_args is what the `dtk run` command will look for
 user = os.getlogin()  # user initials
+
+numseeds = 1
+builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
+                                 ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')  # optional
+                                 ]
+                                for x in range(numseeds)])
+
 run_sim_args = {
     'exp_name': f'{user}_FE_2022_example_w3a',
-    'config_builder': cb
+    'config_builder': cb,
+    'exp_builder': builder
 }
 
 # If you prefer running with `python example_sim.py`, you will need the following block

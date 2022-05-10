@@ -116,13 +116,15 @@ EMOD How To's:
 - [Create climate files](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#create-climate-files)
 - [Add summary reports](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#add-summary-reports) (
   annual)
+- [Set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
+
 
 ### Instructions
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Create _demographics_ and _climate_ files via `generate_input_files.py`
+- Create _demographics_ and _climate_ files via `generate_input_files.py` _(requires access to COMPS for climate database)_
 - Update default parameters in `python run_exampleSim.py`:
 
     ```py
@@ -135,26 +137,44 @@ EMOD How To's:
         "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
     })
     ```
-- Add custom reporter with annual summary for different age groups
-    - add `add_summary_report` (see EMOD How To's) or below
-      ```py
-      from malaria.reports.MalariaReport import add_summary_report
-      add_summary_report(cb, start=1, interval=365,
-                       age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120], 
-                       description='Annual_Agebin')
-      ```
+- Add custom reporter with annual summary for different age groups (see EMOD How To's) or suggested example below:
+  ```py
+  from malaria.reports.MalariaReport import add_summary_report
+  add_summary_report(cb, start=1, interval=365,
+                   age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120], 
+                   description='Annual_Agebin')
+  ```
 - Increase simulation duration from 1 to 3 years by modifying DTKConfigBuilder as below:
   ```py 
-    years = 3
-    cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years*365)
+  years = 3
+  cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years*365)
   ```
+- Add a simple  ModBuilder code chunk, that allows to run multiple simulations and assigning each one tags required in postprocessing.
+  The ModBuilder will be discussed more in detail in the following week, so don't worry about understanding it all this week:
+  ```py 
+  from simtools.ModBuilder import ModBuilder, ModFn
+  ```
+  ```py 
+  numseeds = 1
+  builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
+                                   ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')]
+                                  for x in range(numseeds)])
+  ```
+   - in addition `'exp_builder': builder` needs to be added to the `run_sim_args` object:
+      ```py 
+      run_sim_args = {
+          'exp_name': f'{user}_FE_2022_example_w2',
+          'config_builder': cb,
+          'exp_builder': builder
+      }
+      ```  
 
 - Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
-- Run simulation as learned in Week 1 and wait for simulation to finish (~5 minutes)
+- Run simulation as learned in week 1 and wait for simulation to finish (~5 minutes)
     - Note, if there are problems with running locally, you can peek into [Week 6](#week6) on how to
       change `SetupParser` to run on _COMPS_ (requires login)!
 - Run analyzer script for Week 2 `analyze_exampleSim_w2.py` (don't forget to update expt_id!)
-- Inspect `simulation_outputs` to see additional generated plot
+- Inspect `simulation_outputs` and the generated plots
     - Optional: rerun analyzer with plot for week 1 and compare.
     - _Note that EMOD is a stochastic model and any changes at low population size and few repetitions might be at
       random and not necessarily due to the parameter change!_
@@ -339,7 +359,7 @@ EMOD How To's:
       ```
 - Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
 - Now, run the simulation and wait for it to finish (~5 minutes)
-- While simulations runs, familarize yourself with the generated campaign file, does it include all interventions
+- While simulations runs, familiarize yourself with the generated campaign file, does it include all interventions
   specified?
     - The `campaign.json` file is located in your experiment simulation folder.
 - Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) (don't forget to update _expt_id_!)
@@ -432,31 +452,13 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Further modify the simulation script to run multiple simulations using the detailed steps below
-    - import modules  `from simtools.ModBuilder import ModBuilder, ModFn`
-    - specify number of seeds i.e. `numseeds = 3` (the more seeds the more single simulations run and it takes longer
-      until whole simulation experiment finishes)
-    - modify `run_sim_args` as follows:
-      ```py
-      expt_name =  f'{user}_FE_2022_example_w3b'
-      run_sim_args = {
-          'exp_name': expt_name,
-          'config_builder': cb,
-          'exp_builder' : builder
-      }
-      ```
-    - add `ModBuilder`
-      ```py
-      builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
-                                      ]
-                                      for x in range(numseeds)
-                                      ])
-      ```
-- Modify and extend ModBuilder to allow running different parameter sweeps
+- Modify and extend `ModBuilder`, previously added in week 2, to allow running different parameter sweeps
     ```py
-    builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
+    builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),                     
                                      ModFn(smc_intervention, coverage_level=smc_cov), 
-                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
+                                     ## ModFn(xxx_intervention, coverage_level=xxx_cov),  # adjust to add other interventions
+                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
+                                     ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')  # optional
                                     ]
                                     for cm_cov_U5 in [0.4, 0.6] 
                                     for smc_cov in [0, 0.6] 
@@ -704,11 +706,13 @@ EMOD How To's:
   from malaria.reports.MalariaReport import add_filtered_report, add_event_counter_report
   add_filtered_report(cb, start=0, end=years * 365)
   ```
+   - Note in the analyzer script [analyzer_collection.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/analyzer_collection.py)
+      `InsetChart.json` was replaced with `ReportMalariaFiltered.json` 
 
 - Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulations
     - While simulations are running, take a look at `analyze_exampleSim_w4.py`, and corresponding EMOD How To's to
-      familarize yourself with the Analyzer Classes
+      familiarize yourself with the Analyzer Classes
 - Run the analyzer script `analyze_exampleSim_w4.py` (_remember to change exp_id :)_ )
     - This time, the analyzer generated csv files instead of plots! This allows more flexible result generation.
 - Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the analyer+reports used in

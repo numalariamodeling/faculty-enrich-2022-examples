@@ -5,6 +5,7 @@ from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
 from dtk.vector.species import set_species, set_larval_habitat
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.SetupParser import SetupParser
+from simtools.ModBuilder import ModBuilder, ModFn
 ## Import custom reporters
 from malaria.reports.MalariaReport import add_summary_report
 
@@ -43,9 +44,16 @@ add_summary_report(cb, start=1, interval=365,
 
 # run_sim_args is what the `dtk run` command will look for
 user = os.getlogin()  # user initials
+numseeds = 1
+builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'seed', x),
+                                 ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')  # optional
+                                 ]
+                                for x in range(numseeds)])
+
 run_sim_args = {
     'exp_name': f'{user}_FE_2022_example_w2',
-    'config_builder': cb
+    'config_builder': cb,
+    'exp_builder': builder
 }
 
 # If you prefer running with `python example_sim.py`, you will need the following block
