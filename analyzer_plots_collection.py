@@ -609,7 +609,7 @@ class TransmissionReport(BaseAnalyzer):
     def __init__(self, expt_name, channels=None, sweep_variables=None, working_dir='./', start_year=2022,
                  selected_year=None, daily_report=False, monthly_report=False, filter_exists=False):
         super(TransmissionReport, self).__init__(working_dir=working_dir,
-                                                 filenames=["output/ReportMalariaFiltered.json"])
+                                                 filenames=["output/InsetChart.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
         self.channels = channels or ['Daily Bites per Human', 'Daily EIR', 'Mean Parasitemia', 'PfHRP2 Prevalence',
                                      'Rainfall']
@@ -918,7 +918,7 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
                  selected_year=None, filter_exists=False):
         super(ReceivedCampaignAnalyzer, self).__init__(working_dir=working_dir,
                                                        filenames=["output/ReportEventCounter.json",
-                                                                  "output/ReportMalariaFiltered.json"])
+                                                                  "output/InsetChart.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
         self.channels = channels or ['Received_Treatment']
         self.inset_channels = ['Statistical Population']
