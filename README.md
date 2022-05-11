@@ -58,7 +58,7 @@ EMOD How To's:
 <details><summary><span>Click to expand</span></summary>
 <p>
 
-- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username in path
+- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username in path (5 locations)
 - Run simulation via `python run_exampleSim.py`
 - Wait simulation to finish (~5 minutes)
     - Note, when running locally, the console might return an <span style="color:#ff6666">psutil.AccessDenied
@@ -66,12 +66,12 @@ EMOD How To's:
       error, however the simulation can still successfully run and finish.
     - If there are problems with running locally, you can peek into [Week 6](#week6) on how to change `SetupParser` to
       run on _COMPS_ (requires login)!
-- Go to the experiment folder to notice the generated simulation experiment named '
+- Go to the `experiments/` folder to notice the generated simulation experiment named '
   username_FE_2022_example_w1___2022_04_29_02_14_46_106520' The last part after the '___' is the experiment id and
   changes with each simulation.
 - Update expt_id in `analyze_exampleSim_w1.py` Line 14 (copy number sequence after ___, also printed to console)
 - Run analyzer via `python analyze_exampleSim_w1.py`
-- Inspect `simulation_outputs` to see generated simulation results (csv files)
+- Inspect `simulation_outputs/` to see generated simulation results (csv file and plot)
 - Done!
 
 <details><summary><span>Check results</span></summary>
@@ -97,7 +97,9 @@ Generated simulation output files
 aggregated per month for the simulation duration, in this example 1 year.
 ![img](static/w1_All_Age_Monthly_Cases_excel.png)
 
+Generated plot
 
+![img](static/w1_InsetChart.png)
 
 </p>
 </details>
