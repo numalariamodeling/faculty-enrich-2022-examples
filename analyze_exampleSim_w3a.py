@@ -19,21 +19,25 @@ SetupParser.default_block = 'LOCAL'
 
 user = os.getlogin()  # user initials
 expt_name = f'{user}_FE_2022_example_w3a'
-expt_id = '2022_04_29_04_26_46_512944'  ## change expt_id
+expt_id = '2022_05_11_14_07_24_168284'  ## change expt_id
 working_dir = os.path.join('simulation_outputs')
 
 
 if __name__ == "__main__":
     SetupParser.init()
+    sweep_variables = ['Scenario', 'Run_Number']
 
     analyzers = [
         InsetChartAnalyzer(expt_name=expt_name,
+                           sweep_variables=sweep_variables,
                            working_dir=working_dir),
         AnnualAgebinPfPRAnalyzer(expt_name=expt_name,
+                                 sweep_variables=sweep_variables,
                                  working_dir=working_dir,
                                  start_year=2022,
                                  end_year=2025),
         IndividualEventsAnalyzer(expt_name=expt_name,
+                                 sweep_variables=sweep_variables,
                                  working_dir=working_dir,
                                  start_year=2022,
                                  selected_year=None),
@@ -41,11 +45,13 @@ if __name__ == "__main__":
         #                     working_dir=working_dir,
         #                     start_year=2022),   # only if using add_ITN_age_season instead of add_ITN
         ReceivedCampaignAnalyzer(expt_name=expt_name,
+                                 sweep_variables=sweep_variables,
                                  working_dir=working_dir,
                                  channels=['Received_Treatment', 'Received_Severe_Treatment', 'Received_ITN',
                                            'Received_IRS', 'Received_SMC', 'Received_Vaccine'],
                                  start_year=2022),
         TransmissionReport(expt_name=expt_name,
+                           sweep_variables=sweep_variables,
                            working_dir=working_dir,
                            start_year=2022,
                            selected_year=None,
