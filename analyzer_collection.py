@@ -2,9 +2,7 @@ import os
 import datetime
 import pandas as pd
 import numpy as np
-from simtools.Analysis.AnalyzeManager import AnalyzeManager
 from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
-from simtools.SetupParser import SetupParser
 
 """
 InsetChart Analyzer
@@ -20,7 +18,7 @@ class InsetChartAnalyzer(BaseAnalyzer):
         else:
             return datetime.datetime.strptime(str(x), '%j').month
 
-    def __init__(self, expt_name, sweep_variables=None, channels=None, working_dir=".", start_year=2022, end_year=2023):
+    def __init__(self, expt_name, sweep_variables=None, channels=None, working_dir=".", start_year=2022):
         super(InsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
         self.inset_channels = channels or ['Statistical Population', 'New Clinical Cases', 'New Severe Cases',
@@ -59,7 +57,6 @@ class InsetChartAnalyzer(BaseAnalyzer):
 """
 MalariaSummaryReport Analyzer
 """
-
 
 ### PER AGEBIN
 # AnnualAgebinPfPRAnalyzer
