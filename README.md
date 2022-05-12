@@ -664,18 +664,15 @@ EMOD How To's:
   copy!)
     - Adjust coverage levels in `ModBuilder` to select/deselct interventions to include or change number of simulations
       to run (optional)
-- Add a new summary report with monthly monitoring to the simulation script as shown below
+- Add an individual-level event reporter. This example assumes there is case management for malaria in the simulation.
   ```py
-  sim_start_year = 2022  # add sim_start_year
-  
-  for year in range(years):
-    start_day = 365 + 365 * year
-    sim_year = sim_start_year + year
-    add_summary_report(cb, start=start_day, interval=30,
-                       age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
-                       description=f'Monthly_Agebin_{sim_year}')
+  cb.update_params({
+    'Report_Event_Recorder': 1,  # Enable generation of ReportEventRecorder.csv  
+    'Report_Event_Recorder_Ignore_Events_In_List': 0, # Logical indicating whether to include or exclude the events specified in the list 
+    'Report_Event_Recorder_Events': ['NewClinicalCase', 'Received_Treatment'], # List of events to include
+    })
     ```
-- Add another summary report with monthly monitoring for _children under the age of 5 years_ only (keep min age 0.25)
+- Add a new summary report with monthly monitoring for _children under the age of 5 years_ only (keep min age 0.25)
   ```py
   for year in range(years):
     start_day = 365 + 365 * year
@@ -684,20 +681,20 @@ EMOD How To's:
                        age_bins=[0.25, 5, 100],
                        description=f'Monthly_U5_{sim_year}')
     ```  
-- Add `MalariaFilteredReport` which is a subset of `InsetChart` with selected outcomes relevant for malaria.
+- Add `MalariaFilteredReport` which is the same as `InsetChart` but we can ask only to report on part of the simulation time (or just a subset of nodes, for spatial simulations).
   ```py
   from malaria.reports.MalariaReport import add_filtered_report, add_event_counter_report
-  add_filtered_report(cb, start=0, end=years * 365)
+  add_filtered_report(cb, start=(years-1)*365, end=years * 365)
   ```
-   - Note in the analyzer script [analyzer_collection.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/analyzer_collection.py)
-      `InsetChart.json` was replaced with `ReportMalariaFiltered.json` 
+   - Any analyzer script in [analyzer_collection.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/analyzer_collection.py)
+      that uses `InsetChart.json` can use `ReportMalariaFiltered.json` instead if you update the `self.filenames=` section.
 
 - Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulations
     - While simulations are running, take a look at `analyze_exampleSim_w4.py`, and corresponding EMOD How To's to
       familiarize yourself with the Analyzer Classes
 - Run the analyzer script `analyze_exampleSim_w4.py` (_remember to change exp_id :)_ )
-    - This time, the analyzer generated csv files instead of plots! This allows more flexible result generation.
+    - This time, we didn't automatically generate plots! Now up to you to generate the plots you need.
 - Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the analyer+reports used in
   the simulation
 - Run additional simulations and change the reports, for instance the agebins or reporting interval, and edit the
