@@ -1,18 +1,10 @@
-import os
-import datetime
-import pandas as pd
-import numpy as np
 from simtools.Analysis.AnalyzeManager import AnalyzeManager
-from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
 from simtools.SetupParser import SetupParser
 
 from analyzer_collection import *
 
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import matplotlib.dates as mdates
-
-mpl.rcParams['pdf.fonttype'] = 42
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'LOCAL'

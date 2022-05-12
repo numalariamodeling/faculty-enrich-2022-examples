@@ -428,31 +428,40 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Modify and extend `ModBuilder`, previously added in week 2, to allow running different parameter sweeps
+- Add `ModBuilder` to allow running different parameter sweeps
     ```py
+    from simtools.ModBuilder import ModBuilder, ModFn
+
+    numseeds = 3
     builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),                     
-                                     ModFn(smc_intervention, coverage_level=smc_cov), 
                                      ## ModFn(xxx_intervention, coverage_level=xxx_cov),  # adjust to add other interventions
-                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
-                                     ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')  # optional
+                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
                                     ]
                                     for cm_cov_U5 in [0.4, 0.6] 
-                                    for smc_cov in [0, 0.6] 
+                                    ## for xxx_cov in [0, 0.6] 
                                     for x in range(numseeds)
                                     ])
     ```
 
-- Now, for the interventions to take different coverage values as shown in the example above, 
-  the previously added intervention campaigns  need to be wrapped into a function as shown below:  
+    Adjust the `run_sim_args` block to include the builder:
+    ```py
+    run_sim_args = {
+        'exp_name': f'{user}_FE_2022_example_w3',
+        'config_builder': cb,
+        'exp_builder' : builder
+    }
+    ```
+
+- ModBuilder can consume the same `add_x()` functions we used above, but it's often cleaner to wrap each `add_x()` into another function. For each intervention you wrap and use in the builder, make sure that it's not ALSO called directly using `add_x()`.
     - <details><summary><span style="color: blue";">case_management </span></summary>
        <p>
 
        ```py
         def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
             add_health_seeking(cb, start_day=0,
-                               targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
+                               targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5,
                                          'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                        {'trigger': 'NewClinicalCase', 'coverage': 0.5,
+                                        {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
                                          'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
                                         {'trigger': 'NewSevereCase', 'coverage': 0.85,
                                          'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
@@ -500,35 +509,36 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
                     repetitions=5,  # ITN will be distributed 5 times
                     tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
                     )
-          return {'itn_start': day, 'itn_coverage': coverage_level}
+            return {'itn_start': day, 'itn_coverage': coverage_level}
       
       event_list = event_list + ['Received_ITN']
 
        ```
        ```py                    
         ### Or alternatiively 
-        add_ITN_age_season(cb, start=day,
-                           demographic_coverage=coverage_level,
-                           killing_config={
-                               "Initial_Effect": 0.520249973,  # LLIN Burkina
-                               "Decay_Time_Constant": 1460,
-                               "class": "WaningEffectExponential"},
-                           blocking_config={
-                               "Initial_Effect": 0.53,
-                               "Decay_Time_Constant": 730,
-                               "class": "WaningEffectExponential"},
-                           discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
-                                          "Expiration_Period_Proportion_1": 0.9,
-                                          "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
-                                          "Expiration_Period_Mean_2": 3650},
-                           age_dependence={'Times': [0, 100],
-                                           'Values': [0.9, 0.9]},
-                           duration=-1, birth_triggered=False
-                           )
+        def itn_intervention(cb, coverage_level, day=366):
+            add_ITN_age_season(cb, start=day,
+                               demographic_coverage=coverage_level,
+                               killing_config={
+                                   "Initial_Effect": 0.520249973,  # LLIN Burkina
+                                   "Decay_Time_Constant": 1460,
+                                   "class": "WaningEffectExponential"},
+                               blocking_config={
+                                   "Initial_Effect": 0.53,
+                                   "Decay_Time_Constant": 730,
+                                   "class": "WaningEffectExponential"},
+                               discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+                                              "Expiration_Period_Proportion_1": 0.9,
+                                              "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+                                              "Expiration_Period_Mean_2": 3650},
+                               age_dependence={'Times': [0, 100],
+                                               'Values': [0.9, 0.9]},
+                               duration=-1, birth_triggered=False
+                               )
     
-        return {'itn_start': day,
-                'itn_coverage': coverage_level}
-      
+            return {'itn_start': day,
+                    'itn_coverage': coverage_level}
+          
        event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
 
        ```
@@ -588,7 +598,7 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
       _(Tip: Many text editors allow side by side comparison of two scripts, automatically highlighting differences)_
 
 - Open second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) to update the _exp_id_ as usual, but now also check 
-  that all the relevant sweep variables are included in _sweep_variables_. 
+  that all the relevant sweep variables are included in _sweep_variables_ and all the events of interest are included in _event_list_. 
   The sweep_variables need to change according to the `ModBuilder` and custom functions that return parameters, which
   uniquely define single simulations.
   ```py
@@ -604,28 +614,25 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 <p>
 
 The generated result figures include separate lines. The `Run_Numbers` were aggregated using the mean and the intervention
-coverage levels are used as additional grouping variables when aggregating simulation outputs. An additional variable '
-unique_sweep' was generaetd to simplify automated plotting for different sweep variabels (the parameters defined
-in `ModBuilder`)
-In the example below 'unique_sweep' is in the order of cm, smc, itn, irs, and rtss (rtss not included below).
+coverage levels are used as additional grouping variables when aggregating simulation outputs. You may need to adjust the location of the legend if it's covering your plot!
 
-Aggregated malaria outcomes by agebin for no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_Agebin_PfPR_ClinicalIncidence.png)
+Examples with 4 levels of case management and 2 levels (off and on) of SMC:
+
 __Fig: Agebin_PfPR_ClinicalIncidence__
 
+![img](static/w3b_Agebin_PfPR_ClinicalIncidence.png)
 
 
-All age monthly cases showing no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_All_Age_InsetChart.png)
 __Fig: All_Age_Monthly_Cases__
 
-Monthly transmission report showing no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_TransmissionReport_monthly.png)
-__Fig: TransmissionReport_monthly (SMC)__
+![img](static/w3b_All_Age_InsetChart.png)
+
+__Fig: Interventions distributed__
+
+![img](static/w3b_ReceivedCampaignAnalyzer.png)
 
 Note, if too many parameters changed at once without clear labelling, the results can become difficult to interpret!
-![img](static/w3b_TransmissionReport_monthly.png)
-__Fig: TransmissionReport_monthly (multiple interventions)__
+
 
 View
 suggested [solution script for week 3 (b)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3b.py)
