@@ -2,9 +2,7 @@ import os
 import datetime
 import pandas as pd
 import numpy as np
-from simtools.Analysis.AnalyzeManager import AnalyzeManager
 from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
-from simtools.SetupParser import SetupParser
 
 """
 InsetChart Analyzer
@@ -20,14 +18,13 @@ class InsetChartAnalyzer(BaseAnalyzer):
         else:
             return datetime.datetime.strptime(str(x), '%j').month
 
-    def __init__(self, expt_name, sweep_variables=None, channels=None, working_dir=".", start_year=2022, end_year=2023):
+    def __init__(self, expt_name, sweep_variables=None, channels=None, working_dir=".", start_year=2022):
         super(InsetChartAnalyzer, self).__init__(working_dir=working_dir, filenames=["output/InsetChart.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
         self.inset_channels = channels or ['Statistical Population', 'New Clinical Cases', 'New Severe Cases',
                                            'PfHRP2 Prevalence']
         self.expt_name = expt_name
         self.start_year = start_year
-        self.end_year = end_year
 
     def select_simulation_data(self, data, simulation):
         simdata = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.inset_channels})
@@ -40,6 +37,8 @@ class InsetChartAnalyzer(BaseAnalyzer):
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
                 simdata[sweep_var] = simulation.tags[sweep_var]
+            elif sweep_var == 'Run_Number' :
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -60,12 +59,11 @@ class InsetChartAnalyzer(BaseAnalyzer):
 MalariaSummaryReport Analyzer
 """
 
-
 ### PER AGEBIN
 # AnnualAgebinPfPRAnalyzer
 class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
 
-    def __init__(self, expt_name, sweep_variables=None, agebin_name='customagebins', working_dir='./', start_year=2022,
+    def __init__(self, expt_name, sweep_variables=None, working_dir='./', start_year=2022,
                  end_year=2025, burnin=None):
 
         super(AnnualAgebinPfPRAnalyzer, self).__init__(working_dir=working_dir,
@@ -80,30 +78,29 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
     def select_simulation_data(self, data, simulation):
 
         adf = pd.DataFrame()
-        for fname in self.filenames:
 
-            nyears = (self.end_year - self.start_year)
-            age_bins = data[fname]['Metadata']['Age Bins']
-            pfpr2to10 = data[fname]['DataByTime']['PfPR_2to10'][:nyears]
+        nyears = (self.end_year - self.start_year)
+        age_bins = data[self.filenames[0]]['Metadata']['Age Bins']
+        pfpr2to10 = data[self.filenames[0]]['DataByTime']['PfPR_2to10'][:nyears]
 
-            for age in list(range(0, len(age_bins))):
-                d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:nyears]
-                pfpr = [x[age] for x in d]
-                d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:nyears]
-                clinical_cases = [x[age] for x in d]
-                d = data[fname]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:nyears]
-                severe_cases = [x[age] for x in d]
-                d = data[fname]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:nyears]
-                pop = [x[age] for x in d]
+        for age in range(len(age_bins)):
+            d = data[self.filenames[0]]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:nyears]
+            pfpr = [x[age] for x in d]
+            d = data[self.filenames[0]]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:nyears]
+            clinical_cases = [x[age] for x in d]
+            d = data[self.filenames[0]]['DataByTimeAndAgeBins']['Annual Severe Incidence by Age Bin'][:nyears]
+            severe_cases = [x[age] for x in d]
+            d = data[self.filenames[0]]['DataByTimeAndAgeBins']['Average Population by Age Bin'][:nyears]
+            pop = [x[age] for x in d]
 
-                simdata = pd.DataFrame({'year': range(self.start_year, self.end_year),
-                                        'PfPR': pfpr,
-                                        'Cases': clinical_cases,
-                                        'Severe cases': severe_cases,
-                                        'Pop': pop})
-                simdata['agebin'] = age_bins[age]
-                simdata['pfpr2to10'] = pfpr2to10
-                adf = pd.concat([adf, simdata])
+            simdata = pd.DataFrame({'year': range(self.start_year, self.end_year),
+                                    'PfPR': pfpr,
+                                    'Cases': clinical_cases,
+                                    'Severe cases': severe_cases,
+                                    'Pop': pop})
+            simdata['agebin'] = age_bins[age]
+            simdata['pfpr2to10'] = pfpr2to10
+            adf = pd.concat([adf, simdata])
 
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
@@ -111,6 +108,8 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
                     adf[sweep_var] = simulation.tags[sweep_var]
                 except:
                     adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number' :
+                adf[sweep_var] = 0
 
         return adf
 
@@ -131,7 +130,7 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         if self.burnin is not None:
             adf = adf[adf['year'] >= self.start_year + self.burnin]
         adf = adf.loc[adf['agebin'] <= 100]
-        adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
+        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'Agebin_PfPR_ClinicalIncidence_annual.csv'), index=False)
 
 
 # MonthlyAgebinPfPRAnalyzer
@@ -207,6 +206,8 @@ class MonthlyAgebinPfPRAnalyzer(BaseAnalyzer):
                     adf[sweep_var] = simulation.tags[sweep_var]
                 except:
                     adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number' :
+                adf[sweep_var] = 0
 
         return adf
 
@@ -288,6 +289,8 @@ class MonthlyPfPRAnalyzerU5(BaseAnalyzer):
                     adf[sweep_var] = simulation.tags[sweep_var]
                 except:
                     adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number' :
+                adf[sweep_var] = 0
 
         return adf
 
@@ -359,6 +362,8 @@ class MonthlyPfPRAnalyzerU10(BaseAnalyzer):
                     adf[sweep_var] = simulation.tags[sweep_var]
                 except:
                     adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number' :
+                adf[sweep_var] = 0
 
         return adf
 
@@ -436,6 +441,8 @@ class WeeklyPfPRAnalyzerU5(BaseAnalyzer):
                     adf[sweep_var] = simulation.tags[sweep_var]
                 except:
                     adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number' :
+                adf[sweep_var] = 0
 
         return adf
 
@@ -505,6 +512,8 @@ class IndividualEventsAnalyzer(BaseAnalyzer):
                     simdata[sweep_var] = simulation.tags[sweep_var]
                 except:
                     simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number':
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -578,6 +587,8 @@ class TransmissionReport(BaseAnalyzer):
                     simdata[sweep_var] = simulation.tags[sweep_var]
                 except:
                     simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number':
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -683,6 +694,8 @@ class BednetUsageAnalyzer(BaseAnalyzer):
                     simdata[sweep_var] = simulation.tags[sweep_var]
                 except:
                     simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number':
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -722,47 +735,23 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         else:
             return datetime.datetime.strptime(str(x), '%j').month
 
-    def __init__(self, expt_name, channels=None, sweep_variables=None, working_dir='./', start_year=2022,
-                 selected_year=None, filter_exists=False):
+    def __init__(self, expt_name, channels=None, sweep_variables=None, working_dir='./', start_year=2022):
         super(ReceivedCampaignAnalyzer, self).__init__(working_dir=working_dir,
                                                        filenames=["output/ReportEventCounter.json",
-                                                                  "output/ReportMalariaFiltered.json"])
+                                                                  "output/InsetChart.json"])
         self.sweep_variables = sweep_variables or ["Run_Number"]
         self.channels = channels or ['Received_Treatment']
-        self.inset_channels = ['Statistical Population']
         self.start_year = start_year
-        self.selected_year = selected_year
         self.expt_name = expt_name
-        self.filter_exists = filter_exists
-
-    def filter(self, simulation):
-        if self.filter_exists:
-            file = os.path.join(simulation.get_path(), self.filenames[0])
-            return os.path.exists(file)
-        else:
-            return True
 
     def select_simulation_data(self, data, simulation):
 
-        simdata = pd.DataFrame({x: data[self.filenames[1]]['Channels'][x]['Data'] for x in self.inset_channels})
+        simdata = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.channels})
+        simdata['Population'] = data[self.filenames[1]]['Channels']['Statistical Population']['Data']
         simdata['Time'] = simdata.index
-
-        if self.channels:
-            ## remove selected channels not in data
-            json_channels = list(data[self.filenames[0]]['Channels'].keys())
-            self.channels = [ch for ch in self.channels if ch in json_channels]
-
-            d = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.channels})
-            # d = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'][:len(simdata)] for x in self.channels})
-            d['Time'] = d.index
-            simdata = pd.merge(left=simdata, right=d, on='Time')
-
         simdata['Day'] = simdata['Time'] % 365
         simdata['Month'] = simdata['Day'].apply(lambda x: self.monthparser((x + 1) % 365))
         simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + self.start_year)
-
-        if self.selected_year is not None:
-            simdata = simdata.loc[(simdata['Year'] == self.selected_year)]
 
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
@@ -770,6 +759,8 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
                     simdata[sweep_var] = simulation.tags[sweep_var]
                 except:
                     simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number':
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -786,19 +777,10 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
             os.mkdir(os.path.join(self.working_dir, self.expt_name))
         print(f'\nSaving outputs to: {os.path.join(self.working_dir, self.expt_name)}')
 
-        ## Aggregate
-        sum_channels = self.channels
-        for x in [y for y in sum_channels if y not in adf.columns.values]:
-            adf[x] = 0
-        mean_channels = ['Statistical Population']
-        df = adf.groupby(['date'] + self.sweep_variables)[sum_channels].agg(np.sum).reset_index()
-        pdf = adf.groupby(['date'] + self.sweep_variables)[mean_channels].agg(np.mean).reset_index()
-
-        adf = pd.merge(left=pdf, right=df, on=['date'] + self.sweep_variables)
         events = [ch.replace('Received_', '') for ch in self.channels if 'Received' in ch]
         for event in events:
-            adf[f'{event}_Coverage'] = adf[f'Received_{event}'] / adf['Statistical Population']
-        adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'monthly_Event_Count.csv'), index=False)
+            adf[f'{event}_Coverage'] = adf[f'Received_{event}'] / adf['Population']
+        adf.to_csv(os.path.join(self.working_dir, self.expt_name, f'Event_Count.csv'), index=False)
 
 
 """
@@ -871,7 +853,8 @@ class MonthlyTreatedCasesAnalyzer(BaseAnalyzer):
                     simdata[sweep_var] = simulation.tags[sweep_var]
                 except:
                     simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
-
+            elif sweep_var == 'Run_Number':
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -945,6 +928,8 @@ class MonthlySevereTreatedByAgeAnalyzer(BaseAnalyzer):
             for sweep_var in self.sweep_variables:
                 if sweep_var in simulation.tags.keys():
                     simdata[sweep_var] = simulation.tags[sweep_var]
+                elif sweep_var == 'Run_Number':
+                    simdata[sweep_var] = 0
         else:
             simdata = pd.DataFrame(columns=['year', 'month', 'Num_U5_Received_Severe_Treatment',
                                             'Num_U1_Received_Severe_Treatment',
@@ -1100,6 +1085,8 @@ class MonthlyAgebinSevereTreatedAnalyzer(BaseAnalyzer):
                         simdata[sweep_var] = simulation.tags[sweep_var]
                     except:
                         simdata[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+                elif sweep_var == 'Run_Number':
+                    simdata[sweep_var] = 0
         else:
             simdata = pd.DataFrame(
                 columns=list(filter(None, ['year', 'month', 'agebin', 'Num_Received_Severe_Treatment'] +

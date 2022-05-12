@@ -58,7 +58,7 @@ EMOD How To's:
 <details><summary><span>Click to expand</span></summary>
 <p>
 
-- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username in path
+- Adjust paths in `simtools.ini` by replacing `<USERNAME>` with your username in path (5 locations)
 - Run simulation via `python run_exampleSim.py`
 - Wait simulation to finish (~5 minutes)
     - Note, when running locally, the console might return an <span style="color:#ff6666">psutil.AccessDenied
@@ -66,12 +66,12 @@ EMOD How To's:
       error, however the simulation can still successfully run and finish.
     - If there are problems with running locally, you can peek into [Week 6](#week6) on how to change `SetupParser` to
       run on _COMPS_ (requires login)!
-- Go to the experiment folder to notice the generated simulation experiment named '
+- Go to the `experiments/` folder to notice the generated simulation experiment named '
   username_FE_2022_example_w1___2022_04_29_02_14_46_106520' The last part after the '___' is the experiment id and
   changes with each simulation.
 - Update expt_id in `analyze_exampleSim_w1.py` Line 14 (copy number sequence after ___, also printed to console)
 - Run analyzer via `python analyze_exampleSim_w1.py`
-- Inspect `simulation_outputs` to see generated simulation results (csv files)
+- Inspect `simulation_outputs/` to see generated simulation results (csv file and plot)
 - Done!
 
 <details><summary><span>Check results</span></summary>
@@ -97,7 +97,9 @@ Generated simulation output files
 aggregated per month for the simulation duration, in this example 1 year.
 ![img](static/w1_All_Age_Monthly_Cases_excel.png)
 
+Generated plot
 
+![img](static/w1_InsetChart.png)
 
 </p>
 </details>
@@ -124,8 +126,8 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Create _demographics_ and _climate_ files via `generate_input_files.py` _(requires access to COMPS for climate database)_
-- Update default parameters in `python run_exampleSim.py`:
+- Create _demographics_ and _climate_ files via `python generate_input_files.py` _(requires access to COMPS for climate database : ask someone from NU team)_
+- Update default parameters in `run_exampleSim.py`:
 
     ```py
     cb.update_params({
@@ -137,38 +139,18 @@ EMOD How To's:
         "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
     })
     ```
-- Add custom reporter with annual summary for different age groups (see EMOD How To's) or suggested example below:
+- Add custom reporter with annual summary for different age groups (see EMOD How To's) or suggested example below. Add the import statement at the top and the call to `add_summary_report()` around line 26 (before `run_sim_args` is defined):
   ```py
   from malaria.reports.MalariaReport import add_summary_report
   add_summary_report(cb, start=1, interval=365,
                    age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120], 
                    description='Annual_Agebin')
   ```
-- Increase simulation duration from 1 to 3 years by modifying DTKConfigBuilder as below:
+- Increase simulation duration from 1 to 3 years by modifying the initial call to DTKConfigBuilder:
   ```py 
   years = 3
   cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years*365)
   ```
-- Add a simple  ModBuilder code chunk, that allows to run multiple simulations and assigning each one tags required in postprocessing.
-  The ModBuilder will be discussed more in detail in the following week, so don't worry about understanding it all this week:
-  ```py 
-  from simtools.ModBuilder import ModBuilder, ModFn
-  ```
-  ```py 
-  numseeds = 1
-  builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
-                                   ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')]
-                                  for x in range(numseeds)])
-  ```
-   - in addition `'exp_builder': builder` needs to be added to the `run_sim_args` object:
-      ```py 
-      run_sim_args = {
-          'exp_name': f'{user}_FE_2022_example_w2',
-          'config_builder': cb,
-          'exp_builder': builder
-      }
-      ```  
-
 - Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
 - Run simulation as learned in week 1 and wait for simulation to finish (~5 minutes)
     - Note, if there are problems with running locally, you can peek into [Week 6](#week6) on how to
@@ -246,7 +228,8 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.health_seeking import add_health_seeking
-            add_health_seeking(cb, start_day=0,
+            
+            add_health_seeking(cb, start_day=366,
                                targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
                                          'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                         {'trigger': 'NewClinicalCase', 'coverage': 0.5,
@@ -262,6 +245,7 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
+            
             add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
                               coverage=0.8,
                               start_days=[366],
@@ -276,8 +260,8 @@ EMOD How To's:
             <p>
 
            ```py                    
-            ### Or alternatiively 
             from dtk.interventions.itn import add_ITN
+            
             add_ITN(cb,
                     start=366,  # starts on first day of second year
                     coverage_by_ages=[
@@ -296,6 +280,7 @@ EMOD How To's:
 
            ```py
             from dtk.interventions.irs import add_IRS
+            
             add_IRS(cb, start=366,
                     coverage_by_ages=[{"coverage": 0.8, "min": 0, "max": 100}],
                     killing_config={
@@ -312,7 +297,8 @@ EMOD How To's:
 
            ```py
             from dtk.interventions.novel_vector_control import add_larvicides
-            add_larvicides(cb, start_day=0, 
+            
+            add_larvicides(cb, start_day=366, 
                            habitat_target='CONSTANT',  
                            killing_initial=0.6,        
                            killing_decay=150          
@@ -325,6 +311,7 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.malaria_vaccine import add_vaccine
+            
             add_vaccine(cb,
                         vaccine_type='RTSS',
                         vaccine_params={"Waning_Config":
@@ -339,38 +326,37 @@ EMOD How To's:
            ```
             </p>
             </details>
-- To keep track of the campaign events in the simulations, add `event_list = []` and expand as needed
+- To keep track of the campaign events in the simulations, add `event_list` and expand as needed
   via  `event_list = event_list + [<new_event_name>]`
     - Event
       names:  `'Received_Treatment', 'Received_Severe_Treatment','Received_ITN','Received_IRS', 'Received_SMC', 'Received_Vaccine' `
-- Next, add additional custom reporters to monitor events happening in the simulation
+      For example, if you added case management and ITNs, define `event_list` like this:
+        ``` py
+      event_list = ['Received_Treatment', 'Received_ITN']
+      ```
+- Next, add an event reporter to monitor these events:
     - Report_Event_Recorder and Report_Event_Counter:
       ``` py
       from malaria.reports.MalariaReport import add_event_counter_report
-       cb.update_params({
-            "Report_Event_Recorder": 1,
-            "Report_Event_Recorder_Individual_Properties": [],
-            "Report_Event_Recorder_Ignore_Events_In_List": 0,
-            "Report_Event_Recorder_Events": event_list,   
-            'Custom_Individual_Events': event_list   
-        })
-        # Report_Event_Counter
-        add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
+
+      add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
       ```
 - Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
 - Now, run the simulation and wait for it to finish (~5 minutes)
-- While simulations runs, familiarize yourself with the generated campaign file, does it include all interventions
+- While simulations runs, look at the generated campaign file, does it include all interventions
   specified?
     - The `campaign.json` file is located in your experiment simulation folder.
-- Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) (don't forget to update _expt_id_!)
+- Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) 
+    - Don't forget to update _expt_id_!
+    - And update `event_list` in the analyzer to what you used in `run_exampleSim.py`
 - Inspect the different results generated in `simulation_outputs`.
     - Are all intervention events happening as expected?
     - Parameters changes you can explore with further simulations:
-        - disable and enable some intervention by changing coverage
+        - disable and enable interventions by changing coverage: be sure to change your experiment name if you run more experiments.
             - does malaria transmission get interrupted if you set all to 1?
-        - age group of receiving an intervention
+        - age group receiving an intervention
         - efficacy or start date of an intervention
-- __Optional__: run another simulation to try out other interventions
+- __Extension__: run another simulation to try out other interventions
   - i.e. when using `add_ITN_age_season` instead of `add_ITN` it allows to track the custom events 
     `'Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded'`. 
     - <details><summary><span style="color: blue";">add_ITN_age_season </span></summary>  
@@ -399,42 +385,32 @@ EMOD How To's:
        ```
         </p>
         </details>
+    - When the simulation is complete, try running the BednetUsageAnalyzer.
 
+- __Extension__: Try another analyzer such as the TransmissionReport.
+- __Extension__: Try adding ReportEventRecorder (see how-to's) and use the IndividualEventsAnalyzer to look at output.
 
 
 <details><summary><span>Check results</span></summary>
 <p>
 
 Raw output files in the experiment folder under outputs.
+
 ![img](static/w3a_outputfiles.png)
 
 **ReportEventCounter** with campaign events, aggregated for total population. Most Interventions were set to start after
 day 366, hence there are 365 zeros in the `"Data": [0, 0, ...]`  
-![img](static/w3a_ReportEventCounter.png)  
-_Tip: Notepad ++ offers helpful json plugins._
 
-**ReportEventRecorder** with campaign events, for each individual in the population. Some individuals get multiple
-interventions, some none and so on - age is given in days.  
-![img](static/w3a_ReportEventRecorder.png)  
-_Tip: When running simulations with large populations, this csv file can get very large and should be disabled, while
-for testing it is very useful._
+![img](static/w3a_ReportEventCounter.png)  
+
+_Tip: Notepad ++ offers helpful json plugins. Json files can also be viewed in Pycharm._
 
 Generated results after running analyzer in simulation_outputs/<.exp_name>:  
+
 ![img](static/w3a_simulationoutputfiles.png)
 
-Aggregated transmission report (daily)    
-![img](static/w3a_TransmissionReport_daily.png)
+Aggregated event report
 
-Aggregated transmission report (monthly)  
-![img](static/w3a_TransmissionReport_monthly.png)
-
-Aggregated transmission report (annually)  
-![img](static/w3a_TransmissionReport_annual.png)
-
-Aggregated event report (ITN, Bed nets)
-![img](static/w3a_BednetUsage.png)
-
-Aggregated event report (other campaigns)  
 ![img](static/w3a_ReceivedCampaignAnalyzer.png)
 
 View
@@ -452,31 +428,40 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Modify and extend `ModBuilder`, previously added in week 2, to allow running different parameter sweeps
+- Add `ModBuilder` to allow running different parameter sweeps
     ```py
+    from simtools.ModBuilder import ModBuilder, ModFn
+
+    numseeds = 3
     builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),                     
-                                     ModFn(smc_intervention, coverage_level=smc_cov), 
                                      ## ModFn(xxx_intervention, coverage_level=xxx_cov),  # adjust to add other interventions
-                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
-                                     ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')  # optional
+                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
                                     ]
                                     for cm_cov_U5 in [0.4, 0.6] 
-                                    for smc_cov in [0, 0.6] 
+                                    ## for xxx_cov in [0, 0.6] 
                                     for x in range(numseeds)
                                     ])
     ```
 
-- Now, for the interventions to take different coverage values as shown in the example above, 
-  the previously added intervention campaigns  need to be wrapped into a function as shown below:  
+    Adjust the `run_sim_args` block to include the builder:
+    ```py
+    run_sim_args = {
+        'exp_name': f'{user}_FE_2022_example_w3',
+        'config_builder': cb,
+        'exp_builder' : builder
+    }
+    ```
+
+- ModBuilder can consume the same `add_x()` functions we used above, but it's often cleaner to wrap each `add_x()` into another function. For each intervention you wrap and use in the builder, make sure that it's not ALSO called directly using `add_x()`.
     - <details><summary><span style="color: blue";">case_management </span></summary>
        <p>
 
        ```py
         def case_management(cb, cm_cov_U5, cm_cov_adults=0.5):
             add_health_seeking(cb, start_day=0,
-                               targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
+                               targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5,
                                          'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                        {'trigger': 'NewClinicalCase', 'coverage': 0.5,
+                                        {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
                                          'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
                                         {'trigger': 'NewSevereCase', 'coverage': 0.85,
                                          'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
@@ -524,35 +509,36 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
                     repetitions=5,  # ITN will be distributed 5 times
                     tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
                     )
-          return {'itn_start': day, 'itn_coverage': coverage_level}
+            return {'itn_start': day, 'itn_coverage': coverage_level}
       
       event_list = event_list + ['Received_ITN']
 
        ```
        ```py                    
         ### Or alternatiively 
-        add_ITN_age_season(cb, start=day,
-                           demographic_coverage=coverage_level,
-                           killing_config={
-                               "Initial_Effect": 0.520249973,  # LLIN Burkina
-                               "Decay_Time_Constant": 1460,
-                               "class": "WaningEffectExponential"},
-                           blocking_config={
-                               "Initial_Effect": 0.53,
-                               "Decay_Time_Constant": 730,
-                               "class": "WaningEffectExponential"},
-                           discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
-                                          "Expiration_Period_Proportion_1": 0.9,
-                                          "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
-                                          "Expiration_Period_Mean_2": 3650},
-                           age_dependence={'Times': [0, 100],
-                                           'Values': [0.9, 0.9]},
-                           duration=-1, birth_triggered=False
-                           )
+        def itn_intervention(cb, coverage_level, day=366):
+            add_ITN_age_season(cb, start=day,
+                               demographic_coverage=coverage_level,
+                               killing_config={
+                                   "Initial_Effect": 0.520249973,  # LLIN Burkina
+                                   "Decay_Time_Constant": 1460,
+                                   "class": "WaningEffectExponential"},
+                               blocking_config={
+                                   "Initial_Effect": 0.53,
+                                   "Decay_Time_Constant": 730,
+                                   "class": "WaningEffectExponential"},
+                               discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+                                              "Expiration_Period_Proportion_1": 0.9,
+                                              "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+                                              "Expiration_Period_Mean_2": 3650},
+                               age_dependence={'Times': [0, 100],
+                                               'Values': [0.9, 0.9]},
+                               duration=-1, birth_triggered=False
+                               )
     
-        return {'itn_start': day,
-                'itn_coverage': coverage_level}
-      
+            return {'itn_start': day,
+                    'itn_coverage': coverage_level}
+          
        event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
 
        ```
@@ -612,7 +598,7 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
       _(Tip: Many text editors allow side by side comparison of two scripts, automatically highlighting differences)_
 
 - Open second analyzer script for Week 3 (`analyze_exampleSim_w3b.py`) to update the _exp_id_ as usual, but now also check 
-  that all the relevant sweep variables are included in _sweep_variables_. 
+  that all the relevant sweep variables are included in _sweep_variables_ and all the events of interest are included in _event_list_. 
   The sweep_variables need to change according to the `ModBuilder` and custom functions that return parameters, which
   uniquely define single simulations.
   ```py
@@ -628,28 +614,25 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 <p>
 
 The generated result figures include separate lines. The `Run_Numbers` were aggregated using the mean and the intervention
-coverage levels are used as additional grouping variables when aggregating simulation outputs. An additional variable '
-unique_sweep' was generaetd to simplify automated plotting for different sweep variabels (the parameters defined
-in `ModBuilder`)
-In the example below 'unique_sweep' is in the order of cm, smc, itn, irs, and rtss (rtss not included below).
+coverage levels are used as additional grouping variables when aggregating simulation outputs. You may need to adjust the location of the legend if it's covering your plot!
 
-Aggregated malaria outcomes by agebin for no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_Agebin_PfPR_ClinicalIncidence.png)
+Examples with 4 levels of case management and 2 levels (off and on) of SMC:
+
 __Fig: Agebin_PfPR_ClinicalIncidence__
 
+![img](static/w3b_Agebin_PfPR_ClinicalIncidence.png)
 
 
-All age monthly cases showing no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_All_Age_InsetChart.png)
 __Fig: All_Age_Monthly_Cases__
 
-Monthly transmission report showing no SMC (blue) compared to SMC (orange).
-![img](static/w3b_smc_TransmissionReport_monthly.png)
-__Fig: TransmissionReport_monthly (SMC)__
+![img](static/w3b_All_Age_InsetChart.png)
+
+__Fig: Interventions distributed__
+
+![img](static/w3b_ReceivedCampaignAnalyzer.png)
 
 Note, if too many parameters changed at once without clear labelling, the results can become difficult to interpret!
-![img](static/w3b_TransmissionReport_monthly.png)
-__Fig: TransmissionReport_monthly (multiple interventions)__
+
 
 View
 suggested [solution script for week 3 (b)](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/Solution_scripts/run_exampleSim_w3b.py)
@@ -681,18 +664,15 @@ EMOD How To's:
   copy!)
     - Adjust coverage levels in `ModBuilder` to select/deselct interventions to include or change number of simulations
       to run (optional)
-- Add a new summary report with monthly monitoring to the simulation script as shown below
+- Add an individual-level event reporter. This example assumes there is case management for malaria in the simulation.
   ```py
-  sim_start_year = 2022  # add sim_start_year
-  
-  for year in range(years):
-    start_day = 365 + 365 * year
-    sim_year = sim_start_year + year
-    add_summary_report(cb, start=start_day, interval=30,
-                       age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120],
-                       description=f'Monthly_Agebin_{sim_year}')
+  cb.update_params({
+    'Report_Event_Recorder': 1,  # Enable generation of ReportEventRecorder.csv  
+    'Report_Event_Recorder_Ignore_Events_In_List': 0, # Logical indicating whether to include or exclude the events specified in the list 
+    'Report_Event_Recorder_Events': ['NewClinicalCase', 'Received_Treatment'], # List of events to include
+    })
     ```
-- Add another summary report with monthly monitoring for _children under the age of 5 years_ only (keep min age 0.25)
+- Add a new summary report with monthly monitoring for _children under the age of 5 years_ only (keep min age 0.25)
   ```py
   for year in range(years):
     start_day = 365 + 365 * year
@@ -701,20 +681,20 @@ EMOD How To's:
                        age_bins=[0.25, 5, 100],
                        description=f'Monthly_U5_{sim_year}')
     ```  
-- Add `MalariaFilteredReport` which is a subset of `InsetChart` with selected outcomes relevant for malaria.
+- Add `MalariaFilteredReport` which is the same as `InsetChart` but we can ask only to report on part of the simulation time (or just a subset of nodes, for spatial simulations).
   ```py
   from malaria.reports.MalariaReport import add_filtered_report, add_event_counter_report
-  add_filtered_report(cb, start=0, end=years * 365)
+  add_filtered_report(cb, start=(years-1)*365, end=years * 365)
   ```
-   - Note in the analyzer script [analyzer_collection.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/analyzer_collection.py)
-      `InsetChart.json` was replaced with `ReportMalariaFiltered.json` 
+   - Any analyzer script in [analyzer_collection.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/analyzer_collection.py)
+      that uses `InsetChart.json` can use `ReportMalariaFiltered.json` instead if you update the `self.filenames=` section.
 
 - Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulations
     - While simulations are running, take a look at `analyze_exampleSim_w4.py`, and corresponding EMOD How To's to
       familiarize yourself with the Analyzer Classes
 - Run the analyzer script `analyze_exampleSim_w4.py` (_remember to change exp_id :)_ )
-    - This time, the analyzer generated csv files instead of plots! This allows more flexible result generation.
+    - This time, we didn't automatically generate plots! Now up to you to generate the plots you need.
 - Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the analyer+reports used in
   the simulation
 - Run additional simulations and change the reports, for instance the agebins or reporting interval, and edit the
@@ -767,7 +747,7 @@ Example of a summary report json file, MalariaSummaryReport_Annual_Agebin.json
 Example of simulation results, after running full analyzer (only csv files, see Part II for plots). The main csv files
 that you should have:
 
-- _'All_Age_Monthly_Cases.csv'_ ,
+- _'monthly_transmission_report_all_years.csv'_ ,
 - _'U5_PfPR_ClinicalIncidence.csv'_ ,
 - _'IndividualEvents.csv'_
 
