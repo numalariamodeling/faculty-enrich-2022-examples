@@ -747,7 +747,7 @@ Example of a summary report json file, MalariaSummaryReport_Annual_Agebin.json
 Example of simulation results, after running full analyzer (only csv files, see Part II for plots). The main csv files
 that you should have:
 
-- _'All_Age_Monthly_Cases.csv'_ ,
+- _'monthly_transmission_report_all_years.csv'_ ,
 - _'U5_PfPR_ClinicalIncidence.csv'_ ,
 - _'IndividualEvents.csv'_
 
