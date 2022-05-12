@@ -9,7 +9,7 @@ from dtk.tools.climate.ClimateGenerator import ClimateGenerator
 
 def generate_demographics(demo_df, demo_fname):
     # Get WorldBank birth rate estimate
-    # UPDATE country and birthrate_year
+    # UPDATE country and birthrate_year if needed
     br_concern = WorldBankBirthRateConcern(country="Ghana", birthrate_year=2016)
 
     chain = [
@@ -18,16 +18,13 @@ def generate_demographics(demo_df, demo_fname):
         EquilibriumAgeDistributionConcern(default_birth_rate=br_concern.default_birth_rate),
     ]
 
-    current: Dict[str,
-                  Union[List[Dict[str, Union[Union[int, Dict[Any, Any]], Any]]],
-                        Dict[Any, Any],
-                        Dict[str, Union[str, int]]]] = DemographicsGenerator.from_dataframe(demo_df,
-                                                                                            population_column_name='population',
-                                                                                            nodeid_column_name='nodeid',
-                                                                                            node_id_from_lat_long=False,
-                                                                                            concerns=chain,
-                                                                                            load_other_columns_as_attributes=True,
-                                                                                            include_columns=['Village'])
+    current = DemographicsGenerator.from_dataframe(demo_df,
+                                                   population_column_name='population',
+                                                   nodeid_column_name='nodeid',
+                                                   node_id_from_lat_long=False,
+                                                   concerns=chain,
+                                                   load_other_columns_as_attributes=True,
+                                                   include_columns=['Village'])  # Add any "optional" columns
 
     with open(demo_fname, 'w') as fout:
         json.dump(current, fout, sort_keys=True, indent=4, separators=(',', ': '))
@@ -51,7 +48,6 @@ if __name__ == '__main__':
     if not os.path.exists(inputs_path):
         os.mkdir(inputs_path)
 
-    # df = pd.read_csv( os.path.join(os.getcwd(), 'my_node.csv')
     df = pd.DataFrame(data={'nodeid': [1], 'population': [1400], 'Village': ['Obom'],
                             'lat': [5.760759295941768], 'lon': [-0.4473415119456551]})
 

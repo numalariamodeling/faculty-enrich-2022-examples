@@ -126,8 +126,8 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Create _demographics_ and _climate_ files via `generate_input_files.py` _(requires access to COMPS for climate database)_
-- Update default parameters in `python run_exampleSim.py`:
+- Create _demographics_ and _climate_ files via `python generate_input_files.py` _(requires access to COMPS for climate database : ask someone from NU team)_
+- Update default parameters in `run_exampleSim.py`:
 
     ```py
     cb.update_params({
@@ -139,38 +139,18 @@ EMOD How To's:
         "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
     })
     ```
-- Add custom reporter with annual summary for different age groups (see EMOD How To's) or suggested example below:
+- Add custom reporter with annual summary for different age groups (see EMOD How To's) or suggested example below. Add the import statement at the top and the call to `add_summary_report()` around line 26 (before `run_sim_args` is defined):
   ```py
   from malaria.reports.MalariaReport import add_summary_report
   add_summary_report(cb, start=1, interval=365,
                    age_bins=[0.25, 2, 5, 10, 15, 20, 100, 120], 
                    description='Annual_Agebin')
   ```
-- Increase simulation duration from 1 to 3 years by modifying DTKConfigBuilder as below:
+- Increase simulation duration from 1 to 3 years by modifying the initial call to DTKConfigBuilder:
   ```py 
   years = 3
   cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years*365)
   ```
-- Add a simple  ModBuilder code chunk, that allows to run multiple simulations and assigning each one tags required in postprocessing.
-  The ModBuilder will be discussed more in detail in the following week, so don't worry about understanding it all this week:
-  ```py 
-  from simtools.ModBuilder import ModBuilder, ModFn
-  ```
-  ```py 
-  numseeds = 1
-  builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
-                                   ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')]
-                                  for x in range(numseeds)])
-  ```
-   - in addition `'exp_builder': builder` needs to be added to the `run_sim_args` object:
-      ```py 
-      run_sim_args = {
-          'exp_name': f'{user}_FE_2022_example_w2',
-          'config_builder': cb,
-          'exp_builder': builder
-      }
-      ```  
-
 - Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
 - Run simulation as learned in week 1 and wait for simulation to finish (~5 minutes)
     - Note, if there are problems with running locally, you can peek into [Week 6](#week6) on how to

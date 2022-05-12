@@ -25,7 +25,6 @@ class InsetChartAnalyzer(BaseAnalyzer):
                                            'PfHRP2 Prevalence']
         self.expt_name = expt_name
         self.start_year = start_year
-        self.end_year = end_year
 
     def select_simulation_data(self, data, simulation):
         simdata = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.inset_channels})
@@ -38,6 +37,8 @@ class InsetChartAnalyzer(BaseAnalyzer):
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
                 simdata[sweep_var] = simulation.tags[sweep_var]
+            elif sweep_var == 'Run_Number' :
+                simdata[sweep_var] = 0
         return simdata
 
     def finalize(self, all_data):
@@ -62,7 +63,7 @@ MalariaSummaryReport Analyzer
 # AnnualAgebinPfPRAnalyzer
 class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
 
-    def __init__(self, expt_name, sweep_variables=None, agebin_name='customagebins', working_dir='./', start_year=2022,
+    def __init__(self, expt_name, sweep_variables=None, working_dir='./', start_year=2022,
                  end_year=2025, burnin=None):
 
         super(AnnualAgebinPfPRAnalyzer, self).__init__(working_dir=working_dir,
@@ -83,7 +84,7 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
             age_bins = data[fname]['Metadata']['Age Bins']
             pfpr2to10 = data[fname]['DataByTime']['PfPR_2to10'][:nyears]
 
-            for age in list(range(0, len(age_bins))):
+            for age in range(len(age_bins)):
                 d = data[fname]['DataByTimeAndAgeBins']['PfPR by Age Bin'][:nyears]
                 pfpr = [x[age] for x in d]
                 d = data[fname]['DataByTimeAndAgeBins']['Annual Clinical Incidence by Age Bin'][:nyears]
@@ -108,6 +109,8 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
                     adf[sweep_var] = simulation.tags[sweep_var]
                 except:
                     adf[sweep_var] = '-'.join([str(x) for x in simulation.tags[sweep_var]])
+            elif sweep_var == 'Run_Number' :
+                adf[sweep_var] = 0
 
         return adf
 
@@ -128,7 +131,7 @@ class AnnualAgebinPfPRAnalyzer(BaseAnalyzer):
         if self.burnin is not None:
             adf = adf[adf['year'] >= self.start_year + self.burnin]
         adf = adf.loc[adf['agebin'] <= 100]
-        adf.to_csv((os.path.join(self.working_dir, 'Agebin_PfPR_ClinicalIncidence_annual.csv')), index=False)
+        adf.to_csv(os.path.join(self.working_dir, self.expt_name, 'Agebin_PfPR_ClinicalIncidence_annual.csv'), index=False)
 
 
 # MonthlyAgebinPfPRAnalyzer
