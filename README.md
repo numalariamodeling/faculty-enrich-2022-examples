@@ -228,7 +228,8 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.health_seeking import add_health_seeking
-            add_health_seeking(cb, start_day=0,
+            
+            add_health_seeking(cb, start_day=366,
                                targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
                                          'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                         {'trigger': 'NewClinicalCase', 'coverage': 0.5,
@@ -244,6 +245,7 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
+            
             add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
                               coverage=0.8,
                               start_days=[366],
@@ -258,8 +260,8 @@ EMOD How To's:
             <p>
 
            ```py                    
-            ### Or alternatiively 
             from dtk.interventions.itn import add_ITN
+            
             add_ITN(cb,
                     start=366,  # starts on first day of second year
                     coverage_by_ages=[
@@ -278,6 +280,7 @@ EMOD How To's:
 
            ```py
             from dtk.interventions.irs import add_IRS
+            
             add_IRS(cb, start=366,
                     coverage_by_ages=[{"coverage": 0.8, "min": 0, "max": 100}],
                     killing_config={
@@ -294,7 +297,8 @@ EMOD How To's:
 
            ```py
             from dtk.interventions.novel_vector_control import add_larvicides
-            add_larvicides(cb, start_day=0, 
+            
+            add_larvicides(cb, start_day=366, 
                            habitat_target='CONSTANT',  
                            killing_initial=0.6,        
                            killing_decay=150          
@@ -307,6 +311,7 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.malaria_vaccine import add_vaccine
+            
             add_vaccine(cb,
                         vaccine_type='RTSS',
                         vaccine_params={"Waning_Config":
@@ -321,38 +326,37 @@ EMOD How To's:
            ```
             </p>
             </details>
-- To keep track of the campaign events in the simulations, add `event_list = []` and expand as needed
+- To keep track of the campaign events in the simulations, add `event_list` and expand as needed
   via  `event_list = event_list + [<new_event_name>]`
     - Event
       names:  `'Received_Treatment', 'Received_Severe_Treatment','Received_ITN','Received_IRS', 'Received_SMC', 'Received_Vaccine' `
-- Next, add additional custom reporters to monitor events happening in the simulation
+      For example, if you added case management and ITNs, define `event_list` like this:
+        ``` py
+      event_list = ['Received_Treatment', 'Received_ITN']
+      ```
+- Next, add an event reporter to monitor these events:
     - Report_Event_Recorder and Report_Event_Counter:
       ``` py
       from malaria.reports.MalariaReport import add_event_counter_report
-       cb.update_params({
-            "Report_Event_Recorder": 1,
-            "Report_Event_Recorder_Individual_Properties": [],
-            "Report_Event_Recorder_Ignore_Events_In_List": 0,
-            "Report_Event_Recorder_Events": event_list,   
-            'Custom_Individual_Events': event_list   
-        })
-        # Report_Event_Counter
-        add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
+
+      add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
       ```
 - Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
 - Now, run the simulation and wait for it to finish (~5 minutes)
-- While simulations runs, familiarize yourself with the generated campaign file, does it include all interventions
+- While simulations runs, look at the generated campaign file, does it include all interventions
   specified?
     - The `campaign.json` file is located in your experiment simulation folder.
-- Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) (don't forget to update _expt_id_!)
+- Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) 
+    - Don't forget to update _expt_id_!
+    - And update `event_list` in the analyzer to what you used in `run_exampleSim.py`
 - Inspect the different results generated in `simulation_outputs`.
     - Are all intervention events happening as expected?
     - Parameters changes you can explore with further simulations:
-        - disable and enable some intervention by changing coverage
+        - disable and enable interventions by changing coverage: be sure to change your experiment name if you run more experiments.
             - does malaria transmission get interrupted if you set all to 1?
-        - age group of receiving an intervention
+        - age group receiving an intervention
         - efficacy or start date of an intervention
-- __Optional__: run another simulation to try out other interventions
+- __Extension__: run another simulation to try out other interventions
   - i.e. when using `add_ITN_age_season` instead of `add_ITN` it allows to track the custom events 
     `'Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded'`. 
     - <details><summary><span style="color: blue";">add_ITN_age_season </span></summary>  
@@ -381,42 +385,32 @@ EMOD How To's:
        ```
         </p>
         </details>
+    - When the simulation is complete, try running the BednetUsageAnalyzer.
 
+- __Extension__: Try another analyzer such as the TransmissionReport.
+- __Extension__: Try adding ReportEventRecorder (see how-to's) and use the IndividualEventsAnalyzer to look at output.
 
 
 <details><summary><span>Check results</span></summary>
 <p>
 
 Raw output files in the experiment folder under outputs.
+
 ![img](static/w3a_outputfiles.png)
 
 **ReportEventCounter** with campaign events, aggregated for total population. Most Interventions were set to start after
 day 366, hence there are 365 zeros in the `"Data": [0, 0, ...]`  
-![img](static/w3a_ReportEventCounter.png)  
-_Tip: Notepad ++ offers helpful json plugins._
 
-**ReportEventRecorder** with campaign events, for each individual in the population. Some individuals get multiple
-interventions, some none and so on - age is given in days.  
-![img](static/w3a_ReportEventRecorder.png)  
-_Tip: When running simulations with large populations, this csv file can get very large and should be disabled, while
-for testing it is very useful._
+![img](static/w3a_ReportEventCounter.png)  
+
+_Tip: Notepad ++ offers helpful json plugins. Json files can also be viewed in Pycharm._
 
 Generated results after running analyzer in simulation_outputs/<.exp_name>:  
+
 ![img](static/w3a_simulationoutputfiles.png)
 
-Aggregated transmission report (daily)    
-![img](static/w3a_TransmissionReport_daily.png)
+Aggregated event report
 
-Aggregated transmission report (monthly)  
-![img](static/w3a_TransmissionReport_monthly.png)
-
-Aggregated transmission report (annually)  
-![img](static/w3a_TransmissionReport_annual.png)
-
-Aggregated event report (ITN, Bed nets)
-![img](static/w3a_BednetUsage.png)
-
-Aggregated event report (other campaigns)  
 ![img](static/w3a_ReceivedCampaignAnalyzer.png)
 
 View
