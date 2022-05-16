@@ -662,7 +662,7 @@ EMOD How To's:
 
 - Cleanup your simulation script of any unwanted interventions that were explored during the previous week (keep a
   copy!)
-    - Adjust coverage levels in `ModBuilder` to select/deselct interventions to include or change number of simulations
+    - Adjust coverage levels in `ModBuilder` to select/unselect interventions to include or change number of simulations
       to run (optional)
 - Add an individual-level event reporter. This example assumes there is case management for malaria in the simulation.
   ```py
@@ -691,15 +691,14 @@ EMOD How To's:
 
 - Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulations
-    - While simulations are running, take a look at `analyze_exampleSim_w4.py`, and corresponding EMOD How To's to
-      familiarize yourself with the Analyzer Classes
+    - While simulations are running, you may take a look at `analyze_exampleSim_w4.py`, and corresponding `analyzer_collection.py` to
+      explore the different Analyzer Classes used, no need to understand these in detail!
 - Run the analyzer script `analyze_exampleSim_w4.py` (_remember to change exp_id :)_ )
     - This time, we didn't automatically generate plots! Now up to you to generate the plots you need.
-- Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the analyer+reports used in
+- Inspect `simulation_outputs` and familiarize yourself with the csv files and match them to the analyzer + reports used in
   the simulation
 - Run additional simulations and change the reports, for instance the agebins or reporting interval, and edit the
-  analyzer accordingly!  
-  
+  analyzer accordingly (both `analyze_exampleSim_w4.py`, and corresponding `analyzer_collection.py`)!
     - __Change age group__:
         - Add summary report for children under the age of 10 (U10) in your simulation script.
         - In the analyzer script, copy the analyzer _MonthlyPfPRAnalyzerU5_ and replace U5 with U10
@@ -730,9 +729,12 @@ EMOD How To's:
                                       'New infections': new_infect, ## newly added
                                       'Pop': pop})
               ``` 
-          
+- Great! All the changes done demonstrate the flexibility of analyzers that can be highly customized to the user's and project needs.
+  If you are interested to learn more about `reporters` and how to analyze them, check out the EMOD How To's or IDM's EMOD documentation!
 - __Optional__:
   - Advanced: check the analyzer_collection.py for other analyzers that might be applicable to your simulation.
+    You also may have noticed that there are 2 analyzer commented out in `analyze_exampleSim_w4.py` , you can try to uncomment them to enable them and rerun the analyzer.
+    _(Using comments is a convenient way to adjust which analyzers to run.)_
   - It time: play around with [json_explorer.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/json_explorer.py) in Pycharm interactively to better understand reading in data from json selectively!  
 
 <details><summary><span>Check results</span></summary>
@@ -744,12 +746,15 @@ Example of EMOD generated simulation outputs
 Example of a summary report json file, MalariaSummaryReport_Annual_Agebin.json  
 ![img](static/w4_json_summary_report.png)
 
-Example of simulation results, after running full analyzer (only csv files, see Part II for plots). The main csv files
+Example of simulation results, after running the analyzer (only csv files, see Part II for plots). The csv files
 that you should have:
 
-- _'monthly_transmission_report_all_years.csv'_ ,
-- _'U5_PfPR_ClinicalIncidence.csv'_ ,
-- _'IndividualEvents.csv'_
+- _'All_Age_InsetChart.csv'_ ,
+- _'Agebin_PfPR_ClinicalIncidence_annual.csv'_ ,
+- _'Event_Count.csv'_
+- _'U5_PfPR_ClinicalIncidence.csv'_  ## or more depending on additional summary reports for aggregated age
+- _'annual_transmission_report_all_years.csv'_   ## (optional)
+- _'IndividualEvents_all_years.csv'_    ## (optional)
 
 ![img](static/w4_simulationoutputfiles.png)
 
@@ -771,61 +776,65 @@ and [edited analyzer file](https://github.com/numalariamodeling/faculty-enrich-2
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
+- Check your csv files (see Part I) and make sure all required csv files were generated, optionally disable plots in the plotting script
+  by commenting them out.
 - Run plotting scripts either using Python or R:
     - _Python_: `plot_exampleSim_w4.py`
     - _R_: `plot_exampleSim_w4.R`
 - Look at the figures more critically, anything you would like to change?
     - Given the interventions implemented does the curves look as expected?
 - Open the plotting script of your choice (python or R) and adjust axis titles, colors or even add your own plot!
-    - The plots generate an 'ugly' `unique_sweep` variable automatically to be generic and independent of number and
-      name of sweep variables defined. However, the final output is difficult to interpret. These plots are good for
-      diagnostic and yourself, but not for presenting to others. In the script you can pass on a `scen_channel` variable
-      which is used to color the lines, try it out for a single intervention coverage variable.
-    - Note that all other columns that are not specifed in scen_channels (except date and outcome variables) will
-      automatically be averaged using the mean. If you do not want this behaviour you need to adjust the plotting
-      script.
-- look at  `plot_Agebin_PfPR_ClinicalIncidence`, which aggregated all years to plot agebins at the x-axis, and has
-  several panels of seletced channels.
-    - when calling the function specify 1 channel of choice
-      i.e. `plot_Agebin_PfPR_ClinicalIncidence(sim_dir, channels= 'Cases')`
-        - a) modify the figure to have agebin as panels (facets) and time on the x-axis(annual or monthly summary
-          report csv)
-        - b) modify the figure to have agebin as color and unique_scen as panels, with time on the x-axis (annual or
-          monthly summary report csv)
-    - Note in python you will need to modify `for ai, channel in enumerate(channels):` 
-      since ` axes = [fig.add_subplot(2, 2, x + 1) for x in range(4)]`; and in R `facet_wrap(~name, scales = 'free')`
-
+    - Note that the plots simply combine all sweep_variables in the legend. When having too many sweeps, the final output becomes difficult to interpret. 
+      These plots are good for diagnostic checks of correctness of experiment simulated, but not for presenting to others.
+- Some suggested explorations _(no need to do all, some more meaningful than others ;)
+  - __plot_inset_chart__: per default plots selected channels over time per sweep_variables combination
+    - a) modify `channels_inset_chart` to plot other channels (might need to adjust analyzer to write out more channels)
+    - b) modify x axis to show date in different format and interval
+    - c) change color for no intervention (case management only) to black.
+    - d) add custom labels to sweep_variable combinations to have a better readable legend  
+  - __plot_summary_report__:
+    - a) apply some of the changes done for __plot_inset_chart__ to the summary report
+    - b) when you have added an additional age group analyzer, modify `Uage` to plot results for the other age group
+  - __plot_agebin_summary_report__: per default aggregates all years to plot agebins on the x-axis, and has
+    multiple panels of defined channels (`channels_summary_report`).
+    - a) modify the figure to have agebin as color and unique_scen as panels, with time on the x-axis (annual or
+      monthly summary report csv)
+    - b) modify the figure to have agebin as panels (facets) and time on the x-axis (annual or monthly summary
+      report csv) 
+  - __plot_events__:
+   - a) adjust y-axis to for coverage channels to show values as percentage
+   - b) set y-axis limits to have same y-axis for the left panels (number of individuals that received an intervention) 
+     and for the right panels  (proportion of individuals that received an intervention) 
+    
 <details><summary><span>Check results</span></summary>
 <p>
 
-Default example Agebin_PfPR_ClinicalIncidence figure generated in Python  
-![img](static/w4_Agebin_PfPR_ClinicalIncidence_py.png)
+Example Agebin_PfPR_ClinicalIncidence figure generated in Python  
+![img](static/w4_Agebin_PfPR_ClinicalIncidence.png)
 
-Default example Agebin_PfPR_ClinicalIncidence figure generated in R  
+Example Agebin_PfPR_ClinicalIncidence figure generated in R  
 ![img](static/w4_Agebin_PfPR_ClinicalIncidence_R.png)
 
-Default example All_Age_Monthly_Cases figure generated in Python  
-![img](static/w4_All_Age_Cases_py.png)
+Example All_Age_Monthly_Cases figure generated in Python  
+![img](static/w4_InsetChart.png)
 
-Default example All_Age_Monthly_Cases figure generated in R  
-![img](static/w4_All_Age_Cases_R.png)
+Example All_Age_Monthly_Cases figure generated in R  
+![img](static/w4_InsetChart_R.png)
 
 <!--
-Default example TransmissionReport_monthly figure generated in Python  
-![img](static/w4_TransmissionReport_monthly_py.png)
+Default example Transmission_Monthly figure generated in Python  
+![img](static/w4_Transmission_Monthly.png)
 
 
 Default example All_Age_Monthly_Cases figure generated in R  
-![img](static/w4_TransmissionReport_monthly_R.png)
+![img](static/w4_Transmission_Monthly_R.png)
 -->
 
-Default example Received_Campaigns figure generated in Python  
-![img](static/w4_Received_Campaigns_py.png)  
-_Note: in this example simulation only case management and SMC were included, no IRS and no vaccine_
+Default example Events figure generated in Python  
+![img](static/w4_Events.png)  
 
-Default example All_Age_Monthly_Cases figure generated in R
-![img](static/w4_Received_Campaigns_R.png)  
-_Note: in this example simulation only case management and SMC were included, no IRS and no vaccine_
+Default example Events figure generated in R
+![img](static/w4_Events_R.png)  
 
 </p>
 </details>

@@ -10,7 +10,7 @@ from simtools.ModBuilder import ModBuilder, ModFn
 from malaria.reports.MalariaReport import add_summary_report
 from malaria.reports.MalariaReport import add_event_counter_report, add_filtered_report
 ## Import campaign functions
-# from dtk.interventions.itn import add_ITN
+from dtk.interventions.itn import add_ITN
 from dtk.interventions.itn_age_season import add_ITN_age_season
 from dtk.interventions.irs import add_IRS
 from malaria.interventions.health_seeking import add_health_seeking
@@ -91,7 +91,7 @@ event_list = event_list + ['Received_Vaccine']
 def smc_intervention(cb, coverage_level, day=366, cycles=4):
     add_drug_campaign(cb, campaign_type='SMC', drug_code='SPA',
                       coverage=coverage_level,
-                      start_days=[day,day+365,day+365*2,day+365*3],
+                      start_days=[day, day + 365, day + 365 * 2, day + 365 * 3],
                       repetitions=cycles,
                       tsteps_btwn_repetitions=30,
                       target_group={'agemin': 0.25, 'agemax': 5},
@@ -105,32 +105,43 @@ event_list = event_list + ['Received_SMC']
 
 
 # ITN, start after 1 year
-# add_ITN(cb, start=0, coverage_by_ages=[{'min': 0, 'max': 100, 'coverage': 0.6}])
-def itn_intervention(cb, coverage_level, day=366):
-    add_ITN_age_season(cb, start=day,
-                       demographic_coverage=coverage_level,
-                       killing_config={
-                           "Initial_Effect": 0.520249973,  # LLIN Burkina
-                           "Decay_Time_Constant": 1460,
-                           "class": "WaningEffectExponential"},
-                       blocking_config={
-                           "Initial_Effect": 0.53,
-                           "Decay_Time_Constant": 730,
-                           "class": "WaningEffectExponential"},
-                       discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
-                                      "Expiration_Period_Proportion_1": 0.9,
-                                      "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
-                                      "Expiration_Period_Mean_2": 3650},
-                       age_dependence={'Times': [0, 100],
-                                       'Values': [0.9, 0.9]},
-                       duration=-1, birth_triggered=False
-                       )
+def itn_intervention(cb, coverage_level, day=365):
+    add_ITN(cb,
+            start=day,  # starts on first day of second year
+            coverage_by_ages=[
+                {"coverage": coverage_level, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                {"coverage": coverage_level * 0.75, "min": 10, "max": 50},
+                # 25% lower than for children for 10-50 years old
+                {"coverage": coverage_level * 0.6, "min": 50, "max": 125}
+                # 40% lower than for children for everyone else
+            ],
+            repetitions=5,  # ITN will be distributed 5 times
+            tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
+            )
+    # add_ITN_age_season(cb, start=day,
+    #                    demographic_coverage=coverage_level,
+    #                    killing_config={
+    #                        "Initial_Effect": 0.520249973,  # LLIN Burkina
+    #                        "Decay_Time_Constant": 1460,
+    #                        "class": "WaningEffectExponential"},
+    #                    blocking_config={
+    #                        "Initial_Effect": 0.53,
+    #                        "Decay_Time_Constant": 730,
+    #                        "class": "WaningEffectExponential"},
+    #                    discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+    #                                   "Expiration_Period_Proportion_1": 0.9,
+    #                                   "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+    #                                   "Expiration_Period_Mean_2": 3650},
+    #                    age_dependence={'Times': [0, 100],
+    #                                    'Values': [0.9, 0.9]},
+    #                    duration=-1, birth_triggered=False
+    #                    )
 
     return {'itn_start': day,
             'itn_coverage': coverage_level}
 
-
-event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
+event_list = event_list + ['Received_ITN']  # when using add_ITN
+# event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
 
 
 # IRS, start after 1 year - single campaign
@@ -165,8 +176,6 @@ add_summary_report(cb, start=1, interval=365,
                    age_bins=[0.25, 10, 100],
                    description='Annual_U10')
 
-
-
 for year in range(years):
     start_day = 365 + 365 * year
     sim_year = sim_start_year + year
@@ -199,7 +208,6 @@ cb.update_params({
 ## Event_counter_report
 add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
 
-
 """BUILDER"""
 builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
                                  ModFn(smc_intervention, coverage_level=smc_cov),
@@ -211,7 +219,7 @@ builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
                                 for cm_cov_U5 in [0.6]
                                 for smc_cov in [0, 1]
                                 for rtss_cov in [0]
-                                for itn_cov in [0]
+                                for itn_cov in [0, 1]
                                 for irs_cov in [0]
                                 for x in range(numseeds)
                                 ])

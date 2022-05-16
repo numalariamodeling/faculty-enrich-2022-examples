@@ -8,33 +8,45 @@ SetupParser.default_block = 'LOCAL'
 
 user = os.getlogin()  # user initials
 expt_name = f'{user}_FE_2022_example_w4'
-expt_id = '2022_05_12_22_38_57_447769'  ## change expt_id
+expt_id = '2022_05_16_01_43_03_089223'  ## change expt_id
 working_dir = os.path.join('simulation_outputs')
-
 
 if __name__ == "__main__":
     SetupParser.init()
 
-    sweep_variables = ['cm_cov_U5', 'Run_Number']
+    sweep_variables = ['cm_cov_U5','itn_coverage', 'smc_coverage', 'Run_Number']
     event_list = ['Received_Treatment', 'Received_ITN', 'Received_SMC']
+    channels_inset_chart = ['Statistical Population', 'New Clinical Cases', 'Adult Vectors', 'Infected']
 
     # analyzers to run
-    analyzers = [
-        TransmissionReport(expt_name=expt_name,
-                           working_dir=working_dir,
-                           sweep_variables=sweep_variables,
-                           monthly_report=True,
-                           start_year=2024),
-        MonthlyPfPRAnalyzerU5(expt_name=expt_name,
-                              working_dir=working_dir,
-                              start_year=2022,
-                              end_year=2024,
-                              sweep_variables=sweep_variables),
-        IndividualEventsAnalyzer(expt_name=expt_name,
-                                 working_dir=working_dir,
-                                 start_year=2022,
-                                 selected_year=None,
-                                 sweep_variables=sweep_variables),
-    ]
+    analyzers = [InsetChartAnalyzer(expt_name=expt_name,
+                                    working_dir=working_dir,
+                                    channels=channels_inset_chart,
+                                    sweep_variables=sweep_variables),
+                 AnnualAgebinPfPRAnalyzer(expt_name=expt_name,
+                                          working_dir=working_dir,
+                                          start_year=2022,
+                                          sweep_variables=sweep_variables),
+                 # TransmissionReport(expt_name=expt_name,
+                 #                    working_dir=working_dir,
+                 #                    sweep_variables=sweep_variables,
+                 #                    monthly_report=True,
+                 #                    start_year=2024),
+                 MonthlyPfPRAnalyzerU5(expt_name=expt_name,
+                                       working_dir=working_dir,
+                                       start_year=2022,
+                                       end_year=2024,
+                                       sweep_variables=sweep_variables),
+                 ReceivedCampaignAnalyzer(expt_name=expt_name,
+                                          working_dir=working_dir,
+                                          channels=event_list,
+                                          start_year=2022,
+                                          sweep_variables=sweep_variables),
+                 # IndividualEventsAnalyzer(expt_name=expt_name,
+                 #                          working_dir=working_dir,
+                 #                          start_year=2022,
+                 #                          selected_year=None,
+                 #                          sweep_variables=sweep_variables),
+                 ]
     am = AnalyzeManager(expt_id, analyzers=analyzers)
     am.analyze()
