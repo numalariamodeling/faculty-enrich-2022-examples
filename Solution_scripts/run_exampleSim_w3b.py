@@ -137,8 +137,6 @@ def itn_intervention(cb, coverage_level, day=365):
 
 
 event_list = event_list + ['Received_ITN']  # when using add_ITN
-
-
 # event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']  # when using add_ITN_age_season
 
 

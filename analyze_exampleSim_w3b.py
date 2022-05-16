@@ -111,7 +111,8 @@ def plot_events(event_list, sweep_variables) :
 if __name__ == "__main__":
     SetupParser.init()
 
-    sweep_variables = ['cm_cov_U5', 'smc_coverage', 'Run_Number']
+    """Set sweep_variables and event_list as required depending on experiment"""
+    sweep_variables = ['cm_cov_U5', 'itn_coverage', 'smc_coverage', 'Run_Number']
     event_list = ['Received_Treatment', 'Received_ITN', 'Received_SMC']
     channels_inset_chart = ['Statistical Population', 'New Clinical Cases', 'Adult Vectors', 'Infected']
 
