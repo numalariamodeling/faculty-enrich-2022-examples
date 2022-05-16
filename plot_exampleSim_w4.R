@@ -8,8 +8,8 @@ library(scales)
 theme_set(theme_minimal())
 tab10_palette = c('#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf')
 theme_py = theme(axis.ticks = element_line(),
-                 plot.title = element_text(size = 14, vjust = -1, hjust = 0.5, face = "bold"),
-                 strip.text = element_text(size = 14, face = "bold"),
+                 plot.title = element_text(size = 14, vjust = -1, hjust = 0.5),
+                 strip.text = element_text(size = 14),
                  axis.text = element_text(size = 11),
                  panel.border = element_rect(color = 'black', fill = NA),
                  plot.background = element_rect(, fill = 'white'),
@@ -132,7 +132,7 @@ plot_events <- function(event_list, sweep_variables) {
     mutate(name = factor(name, levels = as.vector(unlist(Map(c, event_list, cov_channel_list))))) %>%
     unite('sweep', sweep_variables, sep = ", ", remove = FALSE, na.rm = FALSE) %>%
     ggplot() +
-    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = 0, col = 'white', alpha = 0.1) + # dummy for ymin
     geom_line(aes(x = date, y = value, col = sweep)) +
     scale_x_date(date_breaks = '12 month', date_labels = "%Y-%m-%d") +
     facet_wrap(~name, scales = 'free', ncol = 2) +
@@ -175,7 +175,7 @@ plot_transmission <- function(sweep_variables, time_res = 'Monthly', selected_ye
     mutate(name = factor(name, levels = channels)) %>%
     unite('sweep', sweep_variables, sep = ", ", remove = FALSE, na.rm = FALSE) %>%
     ggplot() +
-    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = 0, col = 'white', alpha = 0.1) + # dummy for ymin
     geom_line(aes(x = get(x_var), y = value, col = sweep)) +
     facet_wrap(~name, scales = 'free') +
     scale_y_continuous(labels = comma) +

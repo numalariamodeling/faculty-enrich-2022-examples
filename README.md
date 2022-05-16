@@ -822,18 +822,18 @@ Example All_Age_Monthly_Cases figure generated in R
 ![img](static/w4_InsetChart_R.png)
 
 <!--
-Default example Transmission_Monthly figure generated in Python  
+Example Transmission_Monthly figure generated in Python  
 ![img](static/w4_Transmission_Monthly.png)
 
 
-Default example All_Age_Monthly_Cases figure generated in R  
+Example All_Age_Monthly_Cases figure generated in R  
 ![img](static/w4_Transmission_Monthly_R.png)
 -->
 
-Default example Events figure generated in Python  
+Example Events figure generated in Python  
 ![img](static/w4_Events.png)  
 
-Default example Events figure generated in R
+Example Events figure generated in R
 ![img](static/w4_Events_R.png)  
 
 </p>
