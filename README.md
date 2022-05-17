@@ -907,7 +907,26 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- [TODO]
+- Modify `run_exampleBurnin_w6.py` script with the following (You should duplicate and change the file name!)
+  + Change `serialize_years` to 20
+  + Use `ModBuilder` to run 5 simulations instead of 1
+  + ```
+    numseeds = 5
+    builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)]
+                                    for x in range(numseeds)])
+    ```
+  + Add the `ModBuilder` object into `run_sim_args`
+  + Modify `exp_name` in the `run_sim_args` to `f'{user}_FE_2022_example_w7a'`
+
+- Run the burnin in COMPS
+- Modify `burnin_id` in `run_examplePickup_w7.py`, understand what is the script trying to achieve here.
+- Run the 'pickup' in COMPS
+- Modify `expt_id` in `analyze_exampleSim_w7.py`
+- Run the analyzer
+- Finally run the script `select_w7.py`. This script calculate the average log-likelihood of each `itn_coverage` based on simulation output and produces some plots to visualize the parameter selection.
+- Inspect the plot in the corresponding folder in `simulation_output` folder.
+- (*Optional*) The choice of the `itn_coverage` here is based on 5 realizations which some may argue that the sample size is too small. Try to redo the exercise by increasing the number of realizations. 
+  Note that you need to decide if you want to rerun the burnin, or just increase the number of realizations in the pickup phase instead (What are the pros and cons of the two approaches?)
 
 <details><summary><span>Check results</span></summary>
 <p>
