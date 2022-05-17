@@ -931,8 +931,23 @@ EMOD How To's:
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+The log-likelihood of the `itn_coverage` would be printed out and look like this:
+```commandline
+   itn_coverage        ll
+0          0.20 -3.719067
+1          0.25 -3.472211
+2          0.30 -3.509376
+3          0.35 -3.098715
+4          0.40 -2.643516
+5          0.45 -2.683272
+6          0.50 -2.561883
+```
+
+And here is the plot out of `select_w7.py` script.
+On the left is the observed data (size of bubble is proportionate to sample size) vs simulated mean PfPR trajectory. 
+On the right is the `itn_coverage` values and their corresponding log-likelihood.
+
+![img](static/w7_selection.png)
 
 </p>
 </details>

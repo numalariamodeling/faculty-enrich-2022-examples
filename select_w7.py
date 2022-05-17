@@ -55,10 +55,15 @@ def plot_output(sim_df, data_df, score_df, variable):
         axes[0].plot(plot_df['date'], plot_df['PfPR'], color='#FF0000', alpha=a)
 
     axes[0].scatter(data_df['date'].values, data_df['PfPR'], data_df['DHS_n'], 'k')
+    axes[0].set_ylabel('PfPR')
+    axes[0].set_title('Observed vs Simulated (Dark red is the best fit)')
 
     score_df1 = score_df[score_df.ll == score_df.ll.max()]
     axes[1].plot(score_df[variable], score_df['ll'], '-o', color='#FF0000', markersize=5)
     axes[1].scatter(score_df1[variable], score_df1.ll, s=90, color='red')
+    axes[1].set_ylabel('log-likelihood')
+    axes[1].set_xlabel('ITN coverage (U5)')
+    axes[1].set_title('Mean log-likelihood. Larger value = better fit')
 
     fig.savefig(os.path.join(output_dir, expt_name, 'selection.png'))
 
