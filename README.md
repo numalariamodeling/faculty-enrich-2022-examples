@@ -926,16 +926,50 @@ EMOD How To's:
 [Lesson Week 8](https://faculty-enrich-2022.netlify.app/lessons/week-8/)
 
 EMOD How To's:
+- [Individual Properties (IPs)](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#individual-properties-ips)
 
-- Individual properties
-- [TODO]
 
 ### Instructions
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- [TODO]
+
+- First, generate a new demographics file, after modifying  `python generate_input_files.py`
+  - add individual properties to for assigning individuals into a high versus a low access group.
+    ```py
+    IPs = [
+            {'Property': 'Access',
+             'Values': ["Low", "High"],
+             'Initial_Distribution': [0.5, 0.5],  ## set assumption on proportion of individuals in each group
+             'Transitions': []},
+        ]
+    ```
+    Use the already existing demographics file to add the new IP's
+    ```py
+    demo_fname = os.path.join(<INPUTPATH>,"FILENAME_demographics.json") 
+    demo_fname_IP = os.path.join(<INPUTPATH>,"FILENAME_demographics_IP.json")
+    generate_demographics(df, demo_fname) 
+    
+    generate_demographics_properties(refdemo_fname=demo_fname,
+                                         output_filename=demo_fname_IP,
+                                         as_overlay=False,
+                                         IPs=IPs)
+    ```
+- Run `python generate_input_files.py` to generate the new demographics json file, and inspect the new json file to check whether the IP's were successfully added.
+- Few minor edits in your simulation script:
+    - update the cb.update section
+    - set `Disable_IP_Whitelist` to 1 (if not already set at 1)
+    ```py
+    cb.update_params({'Disable_IP_Whitelist' : 1})
+    ```
+- Just having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties!
+- Modify any of the interventions to customize coverage levels for low versus high access groups.
+- Increase simulation duration from 1 to 3 years by modifying the initial call to DTKConfigBuilder:
+- Change _exp_name_  for week 8 `f'{user}_FE_2022_example_w8'`
+- Run simulation and wait for simulation to finish 
+    - While simulations are running check the generated campaign.json file to ensure that the IP separation was implemented correctly.
+- Run analyzer script for Week 8 `analyze_exampleSim_w8.py` 
 
 <details><summary><span>Check results</span></summary>
 <p>
