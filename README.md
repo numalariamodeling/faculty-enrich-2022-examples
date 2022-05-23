@@ -960,22 +960,204 @@ On the right is the `itn_coverage` values and their corresponding log-likelihood
 [Lesson Week 8](https://faculty-enrich-2022.netlify.app/lessons/week-8/)
 
 EMOD How To's:
+- [Individual Properties (IPs)](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#individual-properties-ips)
 
-- Individual properties
-- [TODO]
 
 ### Instructions
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- [TODO]
+
+- First, generate a new demographics file, after modifying  `python generate_input_files.py`
+  - add a function that takes existing demographics json file and add individual properties to it
+    in this example, we group individuals into a high and a low access group.
+    ```py
+    ## Add Individual Properties (IPs)
+    def add_IPs(demo_fname):
+        """Add VaccineStatus IP"""
+        IPs = [{'Property': 'Access',
+                'Values': ['Low', 'High'],
+                'Initial_Distribution': [0.5, 0.5],
+                'Transitions': []}
+               ]
+    
+        adf = pd.DataFrame({'Property': 'VaccineStatus',
+                            'Property_Value': ['Low', 'High'],
+                            'Initial_Distribution': [0.5, 0.5]}
+                           )
+        adf['Property_Type'] = 'IP'
+        adf['node'] = 1
+    
+        IP_demo_fname = os.path.join(demo_fname.replace('.json', '_wIP.json'))
+        generate_demographics_properties(refdemo_fname=demo_fname,
+                                         output_filename=IP_demo_fname,
+                                         as_overlay=False,
+                                         IPs=IPs,
+                                         df=adf)
+    ```
+    Instead of recreating the demographics and climate files, comment these out and add a call for the new `add_IPs` function as shown below:
+    ```py
+    inputs_path = os.path.join('./', 'input/Namawala')
+    ```
+    
+    ```py
+    demo_fname = os.path.join(inputs_path,'Namawala_single_node_demographics.json') 
+    # generate_demographics(df, demo_fname)
+    # generate_climate(demo_fname)  # no need to generate a 2nd time
+    add_IPs(demo_fname)
+    ```
+- Run `python generate_input_files.py` to generate the new demographics json file `Ghana_demographics_wIP.json`, and inspect the file to check whether the IP's were successfully added.
+  - Optional, do the same for the Ghana demographics    
+- Just having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties!
+- Copy and rename both simulation scripts from the previous week, from week 7 to week 8, in addition a couple of modifications are required as instructed below:
+- __In both simulation scripts (burnin + pickup):__
+  - set `Disable_IP_Whitelist` to 1 (if not already set at 1)
+    ```py
+    cb.update_params({'Disable_IP_Whitelist' : 1})
+    ```
+    _Reminder, you can look into the config.json file to see the default parameters and their values_
+  - update the demographics filename in `cb.update_params({
+    'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],` to read in `Namawala_single_node_demographics_wIP.json`
+  - Change exp_name to week 8 to keep track of simulations + weeks
+- __In burnin script__:
+  - No additional changes, you can already submit it to run 
+- __In pickup script__:
+  - Add a helper function to re-calculate coverage depending on access group
+  - Modify the interventions (i.e.add_ITN) to customize coverage levels for low versus high access groups.
+    - duplicate the `add_ITN` within the def `itn_intervention` function
+    - add `ind_property_restrictions` to have one set of ITNs be distributed to the low,
+      the other to the high access group.
+    - define two new parameters coverage_levels_low and coverage_levels_high 
+    <details><summary><span>view modified itn_intervention</span></summary>
+    <p>
+
+    ```py
+    def itn_intervention(cb, coverage_level):
+        ## Assume high access group = 0.5 of total population
+        if coverage_level > 0.5:
+            coverage_level_high = 1
+            coverage_level_low = (coverage_level - 0.5) / (1 - 0.5)
+        else:
+            coverage_level_low = 0
+            coverage_level_high = coverage_level / 0.5
+    
+        add_ITN(cb,
+                start=1,  # starts on first day of second year
+                coverage_by_ages=[
+                    {"coverage": coverage_level_low, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                    {"coverage": coverage_level_low * 0.75, "min": 10, "max": 50},
+                    # 25% lower than for children for 10-50 years old
+                    {"coverage": coverage_level_low * 0.6, "min": 50, "max": 125}
+                    # 40% lower than for children for everyone else
+                ],
+                repetitions=5,  # ITN will be distributed 5 times
+                tsteps_btwn_repetitions=365 * 3,  # three years between ITN distributions
+                ind_property_restrictions=[{'Access': 'Low'}]
+                )
+    
+        add_ITN(cb,
+                start=1,  # starts on first day of second year
+                coverage_by_ages=[
+                    {"coverage": coverage_level_high, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                    {"coverage": coverage_level_high * 0.75, "min": 10, "max": 50},
+                    # 25% lower than for children for 10-50 years old
+                    {"coverage": coverage_level_high * 0.6, "min": 50, "max": 125}
+                    # 40% lower than for children for everyone else
+                ],
+                repetitions=5,  # ITN will be distributed 5 times
+                tsteps_btwn_repetitions=365 * 3,  # three years between ITN distributions
+                ind_property_restrictions=[{'Access': 'High'}]
+                )
+        return {'itn_coverage': coverage_level}
+    ```
+    </p>
+    </details>
+  - add case management (see Week 3 for adding interventions)  
+    <details><summary><span>view modified case_management function</span></summary>
+    <p>
+    
+    ```py
+    def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
+        ## Assume high access group = 0.5 of total population
+        if cm_cov_U5 > 0.5:
+            cm_cov_U5_high = 1
+            cm_cov_U5_low = (cm_cov_U5 - 0.5) / (1 - 0.5)
+        else:
+            cm_cov_U5_low = 0
+            cm_cov_U5_high = cm_cov_U5 / 0.5
+        ## Optionally, depending on assumptions, do same for cm_cov_adults and cm_cov_severe
+    
+        add_health_seeking(cb, start_day=0,
+                           targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_low,
+                                     'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
+                                     'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
+                                     'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                           drug=['Artemether', 'Lumefantrine'])
+    
+        add_health_seeking(cb, start_day=0,
+                           targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_high,
+                                     'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
+                                     'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
+                                     'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                           drug=['Artemether', 'Lumefantrine'])
+    
+        return {'cm_cov_U5': cm_cov_U5,
+                'cm_cov_adults': cm_cov_adults,
+                'cm_cov_severe': cm_cov_severe}
+    ```
+    </p>
+    </details>  
+  - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
+  - Add additional reporters to be able to analyze results for both groups
+    ```py
+     "Report_Event_Recorder_Individual_Properties": ['Access']
+    ```
+    ```py
+     sim_start_year = 2000 + pull_year # for convenience to read simulation times
+     add_summary_report(cb, start=1+365*i, interval=30,
+                   duration_days=365,
+                   age_bins=[0.25, 5, 120],
+                   description=f'Monthly_U5_accesslow{sim_start_year+i}',
+                   ipfilter = 'Access:Low')
+     add_summary_report(cb, start=1+365*i, interval=30,
+               duration_days=365,
+               age_bins=[0.25, 5, 120],
+               description=f'Monthly_U5_accesshigh{sim_start_year+i}',
+               ipfilter = 'Access:High')  
+    ```
+     - _Note: once we made sure it is doing what it is supposed to do, 
+       keeping reporters per group might not always be needed, depending on the research question. 
+       In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
+- Once the burnin simulation finished, update exp_id in the pick-up simulation script and run the simulation
+- Run analyzer script for Week 8 `analyze_exampleSim_w8.py` for the simulation that was just run
+- Inspect results, the generated plots as well as IndividualEvents
+- Options for further exploration:
+  - Rerun the pickup simulation with different coverage levels
+  - Rerun burnin + pickup simulation with different ratio between low and high access group
+- Think about what other individual properties would be useful and how these could be implemented
 
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+Simulation outputs showing summary reports per `Access group` used as example for individual properties
+![img](static/w8_COMPS_simoutputs.png)
+
+
+Plot of aggregated malaria burden over time per `Access group` 
+![img](static/w8_U5_IP_PfPR_ClinicalIncidence.png)
+
+Report Event Recorder including individual properties 
+![img](static/w8_ReportEventRecorder.png)
+
+Simple barplot showing sum of individuals per group that received an intervention
+![img](static/w8_Individual_Events.png)
+
+
 
 </p>
 </details>
