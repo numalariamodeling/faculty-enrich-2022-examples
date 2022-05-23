@@ -8,16 +8,16 @@ from simtools.SetupParser import SetupParser
 SetupParser.default_block = 'HPC'
 serialize_years = 10
 
-
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=serialize_years * 365)
 
 cb.update_params({
     'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_air_temperature_daily.bin'),
     "Land_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_land_temperature_daily.bin'),
     "Rainfall_Filename": os.path.join('Namawala', 'Namawala_single_node_rainfall_daily.bin'),
-    "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin'),
-    'Simulation_Duration': serialize_years * 365,
+    "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin')})
+
+cb.update_params({
     'Serialization_Time_Steps': [365 * serialize_years],
     'Serialization_Type': 'TIMESTEP',
     'Serialized_Population_Writing_Type': 'TIMESTEP',

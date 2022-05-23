@@ -9,8 +9,8 @@ from simtools.ModBuilder import ModBuilder, ModFn
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'HPC'
-burnin_id = "ad725a6c-a9c5-ec11-a9f6-9440c9be2c51"  # UPDATE with burn-in experiment id
-pull_year = 10  # year of burn-in to pick-up from
+burnin_id = "b4f6741c-07da-ec11-a9f8-b88303911bc1"  # UPDATE with burn-in experiment id
+pull_year = 50  # year of burn-in to pick-up from
 pickup_years = 2  # years of pick-up to run
 n_seeds = 5       # number of runs
 
