@@ -8,6 +8,7 @@ from malaria.reports.MalariaReport import add_event_counter_report, add_summary_
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.ModBuilder import ModBuilder, ModFn
 from simtools.SetupParser import SetupParser
+from simtools.ModBuilder import ModBuilder, ModFn
 
 # This block will be used unless overridden on the command-line
 from simtools.Utilities.Experiments import retrieve_experiment
@@ -76,11 +77,11 @@ cb.update_params({
 # Report_Event_Counter
 # add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=pull_year*365)
 
-for i in range(pull_year):
+for i in range(pickup_years):
     add_summary_report(cb, start=1+365*i, interval=30,
                        duration_days=365,
                        age_bins=[0.25, 5, 120],
-                       description=f'Monthly_Agebin_{2010+i}')
+                       description=f'Monthly_U5_{2010+i}')
 
 # run_sim_args is what the `dtk run` command will look for
 builder = ModBuilder.from_list(

@@ -19,11 +19,11 @@ if __name__ == "__main__":
 
     # analyzers to run
     analyzers = [
-        MonthlyAgebinPfPRAnalyzer(expt_name=expt_name,
-                                  working_dir=working_dir,
-                                  start_year=2010,
-                                  end_year=2012,
-                                  sweep_variables=sweep_variables),
+        MonthlyPfPRAnalyzerU5(expt_name=expt_name,
+                              working_dir=working_dir,
+                              start_year=2010,
+                              end_year=2012,
+                              sweep_variables=sweep_variables),
     ]
     am = AnalyzeManager(expt_id, analyzers=analyzers)
     am.analyze()
