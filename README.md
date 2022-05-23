@@ -925,8 +925,10 @@ EMOD How To's:
 - Run the analyzer
 - Finally run the script `select_w7.py`. This script calculate the average log-likelihood of each `itn_coverage` based on simulation output and produces some plots to visualize the parameter selection.
 - Inspect the plot in the corresponding folder in `simulation_output` folder.
+- (*Optional*) Try running the whole procedure but using `Ghana` input files instead. The (fake) Ghana DHS data is located in `data/w7_fake_DHS_Ghana.csv`. What do you need to change so that 
+selection of parameters is based on this dataset?
 - (*Optional*) The choice of the `itn_coverage` here is based on 5 realizations which some may argue that the sample size is too small. Try to redo the exercise by increasing the number of realizations. 
-  Note that you need to decide if you want to rerun the burnin, or just increase the number of realizations in the pickup phase instead (What are the pros and cons of the two approaches?)
+Note that you need to decide if you want to rerun the burnin, or just increase the number of realizations in the pickup phase instead (What are the pros and cons of the two approaches?)
 
 <details><summary><span>Check results</span></summary>
 <p>

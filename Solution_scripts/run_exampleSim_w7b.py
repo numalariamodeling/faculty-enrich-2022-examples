@@ -14,25 +14,36 @@ from simtools.ModBuilder import ModBuilder, ModFn
 from simtools.Utilities.Experiments import retrieve_experiment
 
 SetupParser.default_block = 'HPC'
-burnin_id = "ebfd2b10-0cd6-ec11-a9f8-b88303911bc1"  # UPDATE with burn-in experiment id
+burnin_id = "6c6f80b0-efd9-ec11-a9f8-b88303911bc1"  # UPDATE with burn-in experiment id
 pull_year = 20  # year of burn-in to pick-up from
 pickup_years = 2  # years of pick-up to run
 numseeds = 5
 
 SetupParser.init()
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM')
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=pickup_years * 365)
+
 expt = retrieve_experiment(burnin_id)  # Identifies the desired burn-in experiment
 # Loop through unique "tags" to distinguish between burn-in scenarios (ex. varied historical coverage levels)
 ser_df = pd.DataFrame([x.tags for x in expt.simulations])
 ser_df["outpath"] = pd.Series([sim.get_path() for sim in expt.simulations])
 
+"""Demographics"""
 cb.update_params({
+    # 'Demographics_Filenames': [os.path.join('Ghana', 'Ghana_2.5arcmin_demographics.json')],
+    # "Air_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
+    # "Land_Temperature_Filename": os.path.join('Ghana', 'Ghana_30arcsec_air_temperature_daily.bin'),
+    # "Rainfall_Filename": os.path.join('Ghana', 'Ghana_30arcsec_rainfall_daily.bin'),
+    # "Relative_Humidity_Filename": os.path.join('Ghana', 'Ghana_30arcsec_relative_humidity_daily.bin'),
+    # "Age_Initialization_Distribution_Type": 'DISTRIBUTION_COMPLEX'
     'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_air_temperature_daily.bin'),
     "Land_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_land_temperature_daily.bin'),
     "Rainfall_Filename": os.path.join('Namawala', 'Namawala_single_node_rainfall_daily.bin'),
-    "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin'),
-    'Simulation_Duration': pickup_years * 365,
+    "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin')
+})
+
+"""Serialization"""
+cb.update_params({
     'Serialized_Population_Reading_Type': 'READ',
     'Serialized_Population_Filenames': ['state-%05d.dtk' % (pull_year * 365)],
     'Enable_Random_Generator_From_Serialized_Population': 0,
