@@ -955,7 +955,7 @@ On the right is the `itn_coverage` values and their corresponding log-likelihood
 </p>
 </details>
 
-## Week 8: Individual properties
+## Week 8: Individual properties  <a name="week8"></a>
 
 [Lesson Week 8](https://faculty-enrich-2022.netlify.app/lessons/week-8/)
 
