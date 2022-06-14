@@ -228,16 +228,23 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.health_seeking import add_health_seeking
-            
+            #Clinical cases
             add_health_seeking(cb, start_day=366,
                                targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
                                          'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                         {'trigger': 'NewClinicalCase', 'coverage': 0.5,
-                                         'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                        {'trigger': 'NewSevereCase', 'coverage': 0.85,
-                                         'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                                         'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
                                drug=['Artemether', 'Lumefantrine'])
+            #Severe cases
+            add_health_seeking(cb, start_day=366,
+                               targets=[{'trigger': 'NewSevereCase', 'coverage': 0.49, 
+                                'seek': 1, 'rate': 0.5}],
+                       drug=['Artemether', 'Lumefantrine'],
+                       broadcast_event_name='Received_Severe_Treatment')
             ```
+            _Note: two add_health_seeking events were added to allow tracking clinical and severe treatments separately_ 
+             - _First one uses default event 'Received_Treatment',_ 
+             - _second one uses 'Received_Severe_Treatment' by specifying `broadcast_event_name = 'Received_Severe_Treatment'`_
              </p>
              </details>
         - <details><summary><span style="color: blue";">add_drug_campaign </span></summary>
@@ -254,6 +261,7 @@ EMOD How To's:
                               target_group={'agemin': 0.25, 'agemax': 5},
                               receiving_drugs_event_name='Received_SMC')
            ```
+            _Note: default event 'Received_Campaign_Drugs' has been changed by specifying `receiving_drugs_event_name ='Received_SMC'`_
              </p>
              </details>
         - <details><summary><span style="color: blue";">add_ITN </span></summary>
@@ -273,6 +281,7 @@ EMOD How To's:
                     tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
                     )
            ```
+           _Note: default event 'Received_ITN'. If desired to change this could be done by specifying `receiving_itn_event_name`_
             </p>
             </details>
         - <details><summary><span style="color: blue";">add_IRS </span></summary>
@@ -290,6 +299,7 @@ EMOD How To's:
                         "Initial_Effect": 0.7},
                     )
            ```
+           _Note: default event 'Received_IRS'. If desired to change this could be done by specifying `receiving_irs_event`_
             </p>
             </details>
         - <details><summary><span style="color: blue";">add_larvicides </span></summary>
@@ -324,6 +334,7 @@ EMOD How To's:
                         tsteps_btwn_repetitions=-1,
                         target_group={'agemin': 274, 'agemax': 275})  # children 9 months of age
            ```
+           _Note: default event 'Received_Vaccine' and receiving_vaccine_event does not need to be specified in this case unless desired to change_
             </p>
             </details>
 - To keep track of the campaign events in the simulations, add `event_list` and expand as needed

@@ -41,14 +41,19 @@ set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 
 """ADDITIONAL CAMPAIGNS"""
 event_list = []  ## Collect events to track in reports
 # health seeeking, immediate start
+# Clinical cases
 add_health_seeking(cb, start_day=0,
                    targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
                              'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                             {'trigger': 'NewClinicalCase', 'coverage': 0.5,
-                             'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                            {'trigger': 'NewSevereCase', 'coverage': 0.85,
-                             'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                             'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
                    drug=['Artemether', 'Lumefantrine'])
+# Severe cases
+add_health_seeking(cb, start_day=0,
+                   targets=[{'trigger': 'NewSevereCase', 'coverage': 0.49,
+                             'seek': 1, 'rate': 0.5}],
+                   drug=['Artemether', 'Lumefantrine'],
+                   broadcast_event_name='Received_Severe_Treatment')
 event_list = event_list + ['Received_Treatment', 'Received_Severe_Treatment']
 
 # malaria vaccine (RTS,S), as mass campaign at 80% at a single day (hypothetical example only!)
