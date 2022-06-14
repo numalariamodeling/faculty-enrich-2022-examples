@@ -67,13 +67,17 @@ def plot_events(event_list) :
     # read in analyzed event data
     df = pd.read_csv(os.path.join(working_dir, expt_name, 'Event_Count.csv'))
     df['date'] = pd.to_datetime(df['date'])
+    cov_channel_list = ['%s_Coverage' % x[9:] for x in event_list]
+    cov_channel_list = [x for x in cov_channel_list if x in df.columns.values]
+    df = df.groupby(['date'])[event_list + cov_channel_list].agg(np.mean).reset_index()
 
     # make event plot
     fig3 = plt.figure('Events', figsize=(12,3*len(event_list)))
     fig3.subplots_adjust(hspace=0.5, left=0.08, right=0.97)
     fig3.suptitle(f'Analyzer: ReceivedCampaignAnalyzer')
+    axes = [fig3.add_subplot(len(event_list), 2, x + 1) for x in range(len(event_list)*2)]
     for ch, channel in enumerate(event_list) :
-        ax = fig3.add_subplot(len(event_list),2,ch*2+1)
+        ax = axes[ch*2]
         ax.plot(df['date'], df[channel], '-', linewidth=0.8)
         ax.set_title(channel)
         ax.set_ylabel(channel)
@@ -83,7 +87,7 @@ def plot_events(event_list) :
         coverage_channel = '%s_Coverage' % channel[9:]
         if coverage_channel not in df.columns.values :
             continue
-        ax = fig3.add_subplot(len(event_list),2,ch*2+2)
+        ax = axes[ch*2+1]
         ax.plot(df['date'], df[coverage_channel], '-', linewidth=0.8)
         ax.set_title(coverage_channel)
         ax.set_ylabel(coverage_channel)
