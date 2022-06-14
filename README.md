@@ -346,12 +346,23 @@ EMOD How To's:
       event_list = ['Received_Treatment', 'Received_ITN']
       ```
 - Next, add an event reporter to monitor these events:
-    - Report_Event_Recorder and Report_Event_Counter:
+    - Report_Event_Counter for aggregated event counts:
       ``` py
       from malaria.reports.MalariaReport import add_event_counter_report
 
       add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
       ```
+    - Report_Event_Recorder for individual events:
+      ``` py
+      cb.update_params({
+         "Report_Event_Recorder": 1,
+         "Report_Event_Recorder_Individual_Properties": [],
+         "Report_Event_Recorder_Ignore_Events_In_List": 0,
+         "Report_Event_Recorder_Events": event_list,
+         'Custom_Individual_Events': event_list
+      })
+      ```
+      _Note the Report_Event_Recorder output can get very large and usually is disabled for large interventions_
 - Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
 - Now, run the simulation and wait for it to finish (~5 minutes)
 - While simulations runs, look at the generated campaign file, does it include all interventions
@@ -675,7 +686,7 @@ EMOD How To's:
   copy!)
     - Adjust coverage levels in `ModBuilder` to select/unselect interventions to include or change number of simulations
       to run (optional)
-- Add an individual-level event reporter. This example assumes there is case management for malaria in the simulation.
+- If not already there, enable or modify the individual-level event reporter as shown below. This example assumes there is case management for malaria in the simulation.
   ```py
   cb.update_params({
     'Report_Event_Recorder': 1,  # Enable generation of ReportEventRecorder.csv  
