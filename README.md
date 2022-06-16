@@ -887,7 +887,7 @@ EMOD How To's:
 - Update the configuration parameters as shown below to enable serialization
 - Run simulation
 - Copy the experimentID ('expID') from the simulation metadata to pick-up from later.
-
+- Run analyzer for week 6 and inspect the historical trend, did the simulations find a stable state?
 </p></details>
 
 
@@ -906,8 +906,8 @@ EMOD How To's:
 <details><summary><span>Check results</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+
+![img](static/w6_burnin_InsetChart.png)
 
 </p>
 </details>
