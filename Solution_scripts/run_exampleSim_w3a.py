@@ -19,7 +19,7 @@ from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
 from malaria.interventions.malaria_vaccine import add_vaccine
 
 # This block will be used unless overridden on the command-line
-SetupParser.default_block = 'Local'
+SetupParser.default_block = 'HPC'
 years = 3
 cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years * 365)
 
@@ -41,14 +41,19 @@ set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 
 """ADDITIONAL CAMPAIGNS"""
 event_list = []  ## Collect events to track in reports
 # health seeeking, immediate start
+# Clinical cases
 add_health_seeking(cb, start_day=0,
                    targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
                              'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                             {'trigger': 'NewClinicalCase', 'coverage': 0.5,
-                             'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                            {'trigger': 'NewSevereCase', 'coverage': 0.85,
-                             'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                             'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
                    drug=['Artemether', 'Lumefantrine'])
+# Severe cases
+add_health_seeking(cb, start_day=0,
+                   targets=[{'trigger': 'NewSevereCase', 'coverage': 0.49,
+                             'seek': 1, 'rate': 0.5}],
+                   drug=['Artemether', 'Lumefantrine'],
+                   broadcast_event_name='Received_Severe_Treatment')
 event_list = event_list + ['Received_Treatment', 'Received_Severe_Treatment']
 
 # malaria vaccine (RTS,S), as mass campaign at 80% at a single day (hypothetical example only!)
@@ -70,37 +75,37 @@ event_list = event_list + ['Received_SMC']
 
 # ITN, start after 1 year
 """Select either add_ITN or add_ITN_age_season"""
-# add_ITN(cb,
-#         start=366,  # starts on first day of second year
-#         coverage_by_ages=[
-#             {"coverage": 1, "min": 0, "max": 10},  # 100% for 0-10 years old
-#             {"coverage": 0.75, "min": 10, "max": 50},  # 75% for 10-50 years old
-#             {"coverage": 0.6, "min": 50, "max": 125}  # 60% for everyone else
-#         ],
-#         repetitions=5,  # ITN will be distributed 5 times
-#         tsteps_btwn_repetitions=365 * 1  # assume annual ITN distributions instead of 1 year in example
-#         )
-# event_list = event_list + ['Received_ITN']
+add_ITN(cb,
+        start=366,  # starts on first day of second year
+        coverage_by_ages=[
+            {"coverage": 1, "min": 0, "max": 10},  # 100% for 0-10 years old
+            {"coverage": 0.75, "min": 10, "max": 50},  # 75% for 10-50 years old
+            {"coverage": 0.6, "min": 50, "max": 125}  # 60% for everyone else
+        ],
+        repetitions=5,  # ITN will be distributed 5 times
+        tsteps_btwn_repetitions=365 * 1  # assume annual ITN distributions instead of 1 year in example
+        )
+event_list = event_list + ['Received_ITN']
 
-add_ITN_age_season(cb, start=366,
-                   demographic_coverage=0.8,
-                   killing_config={
-                       "Initial_Effect": 0.520249973,  # LLIN Burkina
-                       "Decay_Time_Constant": 1460,
-                       "class": "WaningEffectExponential"},
-                   blocking_config={
-                       "Initial_Effect": 0.53,
-                       "Decay_Time_Constant": 730,
-                       "class": "WaningEffectExponential"},
-                   discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
-                                  "Expiration_Period_Proportion_1": 0.9,
-                                  "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
-                                  "Expiration_Period_Mean_2": 3650},
-                   age_dependence={'Times': [0, 100],
-                                   'Values': [0.9, 0.9]},
-                   duration=-1, birth_triggered=False
-                   )
-event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
+# add_ITN_age_season(cb, start=366,
+#                    demographic_coverage=0.8,
+#                    killing_config={
+#                        "Initial_Effect": 0.520249973,  # LLIN Burkina
+#                        "Decay_Time_Constant": 1460,
+#                        "class": "WaningEffectExponential"},
+#                    blocking_config={
+#                        "Initial_Effect": 0.53,
+#                        "Decay_Time_Constant": 730,
+#                        "class": "WaningEffectExponential"},
+#                    discard_times={"Expiration_Period_Distribution": "DUAL_EXPONENTIAL_DISTRIBUTION",
+#                                   "Expiration_Period_Proportion_1": 0.9,
+#                                   "Expiration_Period_Mean_1": 365 * 1.7,  # Burkina 1.7
+#                                   "Expiration_Period_Mean_2": 3650},
+#                    age_dependence={'Times': [0, 100],
+#                                    'Values': [0.9, 0.9]},
+#                    duration=-1, birth_triggered=False
+#                    )
+# event_list = event_list + ['Bednet_Got_New_One', 'Bednet_Using', 'Bednet_Discarded']
 
 # IRS, start after 1 year - single campaign
 add_IRS(cb,

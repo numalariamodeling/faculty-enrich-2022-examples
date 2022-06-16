@@ -48,11 +48,13 @@ def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5):
                        targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5,
                                  'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                 {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
-                                 'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                {'trigger': 'NewSevereCase', 'coverage': 0.85,
-                                 'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                                 'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
                        drug=['Artemether', 'Lumefantrine'])
-
+    add_health_seeking(cb, start_day=0,
+                       targets=[{'trigger': 'NewSevereCase', 'coverage': 0.85,
+                                 'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                       drug=['Artemether', 'Lumefantrine'],
+                       broadcast_event_name='Received_Severe_Treatment')
     return {'cm_cov_U5': cm_cov_U5,
             'cm_cov_adults': cm_cov_adults}
 

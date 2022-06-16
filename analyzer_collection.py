@@ -32,7 +32,7 @@ class InsetChartAnalyzer(BaseAnalyzer):
         simdata['Day'] = simdata['Time'] % 365
         simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + 2022)
         simdata['date'] = simdata.apply(
-            lambda x: datetime.date(int(x['Year']), 1, 1) + datetime.timedelta(x['Day'] - 1), axis=1)
+            lambda x: datetime.date(int(x['Year']), 1, 1) + datetime.timedelta(int(x['Day']) - 1), axis=1)
 
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
@@ -750,8 +750,9 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
         simdata['Population'] = data[self.filenames[1]]['Channels']['Statistical Population']['Data']
         simdata['Time'] = simdata.index
         simdata['Day'] = simdata['Time'] % 365
-        simdata['Month'] = simdata['Day'].apply(lambda x: self.monthparser((x + 1) % 365))
-        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + self.start_year)
+        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + 2022)
+        simdata['date'] = simdata.apply(
+            lambda x: datetime.date(int(x['Year']), 1, 1) + datetime.timedelta(int(x['Day']) - 1), axis=1)
 
         for sweep_var in self.sweep_variables:
             if sweep_var in simulation.tags.keys():
@@ -771,7 +772,6 @@ class ReceivedCampaignAnalyzer(BaseAnalyzer):
             return
 
         adf = pd.concat(selected).reset_index(drop=True)
-        adf['date'] = adf.apply(lambda x: datetime.date(int(x['Year']), int(x['Month']), 1), axis=1)
 
         if not os.path.exists(os.path.join(self.working_dir, self.expt_name)):
             os.mkdir(os.path.join(self.working_dir, self.expt_name))

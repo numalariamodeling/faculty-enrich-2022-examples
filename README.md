@@ -228,16 +228,23 @@ EMOD How To's:
 
            ```py
             from malaria.interventions.health_seeking import add_health_seeking
-            
+            #Clinical cases
             add_health_seeking(cb, start_day=366,
                                targets=[{'trigger': 'NewClinicalCase', 'coverage': 0.7,
                                          'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                         {'trigger': 'NewClinicalCase', 'coverage': 0.5,
-                                         'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                        {'trigger': 'NewSevereCase', 'coverage': 0.85,
-                                         'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                                         'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
                                drug=['Artemether', 'Lumefantrine'])
+            #Severe cases
+            add_health_seeking(cb, start_day=366,
+                               targets=[{'trigger': 'NewSevereCase', 'coverage': 0.49, 
+                                'seek': 1, 'rate': 0.5}],
+                       drug=['Artemether', 'Lumefantrine'],
+                       broadcast_event_name='Received_Severe_Treatment')
             ```
+            _Note: two add_health_seeking events were added to allow tracking clinical and severe treatments separately_ 
+             - _First one uses default event 'Received_Treatment',_ 
+             - _second one uses 'Received_Severe_Treatment' by specifying `broadcast_event_name = 'Received_Severe_Treatment'`_
              </p>
              </details>
         - <details><summary><span style="color: blue";">add_drug_campaign </span></summary>
@@ -254,6 +261,7 @@ EMOD How To's:
                               target_group={'agemin': 0.25, 'agemax': 5},
                               receiving_drugs_event_name='Received_SMC')
            ```
+            _Note: default event 'Received_Campaign_Drugs' has been changed by specifying `receiving_drugs_event_name ='Received_SMC'`_
              </p>
              </details>
         - <details><summary><span style="color: blue";">add_ITN </span></summary>
@@ -273,6 +281,7 @@ EMOD How To's:
                     tsteps_btwn_repetitions=365 * 3  # three years between ITN distributions
                     )
            ```
+           _Note: default event 'Received_ITN'. If desired to change this could be done by specifying `receiving_itn_event_name`_
             </p>
             </details>
         - <details><summary><span style="color: blue";">add_IRS </span></summary>
@@ -290,6 +299,7 @@ EMOD How To's:
                         "Initial_Effect": 0.7},
                     )
            ```
+           _Note: default event 'Received_IRS'. If desired to change this could be done by specifying `receiving_irs_event`_
             </p>
             </details>
         - <details><summary><span style="color: blue";">add_larvicides </span></summary>
@@ -324,6 +334,7 @@ EMOD How To's:
                         tsteps_btwn_repetitions=-1,
                         target_group={'agemin': 274, 'agemax': 275})  # children 9 months of age
            ```
+           _Note: default event 'Received_Vaccine' and receiving_vaccine_event does not need to be specified in this case unless desired to change_
             </p>
             </details>
 - To keep track of the campaign events in the simulations, add `event_list` and expand as needed
@@ -335,12 +346,23 @@ EMOD How To's:
       event_list = ['Received_Treatment', 'Received_ITN']
       ```
 - Next, add an event reporter to monitor these events:
-    - Report_Event_Recorder and Report_Event_Counter:
+    - Report_Event_Counter for aggregated event counts:
       ``` py
       from malaria.reports.MalariaReport import add_event_counter_report
 
       add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=10000)
       ```
+    - Report_Event_Recorder for individual events:
+      ``` py
+      cb.update_params({
+         "Report_Event_Recorder": 1,
+         "Report_Event_Recorder_Individual_Properties": [],
+         "Report_Event_Recorder_Ignore_Events_In_List": 0,
+         "Report_Event_Recorder_Events": event_list,
+         'Custom_Individual_Events': event_list
+      })
+      ```
+      _Note the Report_Event_Recorder output can get very large and usually is disabled for large interventions_
 - Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
 - Now, run the simulation and wait for it to finish (~5 minutes)
 - While simulations runs, look at the generated campaign file, does it include all interventions
@@ -664,7 +686,7 @@ EMOD How To's:
   copy!)
     - Adjust coverage levels in `ModBuilder` to select/unselect interventions to include or change number of simulations
       to run (optional)
-- Add an individual-level event reporter. This example assumes there is case management for malaria in the simulation.
+- If not already there, enable or modify the individual-level event reporter as shown below. This example assumes there is case management for malaria in the simulation.
   ```py
   cb.update_params({
     'Report_Event_Recorder': 1,  # Enable generation of ReportEventRecorder.csv  
@@ -925,8 +947,10 @@ EMOD How To's:
 - Run the analyzer
 - Finally run the script `select_w7.py`. This script calculate the average log-likelihood of each `itn_coverage` based on simulation output and produces some plots to visualize the parameter selection.
 - Inspect the plot in the corresponding folder in `simulation_output` folder.
+- (*Optional*) Try running the whole procedure but using `Ghana` input files instead. The (fake) Ghana DHS data is located in `data/w7_fake_DHS_Ghana.csv`. What do you need to change so that 
+selection of parameters is based on this dataset?
 - (*Optional*) The choice of the `itn_coverage` here is based on 5 realizations which some may argue that the sample size is too small. Try to redo the exercise by increasing the number of realizations. 
-  Note that you need to decide if you want to rerun the burnin, or just increase the number of realizations in the pickup phase instead (What are the pros and cons of the two approaches?)
+Note that you need to decide if you want to rerun the burnin, or just increase the number of realizations in the pickup phase instead (What are the pros and cons of the two approaches?)
 
 <details><summary><span>Check results</span></summary>
 <p>

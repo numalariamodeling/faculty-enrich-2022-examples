@@ -12,12 +12,13 @@ user = os.getlogin()  # user initials
 expt_name = f'{user}_FE_2022_example_w7'
 output_dir = os.path.join('simulation_outputs')
 input_dir = os.path.join('input')
+data_dir = os.path.join('data')
 
-sim_pfpr_df = pd.read_csv(os.path.join(output_dir, expt_name, 'Agebin_PfPR_ClinicalIncidence.csv'))
-sim_pfpr_df = sim_pfpr_df[sim_pfpr_df.agebin == 5]
+sim_pfpr_df = pd.read_csv(os.path.join(output_dir, expt_name, 'U5_PfPR_ClinicalIncidence.csv'))
+sim_pfpr_df.columns = [col.replace(' U5', '') for col in sim_pfpr_df.columns]
 sim_pfpr_df['npos'] = sim_pfpr_df['PfPR'] * sim_pfpr_df['Pop']
 sim_pfpr_df['npos'] = sim_pfpr_df.npos.round(0)
-dhs_pfpr_df = pd.read_csv(os.path.join(input_dir, 'w7_fake_DHS.csv'))
+dhs_pfpr_df = pd.read_csv(os.path.join(data_dir, 'w7_fake_DHS.csv'))
 sweep_variables = ['itn_coverage', 'Run_Number']
 
 

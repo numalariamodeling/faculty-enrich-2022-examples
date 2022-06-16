@@ -23,7 +23,7 @@ numseeds = 5
 sim_start_year = 2000 + pull_year
 
 SetupParser.init()
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration= pickup_years * 365)
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=pickup_years * 365)
 
 expt = retrieve_experiment(burnin_id)  # Identifies the desired burn-in experiment
 
@@ -69,7 +69,7 @@ def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
         cm_cov_U5_high = cm_cov_U5 / 0.5
 
     if cm_cov_adults >= 0.5:
-        cm_cov_adults_high= 1
+        cm_cov_adults_high = 1
         cm_cov_adults_low = (cm_cov_adults - 0.5) / (1 - 0.5)
     else:
         cm_cov_adults_low = 0
@@ -86,26 +86,36 @@ def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
                        targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_low,
                                  'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                 {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults_low,
-                                 'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe_low,
-                                 'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                       drug=['Artemether', 'Lumefantrine'])
+                                 'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
+                       drug=['Artemether', 'Lumefantrine'],
+                       ind_property_restrictions=[{'Access': 'Low'}])
 
     add_health_seeking(cb, start_day=0,
                        targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_high,
                                  'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
                                 {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults_high,
-                                 'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe_high,
+                                 'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3}],
+                       drug=['Artemether', 'Lumefantrine'],
+                       ind_property_restrictions=[{'Access': 'High'}])
+
+    add_health_seeking(cb, start_day=0,
+                       targets=[{'trigger': 'NewSevereCase', 'coverage': cm_cov_severe_low,
                                  'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                       drug=['Artemether', 'Lumefantrine'])
+                       drug=['Artemether', 'Lumefantrine'],
+                       ind_property_restrictions=[{'Access': 'Low'}])
+
+    add_health_seeking(cb, start_day=0,
+                       targets=[{'trigger': 'NewSevereCase', 'coverage': cm_cov_severe_high,
+                                 'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                       drug=['Artemether', 'Lumefantrine'],
+                       ind_property_restrictions=[{'Access': 'High'}])
 
     return {'cm_cov_U5': cm_cov_U5,
             'cm_cov_adults': cm_cov_adults,
             'cm_cov_severe': cm_cov_severe}
 
 
-event_list = event_list + ['Received_Treatment', 'Received_Severe_Treatment']
+event_list = event_list + ['Received_Treatment']
 
 
 def itn_intervention(cb, coverage_level):
