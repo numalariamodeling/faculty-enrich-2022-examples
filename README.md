@@ -876,44 +876,62 @@ EMOD How To's:
 
 ### Instructions
 
-**Part 1: Set-Up Serialization & Run Burn-in**
+**Part 1: Create a “Burn-in” simulation from scratch**
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Change the value of `SetupParser.default_block` from 'LOCAL' to **'HPC'**
-    - This is to run the longer simulation on COMPS, as opposed to your local machine
-- Add a variable 'serialize_year' to the run_exampleSim.py script (without any interventions), and set it equal to 50.
-- Update the configuration parameters as shown below to enable serialization
-- Run simulation
-- Copy the experimentID ('expID') from the simulation metadata to pick-up from later.
+The script run_exampleSim_w6a.py is empty. Based on what you’ve learned from previous examples, fill in the code needed to run a simulation without interventions.
+    - Note: Be sure to write code to include the InsetChart analyzer
+    - To test if everything works so far, you can just run the simulation for 1 year with 1 seed. You will increase the duration later.
+
+Next, add/update the configuration parameters needed to serialize the simulations so that you can “pick up” from them again later.
+    - See the “Simple Burn-In” section of the EMOD How-To module. 
+    - Note: the example is written with a parameter ‘serialize_year’ which determines the duration of the burn-in simulation.
+
+Run the simulation for 5 years, and copy the experiment_id to use in part 2.
+
 
 </p></details>
 
 
-**Part 2: Pick-up & run simulations from burn-in**
+**Part 2: Pickup your simulations and add interventions**
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Add a variable 'pull_year' and set it equal to 50
-- Add a variable 'burnin_id' and set it equal to the experimentID copied from Part 1.
-- Update configuration parameters to pick-up from the end of your burn-in simulation
-- Import retreive_experiment from dtk-tools
-- Use retreive_experiment to load the burn-in and group by tags
-- Pick-up the simulations and run for 2 years with some intervention, and at least 10 random seeds
+Make a copy of the run_exampleSim_w6a.py file you edited in part 1, and name it run_exampleSim_w6b.py. 
 
-<details><summary><span>Check results</span></summary>
+Add a new variable ‘pickup_year’ to represent the number of years after the burn-in you want to simulate, maybe 5-10 years. 
+
+Then, add/edit the configuration parameters so EMOD picks up this simulation from the one you ran in Part 1. Some of these differ from those used in Part 1!
+See the “Picking up from Serialized Burn-in” section of the EMOD How-To module. Because you have the experiment ID, you should follow the steps to use retrieve_experiment() detailed in the second code-chunk of the How-To section (the third code-chunk is not relevant here).
+    - Note: In this chunk, only the ‘Serialized_Population_Path’ is changed -  others have been hidden for brevity but should still be included!
+    - Note: In this example the serialize_year parameter refers to the year of the burn-in to pickup from. As written, the code will pick-up on Jan 1 of year 50. You should update the year to be any year less than or equal to the number of burnin-years you ran.
+
+Drawing on examples from earlier weeks, add some interventions (ITNs, SMC, treatment seeking, etc.). Include the model builder to increase the number of runs, and to vary coverage levels of at least one intervention, like in Week 3 Exercise: Part II.
+    - Note: the start/end days for interventions are relative to the beginning of the pick-up simulation - in other words, they re-start at zero. 
+    - Reminder: You may need to import some modules you didn’t use in Part 1. 
+
+Add a Summary Report, drawing on examples from Week 4, and plot results.
+
+</p>
+</details>
+
+**Part 3: Run a longer burn-in and compare**
+
+<details><summary><span>Click here to expand</span></summary>
 <p>
 
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+Repeat Part 1: execute run_exampleSim_w6a.py with a longer burn-in (50 years).
+
+Copy the new experiment ID into run_exampleSim_w6b.py and re-run the pickup from the new burnin. Do not change the duration, interventions, or reports.
+
+Plot results and compare between the simulations with 5- and 50-year burnins. Does it make a difference?
 
 </p>
 </details>
 
-</p>
-</details>
 
 ## Week 7: Sweeping and calibration <a name="week7"></a>
 
