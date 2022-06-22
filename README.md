@@ -937,19 +937,15 @@ Plot results and compare between the simulations with 5- and 50-year burnins. Do
 
 ## Week 7: Sweeping and calibration <a name="week7"></a>
 
-[Lesson Week 7](https://faculty-enrich-2022.netlify.app/lessons/week-7/)
-
-EMOD How To's:
-
-- Sweeping and calibration
-- [TODO]
+Read [Lesson Week 7](https://faculty-enrich-2022.netlify.app/lessons/week-7/) to understand the basics of
+sweeping and calibration, and the story behind this week's example.
 
 ### Instructions
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Modify `run_exampleBurnin_w6.py` script with the following (You should duplicate and change the file name!)
+- Modify `run_exampleBurnin_w6.py` script with the following (You should duplicate and change the file name to `run_exampleBurnin_w6.py`.)
   + Change `serialize_years` to 20
   + Use `ModBuilder` to run 5 simulations instead of 1
   + ```
