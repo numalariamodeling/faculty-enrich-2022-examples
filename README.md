@@ -40,8 +40,6 @@ __Table 1: Overview of scripts used throughout the course__
 |generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
 |plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R |
 |run_exampleSim.py       |the main simulation script which will be expanded and modified throughout the lessons | 
-|run_exampleBurnin_w6.py | first simulation script for week 6 where simulation is splitted into 2 runs (Burnin)  | 
-|run_examplePickup_w6.py | second simulation script for week 6 where simulation is splitted into 2 runs (Pickup)   | 
 |simtools.ini |  Configuration file for main directories required to run simulations (1 single file need in same directory where simulation or analyser script is run) | 
 
 ## Week 1: Overview of EMOD <a name="week1"></a>
