@@ -882,10 +882,12 @@ EMOD How To's:
 <p>
 
 The script run_exampleSim_w6a.py is empty. Based on what you’ve learned from previous examples, fill in the code needed to run a simulation without interventions.
+    
     - Note: Be sure to write code to include the InsetChart analyzer
     - To test if everything works so far, you can just run the simulation for 1 year with 1 seed. You will increase the duration later.
 
 Next, add/update the configuration parameters needed to serialize the simulations so that you can “pick up” from them again later.
+    
     - See the “Simple Burn-In” section of the EMOD How-To module. 
     - Note: the example is written with a parameter ‘serialize_year’ which determines the duration of the burn-in simulation.
 
@@ -906,10 +908,12 @@ Add a new variable ‘pickup_year’ to represent the number of years after the 
 
 Then, add/edit the configuration parameters so EMOD picks up this simulation from the one you ran in Part 1. Some of these differ from those used in Part 1!
 See the “Picking up from Serialized Burn-in” section of the EMOD How-To module. Because you have the experiment ID, you should follow the steps to use retrieve_experiment() detailed in the second code-chunk of the How-To section (the third code-chunk is not relevant here).
+    
     - Note: In this chunk, only the ‘Serialized_Population_Path’ is changed -  others have been hidden for brevity but should still be included!
     - Note: In this example the serialize_year parameter refers to the year of the burn-in to pickup from. As written, the code will pick-up on Jan 1 of year 50. You should update the year to be any year less than or equal to the number of burnin-years you ran.
 
 Drawing on examples from earlier weeks, add some interventions (ITNs, SMC, treatment seeking, etc.). Include the model builder to increase the number of runs, and to vary coverage levels of at least one intervention, like in Week 3 Exercise: Part II.
+    
     - Note: the start/end days for interventions are relative to the beginning of the pick-up simulation - in other words, they re-start at zero. 
     - Reminder: You may need to import some modules you didn’t use in Part 1. 
 
