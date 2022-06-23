@@ -1122,9 +1122,11 @@ Time-series of pick up simulation with burnin
 <details><summary><span>Check results</span></summary>
 <p>
 
-Time-series of pick up simulation
-<--  ![img](static/w6b_InsetChart_withBurnin50.png)  -->
+InsetChart of pick up simulation after 10 year burnin
+ ![img](static/w6_pickup_InsetChart_burnin10.png)  
 
+InsetChart of p pick up simulation after 50 year burnin
+ ![img](static/w6_pickup_InsetChart_burnin50.png)  
 
 </p>
 </details>
