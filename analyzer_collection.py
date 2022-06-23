@@ -30,7 +30,7 @@ class InsetChartAnalyzer(BaseAnalyzer):
         simdata = pd.DataFrame({x: data[self.filenames[0]]['Channels'][x]['Data'] for x in self.inset_channels})
         simdata['Time'] = simdata.index
         simdata['Day'] = simdata['Time'] % 365
-        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + 2022)
+        simdata['Year'] = simdata['Time'].apply(lambda x: int(x / 365) + self.start_year)
         simdata['date'] = simdata.apply(
             lambda x: datetime.date(int(x['Year']), 1, 1) + datetime.timedelta(int(x['Day']) - 1), axis=1)
 
