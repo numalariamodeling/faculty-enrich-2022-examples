@@ -20,27 +20,26 @@ It also needs dtk virtual environment loaded and assumes files are run from a wo
 - [Go to Week 3](#week3)    
 - [Go to Week 4](#week4)    
 - Week 5: no technical track
-- [Go to Week 6](#week6)    _(TH)_
-- [Go to Week 7](#week7)    _(BT)_
-- [Go to Week 8](#week8)    _(MR)_
-- [Go to Week 9](#week9)    _(JG&? )_
+- [Go to Week 6](#week6)
+- [Go to Week 7](#week7)
+- [Go to Week 8](#week8)
+- [Go to Week 9](#week9) 
 - Week 10: no technical track
-- [Go to Week 11](#week11)    _(BT)_
-- [Go to Week 12](#week12)    _(TH)_
-- [Go to Week 13](#week13)    _(tbd)_
-- [Go to Week 14](#week14)    _(BT)_
+- [Go to Week 11](#week11) 
+- [Go to Week 12](#week12)
+- [Go to Week 13](#week13) 
+- [Go to Week 14](#week14)
 
 __Table 1: Overview of scripts used throughout the course__
 
-|Script |Description | 
-|-------|------------|
-|analyzer_collection.py | collection of different analyzers used returning csv files| 
-|analyzer_plots_collection.py | collection of different analyzers used returning plots instead of csv| 
-|analyze_exampleSim_wX.py |the main analyzer script which changes each week (w1, w2,...w5) | 
-|generate_input_files.py |the default script for creating demographics and climate which needs to run only once or when substantial changes are made | 
-|plot_exampleSim.py, plot_exampleSim.R | plotting scripts outside of analyzerin python or R |
-|run_exampleSim.py       |the main simulation script which will be expanded and modified throughout the lessons | 
-|simtools.ini |  Configuration file for main directories required to run simulations (1 single file need in same directory where simulation or analyser script is run) | 
+| Script                                      | Description                                                                                                                                           | 
+|---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| analyzer_collection.py                      | collection of different analyzers used returning csv files                                                                                            |
+| analyze_exampleSim_wX.py                    | the main analyzer script which changes each week (w1, w2,...w5)                                                                                       | 
+| generate_input_files.py                     | the default script for creating demographics and climate which needs to run only once or when substantial changes are made                            | 
+| plot_exampleSim_w4.py, plot_exampleSim_w4.R | plotting scripts outside of analyzerin python or R, introduced in Week 4                                                                              |
+| run_exampleSim.py                           | the main simulation script which will be expanded and modified throughout the lessons                                                                 | 
+| simtools.ini                                | Configuration file for main directories required to run simulations (1 single file need in same directory where simulation or analyser script is run) | 
 
 ## Week 1: Overview of EMOD <a name="week1"></a>
 
@@ -1209,7 +1208,8 @@ EMOD How To's:
 <p>
 
 
-- First, generate a new demographics file, after modifying  `python generate_input_files.py`
+- First, a new demographics file needs to be generated that defines individual properties.
+- Modify  `python generate_input_files.py` as instructed below:
   - add a function that takes existing demographics json file and add individual properties to it
     in this example, we group individuals into a high and a low access group.
     ```py
