@@ -8,8 +8,8 @@ from simtools.ModBuilder import ModBuilder, ModFn
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'HPC'
-serialize_years = 20
-numseeds = 5
+serialize_years = 10
+numseeds = 3
 
 cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration= serialize_years * 365)
 
