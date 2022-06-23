@@ -86,7 +86,7 @@ cb.update_params({
 })
 
 # Report_Event_Counter
-# add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=pull_year*365)
+# add_event_counter_report(cb, event_trigger_list=event_list, start=0, duration=pickup_years*365)
 
 for i in range(pickup_years):
     add_summary_report(cb, start=1+365*i, interval=30,
