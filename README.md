@@ -873,62 +873,262 @@ EMOD How To's:
 
 ### Instructions
 
-**Part 1: Create a “Burn-in” simulation from scratch**
+#### PART I - Create a “Burn-in” simulation
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-The script run_exampleSim_w6a.py is empty. Based on what you’ve learned from previous examples, fill in the code needed to run a simulation without interventions.
+ - Create a new python script named 'run_exampleSim_w6a.py' 
+ - Based on what you’ve learned from previous examples, add the basic code chunks needed to run a simulation, excluding interventions. 
+   Check the details below for help and additional comments.
+    - <details><summary><span style="color: blue";">Import modules </span></summary>
+       <p>
+	   
+       ```py
+        import os
+        from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
+        from dtk.vector.species import set_species, set_larval_habitat
+        from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
+        from simtools.SetupParser import SetupParser
+        from simtools.ModBuilder import ModBuilder, ModFn
+       ```
+      
+       </p>
+      </details>
+      
+    - <details><summary><span style="color: blue";">SetupParser and SimulationDuration </span></summary>
+       <p>
+       - Run the simulation with 1 seed, and for 50 years, for testing you might first select fewer years.
+       - Instead of `years`, define `serialize_years` and use 1 seed only
+       - To keep track of the corresponding time in your experiment, you can include `sim_start_year = 2022  - serialize_years`
+	   
+       ```py
+        SetupParser.default_block = 'LOCAL'
+        numseeds = 1
+        serialize_years = 50
+        sim_start_year = 2022  - serialize_years
     
-    - Note: Be sure to write code to include the InsetChart analyzer
-    - To test if everything works so far, you can just run the simulation for 1 year with 1 seed. You will increase the duration later.
+        cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=serialize_years * 365)
 
-Next, add/update the configuration parameters needed to serialize the simulations so that you can “pick up” from them again later.
-    
-    - See the “Simple Burn-In” section of the EMOD How-To module. 
-    - Note: the example is written with a parameter ‘serialize_year’ which determines the duration of the burn-in simulation.
+        ```
+        </p>
+      </details>
+    - <details><summary><span style="color: blue";">Demographics </span></summary>
+       <p>
+	   
+       ```py
+        cb.update_params({
+          'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],
+          "Air_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_air_temperature_daily.bin'),
+          "Land_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_land_temperature_daily.bin'),
+          "Rainfall_Filename": os.path.join('Namawala', 'Namawala_single_node_rainfall_daily.bin'),
+          "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin')
+        })
+        ```
+        __Note: You may either choose the default demographics for Namawala, or the one generated for Ghana.__
+        </p>
+      </details>
+    - <details><summary><span style="color: blue";">Set vector species </span></summary>
+       <p>
+	   
+       ```py
+        set_species(cb, ["arabiensis", "funestus", "gambiae"])
+        set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 1e7},
+                                "funestus": {'WATER_VEGETATION': 4e8},
+                                "gambiae": {'TEMPORARY_RAINFALL': 8.3e8, 'CONSTANT': 1e7}
+                                })
+        ```
+        </p>
+      </details>
+    - <details><summary><span style="color: blue";">Reporting </span></summary>
+       <p>
+       Reporting during the burnin simulation is optional, it depends on the simulation duration and what you want to track or to check.
+       If not disabled InsetChart is automatically included, and can be plotted, alternatively one can disable the InsetChart and 
+       include an annual summary report to keep track of i.e. malaria metrics in an age group that is also plotted during the main simulation.
+        </p>
+      </details>          
+    - <details><summary><span style="color: blue";">ModBuilder and run_sim_args</span></summary>
+       <p>
+	   
+       ```py
+        builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', seed)]
+                                        for seed in range(numseeds)
+                                        ])
+      
+        user = os.getlogin()  # user initials
+        run_sim_args = {
+            'exp_name': f'{user}_FE_2022_example_w6a_50',
+            'config_builder': cb,
+            'exp_builder': builder
+        }
+        ```
+        </p>
+      </details>
+    - <details><summary><span style="color: blue";">exp_manager and run_simulations</span></summary>
+         <p>
+	   
+         ```py
+         if __name__ == "__main__":
+             SetupParser.init()
+             exp_manager = ExperimentManagerFactory.init()
+             exp_manager.run_simulations(**run_sim_args)
+             # Wait for the simulations to be done
+             exp_manager.wait_for_finished(verbose=True)
+             assert (exp_manager.succeeded())
+          ```
+        </p>
+      </details>
+ - Now, to _serialize_ the simulations so that you can “pick up” from them again later, add the code chunk below to update the serialization configuration parameters.  (see [Simple Burn-In](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#simple-burn-in) in EMOD How To's).  The section ideally would be placed before or after the other `cb.update_params` in your script (i.e. after defining Demographics)
+    - <details><summary><span style="color: blue";">Serialization</span></summary>
+       <p>
+	 
+       ```py
+       cb.update_params({
+           'Serialization_Time_Steps': [365 * serialize_years],
+           'Serialization_Type': 'TIMESTEP',
+           'Serialized_Population_Writing_Type': 'TIMESTEP',
+           'Serialized_Population_Reading_Type': 'NONE',
+           'Serialization_Mask_Node_Write': 0,
+           'Serialization_Precision': 'REDUCED'
+       })
+       ```
+        _Note: ‘serialize_years’ determines the duration of the simulation via `Simulation_Duration` is also used to define the `Serialization_Time_Steps`_
+       </p>
+      </details>
+ - To test if your simulation experiment has been set up correctly run it for 1 year (`years = 1`).
+ - Then run the experiment for 5 years.
+ - Run the analyzer `analyze_exampleSim_w6.py` to visualize the trend 
+   - Note, the analyzer script had been updated to allow running the same analyzer for PART I and PART II of the Week 6 examples,
+     therefore, ensure that `step` is set to 'burnin' and update the `serialize_years` to correspond to the number of years run in the burnin experiment.
+ - Optional: 
+   - test out a longer simulation durations (50 years) and compare the time-series shown in the InsetChart plot.
+     _Note: update the `exp_name` i.e. add 'burnin50', to keep track of your simulation iterations_
 
-Run the simulation for 5 years, and copy the experiment_id to use in part 2.
 
-
-</p></details>
-
-
-**Part 2: Pickup your simulations and add interventions**
-
-<details><summary><span>Click here to expand</span></summary>
+<details><summary><span>Check results</span></summary>
 <p>
 
-Make a copy of the run_exampleSim_w6a.py file you edited in part 1, and name it run_exampleSim_w6b.py. 
+Time-series of 10 year burn-in simulation
+![img](static/w6a_InsetChart.png)
 
-Add a new variable ‘pickup_year’ to represent the number of years after the burn-in you want to simulate, maybe 5-10 years. 
-
-Then, add/edit the configuration parameters so EMOD picks up this simulation from the one you ran in Part 1. Some of these differ from those used in Part 1!
-See the “Picking up from Serialized Burn-in” section of the EMOD How-To module. Because you have the experiment ID, you should follow the steps to use retrieve_experiment() detailed in the second code-chunk of the How-To section (the third code-chunk is not relevant here).
-    
-    - Note: In this chunk, only the ‘Serialized_Population_Path’ is changed -  others have been hidden for brevity but should still be included!
-    - Note: In this example the serialize_year parameter refers to the year of the burn-in to pickup from. As written, the code will pick-up on Jan 1 of year 50. You should update the year to be any year less than or equal to the number of burnin-years you ran.
-
-Drawing on examples from earlier weeks, add some interventions (ITNs, SMC, treatment seeking, etc.). Include the model builder to increase the number of runs, and to vary coverage levels of at least one intervention, like in Week 3 Exercise: Part II.
-    
-    - Note: the start/end days for interventions are relative to the beginning of the pick-up simulation - in other words, they re-start at zero. 
-    - Reminder: You may need to import some modules you didn’t use in Part 1. 
-
-Add a Summary Report, drawing on examples from Week 4, and plot results.
 
 </p>
 </details>
 
-**Part 3: Run a longer burn-in and compare**
+</p></details>
+
+
+#### PART II- Create a “Pickup“ simulation
 
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-Repeat Part 1: execute run_exampleSim_w6a.py with a longer burn-in (50 years).
 
-Copy the new experiment ID into run_exampleSim_w6b.py and re-run the pickup from the new burnin. Do not change the duration, interventions, or reports.
 
-Plot results and compare between the simulations with 5- and 50-year burnins. Does it make a difference?
+- Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation pickung up from the burnin simulation you ran in PART I.
+- To fill the script you can either:
+   - copy the content from experiment script from week 4 `run_exampleSim_w4.py` that already has interventions and reporters defined, and check that the configuration parameters are the same in your burnin and 'pick up simualtion'. Specifically **demographics** and transmission configurations incl. **vector speies**,
+   - copy the content from  `run_exampleSim_w6a.py` and add selected interventions and reporters of relevance to you for the future scenario simulation.
+   - _Note that the start/end days for interventions and reports are relative to the beginning of the pick-up simulation - in other words, they re-start at zero._  
+- Add custom or new parameters that define the simulation and burnin duration as well as ID of the burnin experiment:
+  - `pickup_years` to define your SimulationDuration (i.e. 5-10 years). This will replace the `years` or  `serialize_years` that you had previously in the script.
+  - `pull_years` to define the number of burnin years that were run  (corresponding to  `serialize_years` in  `run_exampleSim_w6a.py`  )
+  - `burnin_id = <exp_id>` with the experiment_id from the burnin experiment you want to pick up from
+  
+    ```py
+
+     burnin_id = "b4f6741c-07da-ec11-a9f8-b88303911bc1"  # UPDATE with burn-in experiment id
+     pull_year = 50  # year of burn-in to pick-up from
+     pickup_years = 2  # years of pick-up to run
+     n_seeds = 3       # number of runs
+     cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=pickup_years * 365)
+     ``` 
+- retrieve output path from burnin experiment (see [Picking up from Serialized Burn-in](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#picking-up-from-serialized-burn-in)) in the EMOD How-To's. 
+  - import `retrieve_experiment` function  via `from simtools.Utilities.Experiments import retrieve_experiment`
+  - define `ser_df`
+  
+    ```py
+      expt = retrieve_experiment(burnin_id)  # Identifies the desired burn-in experiment
+      # Loop through unique "tags" to distinguish between burn-in scenarios (ex. varied historical coverage levels)
+      ser_df = pd.DataFrame([x.tags for x in expt.simulations])
+      ser_df["outpath"] = pd.Series([sim.get_path() for sim in expt.simulations])
+    ```    
+- Then, add/edit the serialization configuration parameters (so EMOD picks up this simulation from the one you ran in PART I). 
+
+      ```py
+      cb.update_params({
+          'Serialized_Population_Reading_Type': 'READ',
+          'Serialized_Population_Filenames': ['state-%05d.dtk' % (pull_year * 365)],
+          'Serialized_Population_Path': os.path.join(ser_df["outpath"][0], 'output'),  # only use if having 1 single burnin
+          'Enable_Random_Generator_From_Serialized_Population': 0,
+          'Serialization_Mask_Node_Read': 0,
+          'Enable_Default_Reporting': 1,
+          'Disable_IP_Whitelist': 1
+       })
+       ```
+       _Notes: `pull_year` refers to the year of the burn-in to pickup from, usually the last year or the burnin. 
+        In this example, the simulation will pick-up on Jan 1 of year 50._
+     - `Serialized_Population_Path` in the example above takes only the first scenario of the burnin simulation (`ser_df["outpath"][0]`). 
+       To match simulation tags and run number in pick up to those in burnin (when running multiple burnin scenarios in one experiment)
+        then `Serialized_Population_Path` needs to be defined in ModBuilder to allow sweeping through the scenarios of the burnin experiment (instead of `cb.update_params`)
+		
+        ```py
+        builder = ModBuilder.from_list([
+             [ModFn(DTKConfigBuilder.set_param, 'Serialized_Population_Path', os.path.join(row['outpath'], 'output')),
+              ModFn(DTKConfigBuilder.set_param, 'Run_Number', seed)
+             ]
+             for r, row in ser_df.iterrows()
+             for seed in range(numseeds)
+              ])
+        ```   
+- Run the experiment 
+- Open the analyzer for week 6 `analyze_exampleSim_w6.py` and change some defaults commented out for PART I, then run the analyzer and check generated results.
+  - update exp_name to 6b instead 6a
+  - update exp_id, as usual
+  - set `step` to 'pickup', this parameter has been added to allow running the same analyzer for both steps burnin and pickup
+- Run `plot_exampleSim_w6.py` and notice the two time-series for both simulations combined in a single plot
+
+<details><summary><span>Check results</span></summary>
+<p>
+
+Time-series of pick up simulation with burnin
+ ![img](static/w6b_InsetChart_withBurnin10.png) 
+
+
+</p>
+</details>
+
+</p></details>
+
+
+</p>
+</details>
+
+#### PART III - Compare “Pickup“ simulations across varying “Burn-in“ durations
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
+- If not already done, run `run_exampleSim_w6a.py` with a longer burn-in (i.e. 50 years).
+- Update the `burnin_id` in `run_exampleSim_w6b.py` 
+- Before running the experiment, update the `exp_name` i.e. add 'burnin50', to keep track of your simulation iterations
+  _Do not_ change anything else in the pickup simulation, to allow comparability across iterations picking up from different burnin durations.
+- Run the experiment
+- Plot results using `plot_exampleSim_w6.py` or a custom plotter using summary report outcomes  
+- Compare the plots between the experiments with 5 and 50 year burnins. Do you notice any difference?
+
+
+<details><summary><span>Check results</span></summary>
+<p>
+
+InsetChart of pick up simulation after 10 year burnin
+ ![img](static/w6_pickup_InsetChart_burnin10.png)  
+
+InsetChart of p pick up simulation after 50 year burnin
+ ![img](static/w6_pickup_InsetChart_burnin50.png)  
+
+</p>
+</details>
 
 </p>
 </details>
@@ -1004,12 +1204,11 @@ EMOD How To's:
 
 ### Instructions
 
-#### PART I: Add IP's to demographics file
-
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- A new demographics file needs to be generated that defines individual properties.
+
+- First, a new demographics file needs to be generated that defines individual properties.
 - Modify  `python generate_input_files.py` as instructed below:
   - add a function that takes existing demographics json file and add individual properties to it
     in this example, we group individuals into a high and a low access group.
@@ -1050,44 +1249,20 @@ EMOD How To's:
     ```
 - Run `python generate_input_files.py` to generate the new demographics json file `Ghana_demographics_wIP.json`, and inspect the file to check whether the IP's were successfully added.
   - Optional, do the same for the Ghana demographics    
-- Copy and rename both simulation scripts from week 7 to `run_exampleSim_w8a.py` and `run_exampleSim_w8b.py`
-- __In both simulation scripts:__
+- Just having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties!
+- Copy and rename both simulation scripts from the previous week, from week 7 to week 8, in addition a couple of modifications are required as instructed below:
+- __In both simulation scripts (burnin + pickup):__
   - set `Disable_IP_Whitelist` to 1 (if not already set at 1)
     ```py
     cb.update_params({'Disable_IP_Whitelist' : 1})
     ```
-  - Update the demographics filename in `cb.update_params({
+    _Reminder, you can look into the config.json file to see the default parameters and their values_
+  - update the demographics filename in `cb.update_params({
     'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],` to read in `Namawala_single_node_demographics_wIP.json`
-  - Change `exp_name` to week 8 to keep track of simulations + weeks
-- Submit burnin experiment to run
-
-<details><summary><span>Check results</span></summary>
-<p>
-
-
-The new demographics file should include the text chunk shown below:
-
-
-![img](static/w8_IP_demographics_chunk.png)
-
-
-</p>
-</details>
-
-
-</p>
-</details>
-
-
-
-#### PART II: Account for IP's in intervention and reports
-
-<details><summary><span>Click here to expand</span></summary>
-<p>
-
-_Note: Having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties._
-
-- Modify the `run_exampleSim_w8b.py` script:
+  - Change exp_name to week 8 to keep track of simulations + weeks
+- __In burnin script__:
+  - No additional changes, you can already submit it to run 
+- __In pickup script__:
   - Add a helper function to re-calculate coverage depending on access group
   - Modify the interventions (i.e.add_ITN) to customize coverage levels for low versus high access groups.
     - duplicate the `add_ITN` within the def `itn_intervention` function
@@ -1138,75 +1313,73 @@ _Note: Having the IPs included in the demographics won't have any effect on the 
     ```
     </p>
     </details>
-    - add case management (see Week 3 for adding interventions)  
-      <details><summary><span>view modified case_management function</span></summary>
-      <p>
+  - add case management (see Week 3 for adding interventions)  
+    <details><summary><span>view modified case_management function</span></summary>
+    <p>
     
-      ```py
-      def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
-          ## Assume high access group = 0.5 of total population
-          if cm_cov_U5 > 0.5:
-              cm_cov_U5_high = 1
-              cm_cov_U5_low = (cm_cov_U5 - 0.5) / (1 - 0.5)
-          else:
-              cm_cov_U5_low = 0
-              cm_cov_U5_high = cm_cov_U5 / 0.5
-          ## Optionally, depending on assumptions, do same for cm_cov_adults and cm_cov_severe
+    ```py
+    def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
+        ## Assume high access group = 0.5 of total population
+        if cm_cov_U5 > 0.5:
+            cm_cov_U5_high = 1
+            cm_cov_U5_low = (cm_cov_U5 - 0.5) / (1 - 0.5)
+        else:
+            cm_cov_U5_low = 0
+            cm_cov_U5_high = cm_cov_U5 / 0.5
+        ## Optionally, depending on assumptions, do same for cm_cov_adults and cm_cov_severe
     
-          add_health_seeking(cb, start_day=0,
-                             targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_low,
-                                       'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                      {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
-                                       'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                      {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
-                                       'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                             drug=['Artemether', 'Lumefantrine'])
+        add_health_seeking(cb, start_day=0,
+                           targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_low,
+                                     'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
+                                     'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
+                                     'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                           drug=['Artemether', 'Lumefantrine'])
     
-          add_health_seeking(cb, start_day=0,
-                             targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_high,
-                                       'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                      {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
-                                       'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                      {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
-                                       'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                             drug=['Artemether', 'Lumefantrine'])
+        add_health_seeking(cb, start_day=0,
+                           targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_high,
+                                     'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
+                                     'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                    {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
+                                     'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                           drug=['Artemether', 'Lumefantrine'])
     
-          return {'cm_cov_U5': cm_cov_U5,
-                  'cm_cov_adults': cm_cov_adults,
-                  'cm_cov_severe': cm_cov_severe}
-      ```
-      </p>
-      </details>  
-    - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
-    - Add additional reporters to be able to analyze results for both groups
-      ```py
-       "Report_Event_Recorder_Individual_Properties": ['Access']
-      ```
-      ```py
-       sim_start_year = 2000 + pull_year # for convenience to read simulation times
-       add_summary_report(cb, start=1+365*i, interval=30,
-                     duration_days=365,
-                     age_bins=[0.25, 5, 120],
-                     description=f'Monthly_U5_accesslow{sim_start_year+i}',
-                     ipfilter = 'Access:Low')
-       add_summary_report(cb, start=1+365*i, interval=30,
-                 duration_days=365,
-                 age_bins=[0.25, 5, 120],
-                 description=f'Monthly_U5_accesshigh{sim_start_year+i}',
-                 ipfilter = 'Access:High')  
-      ```
-       - _Note: once we made sure it is doing what it is supposed to do, 
-         keeping reporters per group might not always be needed, depending on the research question. 
-         In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
-    
-- Once the burnin simulation finished, update exp_id in `run_exampleSim_w8b.py`
-  - Update ModBuilder to have only single coverage levels for the interventions included in your simulation (otherwise result plots will look messy)
-- Run the pickup experiment (`run_exampleSim_w8b.py`)
-- Run the analyzer script for Week 8 `analyze_exampleSim_w8.py` 
+        return {'cm_cov_U5': cm_cov_U5,
+                'cm_cov_adults': cm_cov_adults,
+                'cm_cov_severe': cm_cov_severe}
+    ```
+    </p>
+    </details>  
+  - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
+  - Add additional reporters to be able to analyze results for both groups
+    ```py
+     "Report_Event_Recorder_Individual_Properties": ['Access']
+    ```
+    ```py
+     sim_start_year = 2000 + pull_year # for convenience to read simulation times
+     add_summary_report(cb, start=1+365*i, interval=30,
+                   duration_days=365,
+                   age_bins=[0.25, 5, 120],
+                   description=f'Monthly_U5_accesslow{sim_start_year+i}',
+                   ipfilter = 'Access:Low')
+     add_summary_report(cb, start=1+365*i, interval=30,
+               duration_days=365,
+               age_bins=[0.25, 5, 120],
+               description=f'Monthly_U5_accesshigh{sim_start_year+i}',
+               ipfilter = 'Access:High')  
+    ```
+     - _Note: once we made sure it is doing what it is supposed to do, 
+       keeping reporters per group might not always be needed, depending on the research question. 
+       In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
+- Once the burnin simulation finished, update exp_id in the pick-up simulation script and run the simulation
+- Run analyzer script for Week 8 `analyze_exampleSim_w8.py` for the simulation that was just run
 - Inspect results, the generated plots as well as IndividualEvents
 - Options for further exploration:
+  - Rerun the pickup simulation with different coverage levels
   - Rerun burnin + pickup simulation with different ratio between low and high access group
-- Think about what other individual properties would be useful and how these could be implemented.
+- Think about what other individual properties would be useful and how these could be implemented
 
 <details><summary><span>Check results</span></summary>
 <p>
