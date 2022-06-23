@@ -1,4 +1,6 @@
+## Import basic python functions
 import os
+## Import dtk and EMOD basics functionalities
 from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
 from dtk.vector.species import set_species, set_larval_habitat
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
@@ -7,11 +9,8 @@ from simtools.ModBuilder import ModBuilder, ModFn
 
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'HPC'
-serialize_years = 50
+serialize_years =5
 numseeds = 1
-
-user = os.getlogin()  # user initials
-expt_name = f'{user}_FE_2022_example_w6a'
 
 cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=serialize_years * 365)
 
@@ -21,7 +20,7 @@ cb.update_params({
     "Air_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_air_temperature_daily.bin'),
     "Land_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_land_temperature_daily.bin'),
     "Rainfall_Filename": os.path.join('Namawala', 'Namawala_single_node_rainfall_daily.bin'),
-    "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin'),
+    "Relative_Humidity_Filename": os.path.join('Namawala', 'Namawala_single_node_relative_humidity_daily.bin')
 })
 
 """Serialization"""
@@ -42,13 +41,13 @@ set_larval_habitat(cb, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 
                         })
 
 builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', seed)]
-                                # Run pick-up from each unique burn-in scenario
                                 for seed in range(numseeds)
                                 ])
 
 # run_sim_args is what the `dtk run` command will look for
+user = os.getlogin()  # user initials
 run_sim_args = {
-    'exp_name': expt_name,
+    'exp_name': f'{user}_FE_2022_example_w6a',
     'config_builder': cb,
     'exp_builder': builder
 }
