@@ -1204,11 +1204,17 @@ EMOD How To's:
 
 ### Instructions
 
+#### PART I: Add IP's to demographics file
+
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
+<<<<<<< HEAD
+- A new demographics file needs to be generated that defines individual properties.
+=======
 
 - First, a new demographics file needs to be generated that defines individual properties.
+>>>>>>> 60c24eb3b7fa52f17103b8c09b12d99fb3f2926a
 - Modify  `python generate_input_files.py` as instructed below:
   - add a function that takes existing demographics json file and add individual properties to it
     in this example, we group individuals into a high and a low access group.
@@ -1249,20 +1255,44 @@ EMOD How To's:
     ```
 - Run `python generate_input_files.py` to generate the new demographics json file `Ghana_demographics_wIP.json`, and inspect the file to check whether the IP's were successfully added.
   - Optional, do the same for the Ghana demographics    
-- Just having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties!
-- Copy and rename both simulation scripts from the previous week, from week 7 to week 8, in addition a couple of modifications are required as instructed below:
-- __In both simulation scripts (burnin + pickup):__
+- Copy and rename both simulation scripts from week 7 to `run_exampleSim_w8a.py` and `run_exampleSim_w8b.py`
+- __In both simulation scripts:__
   - set `Disable_IP_Whitelist` to 1 (if not already set at 1)
     ```py
     cb.update_params({'Disable_IP_Whitelist' : 1})
     ```
-    _Reminder, you can look into the config.json file to see the default parameters and their values_
-  - update the demographics filename in `cb.update_params({
+  - Update the demographics filename in `cb.update_params({
     'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],` to read in `Namawala_single_node_demographics_wIP.json`
-  - Change exp_name to week 8 to keep track of simulations + weeks
-- __In burnin script__:
-  - No additional changes, you can already submit it to run 
-- __In pickup script__:
+  - Change `exp_name` to week 8 to keep track of simulations + weeks
+- Submit burnin experiment to run
+
+<details><summary><span>Check results</span></summary>
+<p>
+
+
+The new demographics file should include the text chunk shown below:
+
+
+![img](static/w8_IP_demographics_chunk.png)
+
+
+</p>
+</details>
+
+
+</p>
+</details>
+
+
+
+#### PART II: Account for IP's in intervention and reports
+
+<details><summary><span>Click here to expand</span></summary>
+<p>
+
+_Note: Having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties._
+
+- Modify the `run_exampleSim_w8b.py` script:
   - Add a helper function to re-calculate coverage depending on access group
   - Modify the interventions (i.e.add_ITN) to customize coverage levels for low versus high access groups.
     - duplicate the `add_ITN` within the def `itn_intervention` function
@@ -1313,73 +1343,75 @@ EMOD How To's:
     ```
     </p>
     </details>
-  - add case management (see Week 3 for adding interventions)  
-    <details><summary><span>view modified case_management function</span></summary>
-    <p>
+    - add case management (see Week 3 for adding interventions)  
+      <details><summary><span>view modified case_management function</span></summary>
+      <p>
     
-    ```py
-    def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
-        ## Assume high access group = 0.5 of total population
-        if cm_cov_U5 > 0.5:
-            cm_cov_U5_high = 1
-            cm_cov_U5_low = (cm_cov_U5 - 0.5) / (1 - 0.5)
-        else:
-            cm_cov_U5_low = 0
-            cm_cov_U5_high = cm_cov_U5 / 0.5
-        ## Optionally, depending on assumptions, do same for cm_cov_adults and cm_cov_severe
+      ```py
+      def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
+          ## Assume high access group = 0.5 of total population
+          if cm_cov_U5 > 0.5:
+              cm_cov_U5_high = 1
+              cm_cov_U5_low = (cm_cov_U5 - 0.5) / (1 - 0.5)
+          else:
+              cm_cov_U5_low = 0
+              cm_cov_U5_high = cm_cov_U5 / 0.5
+          ## Optionally, depending on assumptions, do same for cm_cov_adults and cm_cov_severe
     
-        add_health_seeking(cb, start_day=0,
-                           targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_low,
-                                     'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                    {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
-                                     'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                    {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
-                                     'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                           drug=['Artemether', 'Lumefantrine'])
+          add_health_seeking(cb, start_day=0,
+                             targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_low,
+                                       'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                      {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
+                                       'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                      {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
+                                       'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                             drug=['Artemether', 'Lumefantrine'])
     
-        add_health_seeking(cb, start_day=0,
-                           targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_high,
-                                     'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
-                                    {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
-                                     'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
-                                    {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
-                                     'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
-                           drug=['Artemether', 'Lumefantrine'])
+          add_health_seeking(cb, start_day=0,
+                             targets=[{'trigger': 'NewClinicalCase', 'coverage': cm_cov_U5_high,
+                                       'agemin': 0, 'agemax': 5, 'seek': 1, 'rate': 0.3},
+                                      {'trigger': 'NewClinicalCase', 'coverage': cm_cov_adults,
+                                       'agemin': 5, 'agemax': 100, 'seek': 1, 'rate': 0.3},
+                                      {'trigger': 'NewSevereCase', 'coverage': cm_cov_severe,
+                                       'agemin': 0, 'agemax': 100, 'seek': 1, 'rate': 0.5}],
+                             drug=['Artemether', 'Lumefantrine'])
     
-        return {'cm_cov_U5': cm_cov_U5,
-                'cm_cov_adults': cm_cov_adults,
-                'cm_cov_severe': cm_cov_severe}
-    ```
-    </p>
-    </details>  
-  - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
-  - Add additional reporters to be able to analyze results for both groups
-    ```py
-     "Report_Event_Recorder_Individual_Properties": ['Access']
-    ```
-    ```py
-     sim_start_year = 2000 + pull_year # for convenience to read simulation times
-     add_summary_report(cb, start=1+365*i, interval=30,
-                   duration_days=365,
-                   age_bins=[0.25, 5, 120],
-                   description=f'Monthly_U5_accesslow{sim_start_year+i}',
-                   ipfilter = 'Access:Low')
-     add_summary_report(cb, start=1+365*i, interval=30,
-               duration_days=365,
-               age_bins=[0.25, 5, 120],
-               description=f'Monthly_U5_accesshigh{sim_start_year+i}',
-               ipfilter = 'Access:High')  
-    ```
-     - _Note: once we made sure it is doing what it is supposed to do, 
-       keeping reporters per group might not always be needed, depending on the research question. 
-       In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
-- Once the burnin simulation finished, update exp_id in the pick-up simulation script and run the simulation
-- Run analyzer script for Week 8 `analyze_exampleSim_w8.py` for the simulation that was just run
+          return {'cm_cov_U5': cm_cov_U5,
+                  'cm_cov_adults': cm_cov_adults,
+                  'cm_cov_severe': cm_cov_severe}
+      ```
+      </p>
+      </details>  
+    - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
+    - Add additional reporters to be able to analyze results for both groups
+      ```py
+       "Report_Event_Recorder_Individual_Properties": ['Access']
+      ```
+      ```py
+       sim_start_year = 2000 + pull_year # for convenience to read simulation times
+       add_summary_report(cb, start=1+365*i, interval=30,
+                     duration_days=365,
+                     age_bins=[0.25, 5, 120],
+                     description=f'Monthly_U5_accesslow{sim_start_year+i}',
+                     ipfilter = 'Access:Low')
+       add_summary_report(cb, start=1+365*i, interval=30,
+                 duration_days=365,
+                 age_bins=[0.25, 5, 120],
+                 description=f'Monthly_U5_accesshigh{sim_start_year+i}',
+                 ipfilter = 'Access:High')  
+      ```
+       - _Note: once we made sure it is doing what it is supposed to do, 
+         keeping reporters per group might not always be needed, depending on the research question. 
+         In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
+    
+- Once the burnin simulation finished, update exp_id in `run_exampleSim_w8b.py`
+  - Update ModBuilder to have only single coverage levels for the interventions included in your simulation (otherwise result plots will look messy)
+- Run the pickup experiment (`run_exampleSim_w8b.py`)
+- Run the analyzer script for Week 8 `analyze_exampleSim_w8.py` 
 - Inspect results, the generated plots as well as IndividualEvents
 - Options for further exploration:
-  - Rerun the pickup simulation with different coverage levels
   - Rerun burnin + pickup simulation with different ratio between low and high access group
-- Think about what other individual properties would be useful and how these could be implemented
+- Think about what other individual properties would be useful and how these could be implemented.
 
 <details><summary><span>Check results</span></summary>
 <p>
