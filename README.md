@@ -1008,6 +1008,7 @@ EMOD How To's:
 <p>
 
 
+#### Add IP's to demographics
 - First, a new demographics file needs to be generated that defines individual properties.
 - Modify  `python generate_input_files.py` as instructed below:
   - add a function that takes existing demographics json file and add individual properties to it
@@ -1049,6 +1050,8 @@ EMOD How To's:
     ```
 - Run `python generate_input_files.py` to generate the new demographics json file `Ghana_demographics_wIP.json`, and inspect the file to check whether the IP's were successfully added.
   - Optional, do the same for the Ghana demographics    
+  
+#### Modify the simulation scripts
 - Just having the IPs included in the demographics won't have any effect on the simulation if interventions or campaigns do not distinguish individuals by their properties!
 - Copy and rename both simulation scripts from the previous week, from week 7 to week 8, in addition a couple of modifications are required as instructed below:
 - __In both simulation scripts (burnin + pickup):__
@@ -1062,6 +1065,8 @@ EMOD How To's:
   - Change exp_name to week 8 to keep track of simulations + weeks
 - __In burnin script__:
   - No additional changes, you can already submit it to run 
+
+#### Modify the intervention and intervention coverages 
 - __In pickup script__:
   - Add a helper function to re-calculate coverage depending on access group
   - Modify the interventions (i.e.add_ITN) to customize coverage levels for low versus high access groups.
@@ -1173,8 +1178,10 @@ EMOD How To's:
      - _Note: once we made sure it is doing what it is supposed to do, 
        keeping reporters per group might not always be needed, depending on the research question. 
        In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
+
+#### Run pickup simulation and analyzer
 - Once the burnin simulation finished, update exp_id in the pick-up simulation script and run the simulation
-- Run analyzer script for Week 8 `analyze_exampleSim_w8.py` for the simulation that was just run
+- Run the analyzer script for Week 8 `analyze_exampleSim_w8.py` for the simulation that was just run
 - Inspect results, the generated plots as well as IndividualEvents
 - Options for further exploration:
   - Rerun the pickup simulation with different coverage levels
