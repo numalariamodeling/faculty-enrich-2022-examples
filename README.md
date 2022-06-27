@@ -1216,14 +1216,14 @@ EMOD How To's:
     ```py
     ## Add Individual Properties (IPs)
     def add_IPs(demo_fname):
-        """Add VaccineStatus IP"""
+        """Add Access IP"""
         IPs = [{'Property': 'Access',
                 'Values': ['Low', 'High'],
                 'Initial_Distribution': [0.5, 0.5],
                 'Transitions': []}
                ]
     
-        adf = pd.DataFrame({'Property': 'VaccineStatus',
+        adf = pd.DataFrame({'Property': 'Access',
                             'Property_Value': ['Low', 'High'],
                             'Initial_Distribution': [0.5, 0.5]}
                            )
