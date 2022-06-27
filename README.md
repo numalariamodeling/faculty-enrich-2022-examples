@@ -1209,13 +1209,8 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-<<<<<<< HEAD
-- A new demographics file needs to be generated that defines individual properties.
-=======
-
 - First, a new demographics file needs to be generated that defines individual properties.
->>>>>>> 60c24eb3b7fa52f17103b8c09b12d99fb3f2926a
-- Modify  `python generate_input_files.py` as instructed below:
+- Modify `generate_input_files.py` as instructed below:
   - add a function that takes existing demographics json file and add individual properties to it
     in this example, we group individuals into a high and a low access group.
     ```py
@@ -1298,51 +1293,52 @@ _Note: Having the IPs included in the demographics won't have any effect on the 
     - duplicate the `add_ITN` within the def `itn_intervention` function
     - add `ind_property_restrictions` to have one set of ITNs be distributed to the low,
       the other to the high access group.
-    - define two new parameters coverage_levels_low and coverage_levels_high 
-    <details><summary><span>view modified itn_intervention</span></summary>
-    <p>
+    - define two new parameters coverage_levels_low and coverage_levels_high
+      <details><summary><span>view modified itn_intervention</span></summary>
+      <p>
 
-    ```py
-    def itn_intervention(cb, coverage_level):
-        ## Assume high access group = 0.5 of total population
-        if coverage_level > 0.5:
-            coverage_level_high = 1
-            coverage_level_low = (coverage_level - 0.5) / (1 - 0.5)
-        else:
-            coverage_level_low = 0
-            coverage_level_high = coverage_level / 0.5
+      ```py
+      def itn_intervention(cb, coverage_level):
+          ## Assume high access group = 0.5 of total population
+          if coverage_level > 0.5:
+              coverage_level_high = 1
+              coverage_level_low = (coverage_level - 0.5) / (1 - 0.5)
+          else:
+              coverage_level_low = 0
+              coverage_level_high = coverage_level / 0.5
+      
+          add_ITN(cb,
+                  start=1,  # starts on first day of second year
+                  coverage_by_ages=[
+                      {"coverage": coverage_level_low, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                      {"coverage": coverage_level_low * 0.75, "min": 10, "max": 50},
+                      # 25% lower than for children for 10-50 years old
+                      {"coverage": coverage_level_low * 0.6, "min": 50, "max": 125}
+                      # 40% lower than for children for everyone else
+                  ],
+                  repetitions=5,  # ITN will be distributed 5 times
+                  tsteps_btwn_repetitions=365 * 3,  # three years between ITN distributions
+                  ind_property_restrictions=[{'Access': 'Low'}]
+                  )
+      
+          add_ITN(cb,
+                  start=1,  # starts on first day of second year
+                  coverage_by_ages=[
+                      {"coverage": coverage_level_high, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
+                      {"coverage": coverage_level_high * 0.75, "min": 10, "max": 50},
+                      # 25% lower than for children for 10-50 years old
+                      {"coverage": coverage_level_high * 0.6, "min": 50, "max": 125}
+                      # 40% lower than for children for everyone else
+                  ],
+                  repetitions=5,  # ITN will be distributed 5 times
+                  tsteps_btwn_repetitions=365 * 3,  # three years between ITN distributions
+                  ind_property_restrictions=[{'Access': 'High'}]
+                  )
+          return {'itn_coverage': coverage_level}
+      ```
+      </p>
+      </details>
     
-        add_ITN(cb,
-                start=1,  # starts on first day of second year
-                coverage_by_ages=[
-                    {"coverage": coverage_level_low, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
-                    {"coverage": coverage_level_low * 0.75, "min": 10, "max": 50},
-                    # 25% lower than for children for 10-50 years old
-                    {"coverage": coverage_level_low * 0.6, "min": 50, "max": 125}
-                    # 40% lower than for children for everyone else
-                ],
-                repetitions=5,  # ITN will be distributed 5 times
-                tsteps_btwn_repetitions=365 * 3,  # three years between ITN distributions
-                ind_property_restrictions=[{'Access': 'Low'}]
-                )
-    
-        add_ITN(cb,
-                start=1,  # starts on first day of second year
-                coverage_by_ages=[
-                    {"coverage": coverage_level_high, "min": 0, "max": 10},  # Highest coverage for 0-10 years old
-                    {"coverage": coverage_level_high * 0.75, "min": 10, "max": 50},
-                    # 25% lower than for children for 10-50 years old
-                    {"coverage": coverage_level_high * 0.6, "min": 50, "max": 125}
-                    # 40% lower than for children for everyone else
-                ],
-                repetitions=5,  # ITN will be distributed 5 times
-                tsteps_btwn_repetitions=365 * 3,  # three years between ITN distributions
-                ind_property_restrictions=[{'Access': 'High'}]
-                )
-        return {'itn_coverage': coverage_level}
-    ```
-    </p>
-    </details>
     - add case management (see Week 3 for adding interventions)  
       <details><summary><span>view modified case_management function</span></summary>
       <p>
@@ -1382,6 +1378,7 @@ _Note: Having the IPs included in the demographics won't have any effect on the 
       ```
       </p>
       </details>  
+      
     - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
     - Add additional reporters to be able to analyze results for both groups
       ```py
