@@ -995,8 +995,7 @@ EMOD How To's:
         _Note: ‘serialize_years’ determines the duration of the simulation via `Simulation_Duration` is also used to define the `Serialization_Time_Steps`_
        </p>
       </details>
- - To test if your simulation experiment has been set up correctly run it for 1 year (`years = 1`).
- - Then run the experiment for 5 years.
+ - To test if your simulation experiment has been set up correctly run it for 5 years (`serialize_years = 5`).
  - Run the analyzer `analyze_exampleSim_w6.py` to visualize the trend 
    - Note, the analyzer script had been updated to allow running the same analyzer for PART I and PART II of the Week 6 examples,
      therefore, ensure that `step` is set to 'burnin' and update the `serialize_years` to correspond to the number of years run in the burnin experiment.
@@ -1025,15 +1024,16 @@ Time-series of 10 year burn-in simulation
 
 
 
-- Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation pickung up from the burnin simulation you ran in PART I.
+- Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation picking up from the burnin simulations you ran in PART I.
 - To fill the script you can either:
    - copy the content from experiment script from week 4 `run_exampleSim_w4.py` that already has interventions and reporters defined, and check that the configuration parameters are the same in your burnin and 'pick up simualtion'. Specifically **demographics** and transmission configurations incl. **vector speies**,
    - copy the content from  `run_exampleSim_w6a.py` and add selected interventions and reporters of relevance to you for the future scenario simulation.
    - _Note that the start/end days for interventions and reports are relative to the beginning of the pick-up simulation - in other words, they re-start at zero._  
-- Add custom or new parameters that define the simulation and burnin duration as well as ID of the burnin experiment:
+- Add custom or new parameters that define the simulation and burnin duration as well as ID of the burnin experiment. Add these at the top of your new script *after* your import statements:
   - `pickup_years` to define your SimulationDuration (i.e. 5-10 years). This will replace the `years` or  `serialize_years` that you had previously in the script.
-  - `pull_years` to define the number of burnin years that were run  (corresponding to  `serialize_years` in  `run_exampleSim_w6a.py`  )
+  - `pull_year` to define the year of the burn-in that serves as the start of the pick-up (> or =  `serialize_years` in  `run_exampleSim_w6a.py`  )
   - `burnin_id = <exp_id>` with the experiment_id from the burnin experiment you want to pick up from
+  - `n_seeds` to define the number of stochastic runs executed under each parameter set
   
     ```py
 
@@ -1070,7 +1070,7 @@ Time-series of 10 year burn-in simulation
         In this example, the simulation will pick-up on Jan 1 of year 50._
      - `Serialized_Population_Path` in the example above takes only the first scenario of the burnin simulation (`ser_df["outpath"][0]`). 
        To match simulation tags and run number in pick up to those in burnin (when running multiple burnin scenarios in one experiment)
-        then `Serialized_Population_Path` needs to be defined in ModBuilder to allow sweeping through the scenarios of the burnin experiment (instead of `cb.update_params`)
+        then `Serialized_Population_Path` needs to be defined in ModBuilder to allow sweeping through the scenarios of the burnin experiment (**instead of `cb.update_params`**). You only need to do this if there is more than 1 burnin simulation in your experiment.
 		
         ```py
         builder = ModBuilder.from_list([
@@ -1086,6 +1086,8 @@ Time-series of 10 year burn-in simulation
   - update exp_name to 6b instead 6a
   - update exp_id, as usual
   - set `step` to 'pickup', this parameter has been added to allow running the same analyzer for both steps burnin and pickup
+  - set `sweep_variables` to include any variables that differ between simulations within this experiment ['Run_Number', others depending on your interventions].
+  	- You can see available variables as 'tags' if you run your simulations on COMPS.
 - Run `plot_exampleSim_w6.py` and notice the two time-series for both simulations combined in a single plot
 
 <details><summary><span>Check results</span></summary>
