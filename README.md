@@ -1027,11 +1027,11 @@ Time-series of 10 year burn-in simulation
 
 - Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation picking up from the 10-year burnin simulations you ran in PART I.
 - To fill the script you can either:
-   - copy the content from experiment script from week 4 `run_exampleSim_w4.py` that already has interventions and reporters defined, and check that the configuration parameters are the same in your burnin and 'pick up simualtion'. Specifically **demographics** and transmission configurations incl. **vector speies**,
+   - copy the content from experiment script from week 4 `run_exampleSim_w4.py` that already has interventions and reporters defined, and check that the configuration parameters are the same in your burnin and 'pick up' simulation. Specifically **demographics** and transmission configurations incl. *vector speies*, **OR**
    - copy the content from  `run_exampleSim_w6a.py` and add selected interventions and reporters of relevance to you for the future scenario simulation.
    - _Note that the start/end days for interventions and reports are relative to the beginning of the pick-up simulation - in other words, they re-start at zero._  
 - Add custom or new parameters that define the simulation and burnin duration as well as ID of the burnin experiment. Add these at the top of your new script *after* your import statements:
-  - `pickup_years` to define your SimulationDuration (i.e. 5-10 years). This will replace the `years` or  `serialize_years` that you had previously in the script.
+  - `pickup_years` to define your SimulationDuration (i.e. # of years post-burnin). This will replace the `years` or  `serialize_years` that you had previously in the script.
   - `pull_year` to define the year of the burn-in that serves as the start of the pick-up (> or =  `serialize_years` in  `run_exampleSim_w6a.py`  )
   - `burnin_id = <exp_id>` with the experiment_id from the burnin experiment you want to pick up from
   - `n_seeds` to define the number of stochastic runs executed under each parameter set
