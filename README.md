@@ -898,14 +898,14 @@ EMOD How To's:
       
     - <details><summary><span style="color: blue";">SetupParser and SimulationDuration </span></summary>
        <p>
-       - Run the simulation with 1 seed, and for 50 years, for testing you might first select fewer years.
+       - Run the simulation with 1 seed, and for 10 years. (For testing you might first run just 1 year).
        - Instead of `years`, define `serialize_years` and use 1 seed only
        - To keep track of the corresponding time in your experiment, you can include `sim_start_year = 2022  - serialize_years`
 	   
        ```py
         SetupParser.default_block = 'LOCAL'
         numseeds = 1
-        serialize_years = 50
+        serialize_years = 10
         sim_start_year = 2022  - serialize_years
     
         cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=serialize_years * 365)
@@ -995,12 +995,13 @@ EMOD How To's:
         _Note: ‘serialize_years’ determines the duration of the simulation via `Simulation_Duration` is also used to define the `Serialization_Time_Steps`_
        </p>
       </details>
- - To test if your simulation experiment has been set up correctly run it for 5 years (`serialize_years = 5`).
+ - If you have been testing with fewer years, run the simulation for 10 years (`serialize_years = 10`) and update the `exp_name` to reflect the duration, ex. 
+ 'burnin10'.
  - Run the analyzer `analyze_exampleSim_w6.py` to visualize the trend 
    - Note, the analyzer script had been updated to allow running the same analyzer for PART I and PART II of the Week 6 examples,
-     therefore, ensure that `step` is set to 'burnin' and update the `serialize_years` to correspond to the number of years run in the burnin experiment.
+     therefore, ensure that `step` is set to 'burnin' and update the `serialize_years` to correspond to the number of years run in the burnin experiment (10).
  - Optional: 
-   - test out a longer simulation durations (50 years) and compare the time-series shown in the InsetChart plot.
+   - test out a longer burnin durations (ex. 50 years) and compare the time-series shown in the InsetChart plot.
      _Note: update the `exp_name` i.e. add 'burnin50', to keep track of your simulation iterations_
 
 
@@ -1024,7 +1025,7 @@ Time-series of 10 year burn-in simulation
 
 
 
-- Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation picking up from the burnin simulations you ran in PART I.
+- Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation picking up from the 10-year burnin simulations you ran in PART I.
 - To fill the script you can either:
    - copy the content from experiment script from week 4 `run_exampleSim_w4.py` that already has interventions and reporters defined, and check that the configuration parameters are the same in your burnin and 'pick up simualtion'. Specifically **demographics** and transmission configurations incl. **vector speies**,
    - copy the content from  `run_exampleSim_w6a.py` and add selected interventions and reporters of relevance to you for the future scenario simulation.
@@ -1038,7 +1039,7 @@ Time-series of 10 year burn-in simulation
     ```py
 
      burnin_id = "b4f6741c-07da-ec11-a9f8-b88303911bc1"  # UPDATE with burn-in experiment id
-     pull_year = 50  # year of burn-in to pick-up from
+     pull_year = 10  # year of burn-in to pick-up from
      pickup_years = 2  # years of pick-up to run
      n_seeds = 3       # number of runs
      cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=pickup_years * 365)
@@ -1067,10 +1068,10 @@ Time-series of 10 year burn-in simulation
        })
        ```
        _Notes: `pull_year` refers to the year of the burn-in to pickup from, usually the last year or the burnin. 
-        In this example, the simulation will pick-up on Jan 1 of year 50._
+        In this example, the simulation will pick-up on Jan 1 of year 10._
      - `Serialized_Population_Path` in the example above takes only the first scenario of the burnin simulation (`ser_df["outpath"][0]`). 
        To match simulation tags and run number in pick up to those in burnin (when running multiple burnin scenarios in one experiment)
-        then `Serialized_Population_Path` needs to be defined in ModBuilder to allow sweeping through the scenarios of the burnin experiment (**instead of `cb.update_params`**). You only need to do this if there is more than 1 burnin simulation in your experiment.
+        then `Serialized_Population_Path` needs to be defined in ModBuilder to allow sweeping through the scenarios of the burnin experiment (**instead of `cb.update_params`**). You only need to do this if there is more than 1 burnin simulation in your experiment. You should only have one builder in your script - if you already have one for interventions, you would add the following code to it.
 		
         ```py
         builder = ModBuilder.from_list([
@@ -1111,13 +1112,13 @@ Time-series of pick up simulation with burnin
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- If not already done, run `run_exampleSim_w6a.py` with a longer burn-in (i.e. 50 years).
+- If not already done, run `run_exampleSim_w6a.py` with a longer burn-in (50 years).
 - Update the `burnin_id` in `run_exampleSim_w6b.py` 
-- Before running the experiment, update the `exp_name` i.e. add 'burnin50', to keep track of your simulation iterations
+- Before running the experiment, update the `exp_name` (i.e. add 'burnin50'), to keep track of your simulation iterations
   _Do not_ change anything else in the pickup simulation, to allow comparability across iterations picking up from different burnin durations.
 - Run the experiment
 - Plot results using `plot_exampleSim_w6.py` or a custom plotter using summary report outcomes  
-- Compare the plots between the experiments with 5 and 50 year burnins. Do you notice any difference?
+- Compare the plots between the experiments with 10 and 50 year burnins. Do you notice any difference?
 
 
 <details><summary><span>Check results</span></summary>
