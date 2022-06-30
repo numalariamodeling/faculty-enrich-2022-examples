@@ -871,6 +871,13 @@ EMOD How To's:
 
 - [Serialization](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#serialization)
 
+This week's exercise demonstrates the concept of serializing populations in simulations. Serialization allows us to run simulations, save them at a certain point in time, and simulate another campaign/scenario starting from the point we saved. We can run multiple simulations on the same population *in series*. 
+
+- We often use this process to save long initial simulations called "burnins", during which population immunity is established. 
+- We don't want to wait for this to run everytime, so we serialize the population at the end of the "burnin" and then run shorter simulations of interventions (also called "pickup" simulations).
+
+The exercise has three parts. In part 1 you will run and save a "burnin" simulation. In part 2 you will "pickup" this simulation and add antimalarial interventions. In part 3 you will repeat parts 1 & 2 using a longer "burnin" duration, and compare the results.
+
 ### Instructions
 
 #### PART I - Create a “Burn-in” simulation
@@ -903,7 +910,7 @@ EMOD How To's:
        - To keep track of the corresponding time in your experiment, you can include `sim_start_year = 2022  - serialize_years`
 	   
        ```py
-        SetupParser.default_block = 'LOCAL'
+        SetupParser.default_block = 'HPC'
         numseeds = 1
         serialize_years = 10
         sim_start_year = 2022  - serialize_years
@@ -1026,13 +1033,32 @@ Time-series of 10 year burn-in simulation
 
 
 - Create a new simulation experiment `run_exampleSim_w6b.py` that will be used to run a simulation picking up from the 10-year burnin simulations you ran in PART I.
-- To fill the script you can either:
-   - copy the content from experiment script from week 4 `run_exampleSim_w4.py` that already has interventions and reporters defined, and check that the configuration parameters are the same in your burnin and 'pick up' simulation. Specifically **demographics** and transmission configurations incl. *vector speies*, **OR**
-   - copy the content from  `run_exampleSim_w6a.py` and add selected interventions and reporters of relevance to you for the future scenario simulation.
+- To fill the script:
+   - copy the content from `run_exampleSim_w6a.py` into the new script. 
+   - Add the following selected interventions and reporters for the future scenario simulation (see solution script):
+   	- Case Management / Health-Seeking
+		- Starting on Day 0 of the pickup
+		- Treatment is with AL
+		- For NewClinicalCase:
+			- Coverage = 0.7 for children U5, 0.5 for all age 5+
+			- Seek = 1
+			- Rate = 0.3 (takes 3.33 days on average)
+		- For NewSevereCase:
+			- Coverage = 0.85 for all ages
+			- Seek = 1
+			- Rate = 0.5 (takes 2 days on average)
+	- ITNs	
+		- Starting on Day 1 of Year 2 in the pickup
+		- Coverage of 0.6 for U5, 0.4 for ages 10-50 and 0.36 for ages 50+
+		- Distributed every 3 years of the pickup simulation
+		- *Don't forget* 
+			- add 'Received_ITN' to the `event_list`
+			- `return` the U5 coverage level
    - _Note that the start/end days for interventions and reports are relative to the beginning of the pick-up simulation - in other words, they re-start at zero._  
 - Add custom or new parameters that define the simulation and burnin duration as well as ID of the burnin experiment. Add these at the top of your new script *after* your import statements:
   - `pickup_years` to define your SimulationDuration (i.e. # of years post-burnin). This will replace the `years` or  `serialize_years` that you had previously in the script.
-  - `pull_year` to define the year of the burn-in that serves as the start of the pick-up (> or =  `serialize_years` in  `run_exampleSim_w6a.py`  )
+  - `pull_year` to define the year of the burn-in that serves as the start of the pick-up 
+  	- Set equal to the value of  `serialize_years` in  `run_exampleSim_w6a.py` (either 10 or 50 years).
   - `burnin_id = <exp_id>` with the experiment_id from the burnin experiment you want to pick up from
   - `n_seeds` to define the number of stochastic runs executed under each parameter set
   
@@ -1040,7 +1066,7 @@ Time-series of 10 year burn-in simulation
 
      burnin_id = "b4f6741c-07da-ec11-a9f8-b88303911bc1"  # UPDATE with burn-in experiment id
      pull_year = 10  # year of burn-in to pick-up from
-     pickup_years = 2  # years of pick-up to run
+     pickup_years = 5  # years of pick-up to run
      n_seeds = 3       # number of runs
      cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=pickup_years * 365)
      ``` 
@@ -1087,7 +1113,7 @@ Time-series of 10 year burn-in simulation
   - update exp_name to 6b instead 6a
   - update exp_id, as usual
   - set `step` to 'pickup', this parameter has been added to allow running the same analyzer for both steps burnin and pickup
-  - set `sweep_variables` to include any variables that differ between simulations within this experiment ['Run_Number', others depending on your interventions].
+  - set `sweep_variables` to include any variables that differ between simulations within the experiment ['Run_Number' in this example].
   	- You can see available variables as 'tags' if you run your simulations on COMPS.
 - Run `plot_exampleSim_w6.py` and notice the two time-series for both simulations combined in a single plot
 
@@ -1113,7 +1139,7 @@ Time-series of pick up simulation with burnin
 <p>
 
 - If not already done, run `run_exampleSim_w6a.py` with a longer burn-in (50 years).
-- Update the `burnin_id` in `run_exampleSim_w6b.py` 
+- When it finishes running (may take a while), update the `burnin_id` in `run_exampleSim_w6b.py` 
 - Before running the experiment, update the `exp_name` (i.e. add 'burnin50'), to keep track of your simulation iterations
   _Do not_ change anything else in the pickup simulation, to allow comparability across iterations picking up from different burnin durations.
 - Run the experiment
