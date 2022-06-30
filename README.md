@@ -1205,7 +1205,25 @@ EMOD How To's:
 - [Individual Properties (IPs)](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#individual-properties-ips)
 
 
+This week's example exercise introduces the concept and use case for individual properties.
+Individual properties allow to target specific groups of individuals by attaching a 'tag' or property to individuals in the simulation.
+These properties are completely customizable and for instance, they can be used to define intervention access, study enrollment, or drug response groups.
+It is also possible to have multiple individual properties.
+
+- __Individual properties for intervention access groups__
+  - This example exercise uses individual properties to create 2 subgroups for intervention access: low access, high access.
+  - For simplicity, it is assumed that their relative size is equal (50% low access, 50% high access). 
+  - Note that when deploying interventions at i.e. 80% coverage to the total population, the coverage for the subpopulations needs to 
+    be adjusted to reflect different population sizes, (covered in PART II).
+
 ### Instructions
+
+In contrast to some other parameters, that can be easily switched on or off via `cb.update_params`, 
+individual properties need to be set up in the demographics file and also in the simulation script (to target campaign events or reports as needed).
+- PART I shows how to modify the demographics file and asks to rerun a burnin similation (revisit week 6 for burnin), since demographics cannot be different in burnin and pick-up simulation.
+- PART II shows a) how to target an intervention to subpopulations defined by individual properties, and b) how to get a summary report separately for the subpopulations.
+_(Depending on the research question individual properties might only be needed for interventions and not for the reports, or vice versa, if not both.)_  
+</br>
 
 #### PART I: Add IP's to demographics file
 
@@ -1303,12 +1321,13 @@ _Note: Having the IPs included in the demographics won't have any effect on the 
       ```py
       def itn_intervention(cb, coverage_level):
           ## Assume high access group = 0.5 of total population
-          if coverage_level > 0.5:
+          frac_high = 0.5
+          if coverage_level > frac_high:
               coverage_level_high = 1
-              coverage_level_low = (coverage_level - 0.5) / (1 - 0.5)
+              coverage_level_low = (coverage_level - frac_high) / (1 - frac_high)
           else:
               coverage_level_low = 0
-              coverage_level_high = coverage_level / 0.5
+              coverage_level_high = coverage_level / frac_high
       
           add_ITN(cb,
                   start=1,  # starts on first day of second year
@@ -1349,12 +1368,13 @@ _Note: Having the IPs included in the demographics won't have any effect on the 
       ```py
       def case_management(cb, cm_cov_U5=0.7, cm_cov_adults=0.5, cm_cov_severe=0.85):
           ## Assume high access group = 0.5 of total population
-          if cm_cov_U5 > 0.5:
+          frac_high = 0.5
+          if cm_cov_U5 > frac_high:
               cm_cov_U5_high = 1
-              cm_cov_U5_low = (cm_cov_U5 - 0.5) / (1 - 0.5)
+              cm_cov_U5_low = (cm_cov_U5 - frac_high) / (1 - frac_high)
           else:
               cm_cov_U5_low = 0
-              cm_cov_U5_high = cm_cov_U5 / 0.5
+              cm_cov_U5_high = cm_cov_U5 / frac_high
           ## Optionally, depending on assumptions, do same for cm_cov_adults and cm_cov_severe
     
           add_health_seeking(cb, start_day=0,
@@ -1382,27 +1402,30 @@ _Note: Having the IPs included in the demographics won't have any effect on the 
       </p>
       </details>  
       
-    - For simplicity, set all intervention coverage levels >0.5 (due to the assumotions on coverage access made in this example)
+    - For simplicity, set all intervention coverage levels >0.5 (due to the assumptions on coverage access made in this example)
     - Add additional reporters to be able to analyze results for both groups
       ```py
-       "Report_Event_Recorder_Individual_Properties": ['Access']
+       cb.update_params({
+           'Report_Event_Recorder': 1,
+           'Report_Event_Recorder_Individual_Properties': ['Access'],   ## add name of individual properties
+           <...other report event parameter...>  
+       })
       ```
       ```py
        sim_start_year = 2000 + pull_year # for convenience to read simulation times
-       add_summary_report(cb, start=1+365*i, interval=30,
-                     duration_days=365,
-                     age_bins=[0.25, 5, 120],
-                     description=f'Monthly_U5_accesslow{sim_start_year+i}',
-                     ipfilter = 'Access:Low')
-       add_summary_report(cb, start=1+365*i, interval=30,
-                 duration_days=365,
-                 age_bins=[0.25, 5, 120],
-                 description=f'Monthly_U5_accesshigh{sim_start_year+i}',
-                 ipfilter = 'Access:High')  
+       for i in range(pickup_years):
+           add_summary_report(cb, start=1+365*i, interval=30,
+                             duration_days=365,
+                             age_bins=[0.25, 5, 120],
+                             description=f'Monthly_U5_accesslow{sim_start_year+i}',
+                             ipfilter = 'Access:Low')
+           add_summary_report(cb, start=1+365*i, interval=30,
+                             duration_days=365,
+                             age_bins=[0.25, 5, 120],
+                             description=f'Monthly_U5_accesshigh{sim_start_year+i}',
+                             ipfilter = 'Access:High')  
       ```
-       - _Note: once we made sure it is doing what it is supposed to do, 
-         keeping reporters per group might not always be needed, depending on the research question. 
-         In the EMOD How To example, StudyCohort is defined using IP's and in that case having reports for each study group is one of the reasons to use IP's_
+       - _Note: once we made sure it is doing what it is supposed to do, keeping reporters per group might not always be needed, depending on the research question_
     
 - Once the burnin simulation finished, update exp_id in `run_exampleSim_w8b.py`
   - Update ModBuilder to have only single coverage levels for the interventions included in your simulation (otherwise result plots will look messy)
