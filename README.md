@@ -5,13 +5,21 @@
 Example scripts for the [weekly lessons](https://faculty-enrich-2022.netlify.app/lessons/) of the faculty enrichment
 program 2022.
 
+**Overview**: 
+This readme includes detailed instructions for each week example exercise.
+An exercise usually consists of a simulation and an analyzer of simulation outputs. 
+In some weeks, additional scripts exist to prepare simulation inputs or generate additional outputs and plots, or for model calibration as described in the instructions for the respective weeks.
+Weekly analyzer scripts already exists in  the repository whereas the simulation scripts need to be copied over from Week 1 and further edited or newly created as instructed in following weeks.
+
+**Checking results:**
+For each week suggested simulation scripts for comparison or help during the exercise are provided in the folder [Solution_scripts](https://github.com/numalariamodeling/faculty-enrich-2022-examples/tree/main/Solution_scripts).
+Also, at the end of the instructions results images and plots are included to compare against.
+
 **Prerequisites**: 
 Before running the weekly example scripts, please ensure that EMOD and dtk have been successfully [installed]((https://faculty-enrich-2022.netlify.app/modules/install-emod/))
 and that the [repository has been cloned](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 to your local computer, ideally under _/<.username>/Documents/faculty-enrich-2022-examples_.
 It also needs dtk virtual environment loaded and assumes files are run from a working directory set to where the script is located.
-
-
 
 #### Weekly example exercises
 
@@ -30,16 +38,17 @@ It also needs dtk virtual environment loaded and assumes files are run from a wo
 - [Go to Week 13](#week13) 
 - [Go to Week 14](#week14)
 
-__Table 1: Overview of scripts used throughout the course__
 
-| Script                                      | Description                                                                                                                                           | 
-|---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| analyzer_collection.py                      | collection of different analyzers used returning csv files                                                                                            |
-| analyze_exampleSim_wX.py                    | the main analyzer script which changes each week (w1, w2,...w5)                                                                                       | 
-| generate_input_files.py                     | the default script for creating demographics and climate which needs to run only once or when substantial changes are made                            | 
-| plot_exampleSim_w4.py, plot_exampleSim_w4.R | plotting scripts outside of analyzerin python or R, introduced in Week 4                                                                              |
-| run_exampleSim.py                           | the main simulation script which will be expanded and modified throughout the lessons                                                                 | 
-| simtools.ini                                | Configuration file for main directories required to run simulations (1 single file need in same directory where simulation or analyser script is run) | 
+__Table 1: Overview of main scripts used throughout the course__
+
+| Script                                      | Description                                                                                                                                                                                                                          | 
+|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| analyzer_collection.py                      | collection of different analyzers used returning csv files                                                                                                                                                                           |
+| analyze_exampleSim_wX.py                    | the main analyzer script which changes each week (w1, w2,...w5)                                                                                                                                                                      | 
+| generate_input_files.py                     | the default script for creating demographics and climate which needs to run only once or when substantial changes are made                                                                                                           | 
+| plot_exampleSim_w4.py, plot_exampleSim_w4.R | plotting scripts outside of analyzer in python or R, introduced in Week 4                                                                                                                                                            |
+| run_exampleSim_wX.py                        | the main simulation script which will be expanded and modified throughout the lessons                                                                                                                                                | 
+| simtools.ini                                | Configuration file for main directories required to run simulations (1 single file need in same directory where simulation or analyser script is run). Once paths have been defined, this file does not require any further editing. | 
 
 ## Week 1: Overview of EMOD <a name="week1"></a>
 
@@ -49,6 +58,10 @@ EMOD How To's:
 
 - Update _simtools.ini_
 - Define _exp_name_ and identify _expt_id_
+
+This week's exercise introduces the simplest version or running and analyzing a single simulation experiment in EMOD using the dtk infrastructure and python.
+Before running a simulation, one needs to check that all configurations and installations were successful and edit paths in simtools.ini file.
+The steps are 1) to run simulation and 2) to analyze simulation outputs. If that all works without any issues, the goal for week 1 has been reached!
 
 ### Instructions
 
@@ -117,6 +130,9 @@ EMOD How To's:
   annual)
 - [Set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
+This week's exercise demonstrates how to create demographics and climate files and how to incorporate these into the simulation.
+The exercise further introduces how to modify config parameters (i.e. population size or simulation duration) and observe changes in simulation results based on the InsetChart.json model outputs.
+
 
 ### Instructions
 
@@ -124,7 +140,8 @@ EMOD How To's:
 <p>
 
 - Create _demographics_ and _climate_ files via `python generate_input_files.py` _(requires access to COMPS for climate database : ask someone from NU team)_
-- Update default parameters in `run_exampleSim.py`:
+- Copy `run_exampleSim.py` and name it `run_exampleSim_w2.py` and in the script change _exp_name_ to `f'{user}_FE_2022_example_w2'`
+- Update default parameters in your simulation script (`run_exampleSim_w2.py`):
 
     ```py
     cb.update_params({
@@ -148,7 +165,6 @@ EMOD How To's:
   years = 3
   cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=years*365)
   ```
-- Change _exp_name_  for week 2 `f'{user}_FE_2022_example_w2'`
 - Run simulation as learned in week 1 and wait for simulation to finish (~5 minutes)
     - Note, if there are problems with running locally, you can peek into [Week 6](#week6) on how to
       change `SetupParser` to run on _COMPS_ (requires login)!
@@ -210,6 +226,17 @@ EMOD How To's:
 - [Event reporters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#event-reporting)
 - [Set up multi-simulation experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#using-the-model-builder-to-set-up-multi-simulation-experiments)
 
+This week's exercise introduces how to implement the major malaria interventions in the EMOD simulation and is split into 2 parts:
+- PART I - customization of the simulation, add interventions and reports
+- PART II - multi-simulation experiment using ModBuilder
+
+PART I, provides the parameterization or python code chunk for each of the main malaria interventions available in EMOD, and the exercise is to add these to the simulation script 
+together with proper 'reporting events' to be able to ensure that the intervention is successfully deployed in the simulation.
+In addition, the `ModBuilder` is introduced in order to be able to run the same simulation multiple times, since EMOD is a stochastic model.  
+
+When simulating interventions, one might want to compare 'intervention' against 'no intervention', which can be achieved by expanding the `ModBuilder` to run multiple coverage values, or also other parameter values within a single experiments (PART II).
+
+
 ### Instructions
 
 #### PART I - customization of the simulation, add interventions and reports
@@ -217,8 +244,10 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Add case management + 2 additional interventions of choice to your simulation. For each intervention, add the
-  corresponding code chunk as well as module import into the `run_exampleSim.py`.
+- Copy `run_exampleSim_w2.py` and name it `run_exampleSim_w3a.py` and in the script change _exp_name_ to `f'{user}_FE_2022_example_w3a'`
+- Add case management + 2 additional interventions of choice to your simulation script (`run_exampleSim_w3a.py`). 
+For each intervention, add the
+  corresponding code chunk as well as module import into the `run_exampleSim_w3a.py`.
     - Suggested intervention code snippets:
         - <details><summary><span style="color: blue";">add_health_seeking </span></summary>
             <p>
@@ -360,14 +389,33 @@ EMOD How To's:
       })
       ```
       _Note the Report_Event_Recorder output can get very large and usually is disabled for large interventions_
-- Change _exp_name_ for week 3 `f'{user}_FE_2022_example_w3a'`
+- Add `ModBuilder` to allow running different stochastic seeds:
+    ```py
+    from simtools.ModBuilder import ModBuilder, ModFn
+
+    numseeds = 3
+    builder = ModBuilder.from_list([[ModFn(DTKConfigBuilder.set_param, 'Run_Number', x),
+                                     ModFn(DTKConfigBuilder.set_param, 'Scenario', 'Basic')  # optional
+                                    ]
+                                    for x in range(numseeds)
+                                    ])
+    ```
+
+    Adjust the `run_sim_args` block to include the builder:
+    ```py
+    run_sim_args = {
+        'exp_name': f'{user}_FE_2022_example_w3a',
+        'config_builder': cb,
+        'exp_builder' : builder
+    }
+    ```
 - Now, run the simulation and wait for it to finish (~5 minutes)
 - While simulations runs, look at the generated campaign file, does it include all interventions
   specified?
     - The `campaign.json` file is located in your experiment simulation folder.
 - Run analyzer script for Week 3 (`analyze_exampleSim_w3a.py`) 
     - Don't forget to update _expt_id_!
-    - And update `event_list` in the analyzer to what you used in `run_exampleSim.py`
+    - And update `event_list` in the analyzer to what you used in `run_exampleSim_w3a.py`
 - Inspect the different results generated in `simulation_outputs`.
     - Are all intervention events happening as expected?
     - Parameters changes you can explore with further simulations:
@@ -447,31 +495,9 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Add `ModBuilder` to allow running different parameter sweeps
-    ```py
-    from simtools.ModBuilder import ModBuilder, ModFn
-
-    numseeds = 3
-    builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),                     
-                                     ## ModFn(xxx_intervention, coverage_level=xxx_cov),  # adjust to add other interventions
-                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
-                                    ]
-                                    for cm_cov_U5 in [0.4, 0.6] 
-                                    ## for xxx_cov in [0, 0.6] 
-                                    for x in range(numseeds)
-                                    ])
-    ```
-
-    Adjust the `run_sim_args` block to include the builder:
-    ```py
-    run_sim_args = {
-        'exp_name': f'{user}_FE_2022_example_w3',
-        'config_builder': cb,
-        'exp_builder' : builder
-    }
-    ```
-
-- ModBuilder can consume the same `add_x()` functions we used above, but it's often cleaner to wrap each `add_x()` into another function. For each intervention you wrap and use in the builder, make sure that it's not ALSO called directly using `add_x()`.
+- Copy `run_exampleSim_w3a.py` and name it `run_exampleSim_w3b.py` and in the script change _exp_name_ to `f'{user}_FE_2022_example_w3b'`
+- ModBuilder can consume the same `add_x()` intervention functions as used above in PART I, however it's often cleaner to wrap each `add_x()` into another function as shown below. 
+For each intervention you wrap and use in the builder, make sure that it's not ALSO called directly using `add_x()`.
     - <details><summary><span style="color: blue";">case_management </span></summary>
        <p>
 
@@ -608,9 +634,23 @@ suggested [solution script for week 3 (a)](https://github.com/numalariamodeling/
        ```
         </p>
         </details>  
-
-- change _exp_name_  to `f'{user}_FE_2022_example_w3b'` and the simulation is ready to go!
-  
+- Modify the `ModBuilder` to allow running different parameter sweeps for intervention coverage using the functions newly added:
+    ```py
+    builder = ModBuilder.from_list([[ModFn(case_management, cm_cov_U5),
+                                     ModFn(smc_intervention, coverage_level=smc_cov),
+                                     ModFn(rtss_intervention, coverage_level=rtss_cov),
+                                     ModFn(itn_intervention, coverage_level=itn_cov),
+                                     ModFn(irs_intervention, coverage_level=irs_cov),
+                                     ModFn(DTKConfigBuilder.set_param, 'Run_Number', x)
+                                     ]
+                                    for cm_cov_U5 in [0.6]
+                                    for smc_cov in [0, 1]
+                                    for rtss_cov in [0]
+                                    for itn_cov in [0]
+                                    for irs_cov in [0]
+                                    for x in range(numseeds)
+                                    ])
+    ```
 - Run simulations 
     - While waiting, check out the generated experiment folder, that now includes more subfolders for each of the
       single simulations. Open two campaign files and compare, do you see any differences?   
@@ -672,6 +712,16 @@ EMOD How To's:
 - [Update config parameters](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#update-config-parameters)
 - [Analyze experiments](https://faculty-enrich-2022.netlify.app/modules/emod-how-to/emod-how-to/#analyze-experiments)
 
+This week's exercise focuses on the analyzer, i.e. the postprocessing of simulation outputs.  
+Specifically:
+- analysing single simulation (already done Week 1-2)
+- Multi-simulation experiment  (introduced in Week 3, but more options for reporting available)
+- Saving to csv (in previous weeks no csv was saved and plots automatically generated)
+- Plotting in and outside of the analyzer  using Python or R (this allows more flexibility and additional analysis after the simulation experiment finished)
+
+The exercise is split into 2 parts:  PART I adds more reporters for additional model output files to analyze and PART II provides examples of how to generate plots from the saved csv file from PART I.
+
+
 ### Instructions
 
 #### PART I - Analyzer
@@ -679,8 +729,8 @@ EMOD How To's:
 <details><summary><span>Click here to expand</span></summary>
 <p>
 
-- Cleanup your simulation script of any unwanted interventions that were explored during the previous week (keep a
-  copy!)
+- Copy `run_exampleSim_w3b.py` and name it `run_exampleSim_w4.py` and in the script change _exp_name_ to `f'{user}_FE_2022_example_w4'`
+- Cleanup your simulation script (`run_exampleSim_w4.py`) of any unwanted interventions that were explored during the previous week 
     - Adjust coverage levels in `ModBuilder` to select/unselect interventions to include or change number of simulations
       to run (optional)
 - If not already there, enable or modify the individual-level event reporter as shown below. This example assumes there is case management for malaria in the simulation.
@@ -708,7 +758,6 @@ EMOD How To's:
    - Any analyzer script in [analyzer_collection.py](https://github.com/numalariamodeling/faculty-enrich-2022-examples/blob/main/analyzer_collection.py)
       that uses `InsetChart.json` can use `ReportMalariaFiltered.json` instead if you update the `self.filenames=` section.
 
-- Change _exp_name_ to `f'{user}_FE_2022_example_w4'` for week 4
 - Run simulations
     - While simulations are running, you may take a look at `analyze_exampleSim_w4.py`, and corresponding `analyzer_collection.py` to
       explore the different Analyzer Classes used, no need to understand these in detail!
