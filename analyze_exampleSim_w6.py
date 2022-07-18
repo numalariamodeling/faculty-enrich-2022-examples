@@ -103,6 +103,7 @@ if __name__ == "__main__":
         am = AnalyzeManager(expt_id, analyzers=analyzers_burnin)
         am.analyze()
         sweep_vars_for_plotting = ['Run_Number']
+        plot_inset_chart(channels_inset_chart, sweep_vars_for_plotting)
 
     elif step == 'pickup':
         am = AnalyzeManager(expt_id, analyzers=analyzers_pickup)
