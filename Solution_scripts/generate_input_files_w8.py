@@ -5,7 +5,7 @@ from dtk.tools.demographics.DemographicsGeneratorConcern import WorldBankBirthRa
     EquilibriumAgeDistributionConcern, DefaultIndividualAttributesConcern
 from dtk.tools.demographics.DemographicsGenerator import DemographicsGenerator
 from dtk.tools.climate.ClimateGenerator import ClimateGenerator
-from input_file_generation.add_properties_to_demographics import generate_demographics_properties
+from add_properties_to_demographics import generate_demographics_properties
 
 
 def generate_demographics(demo_df, demo_fname):
