@@ -4,7 +4,7 @@ author: "Tobias Holden"
 date: "7/19/2022"
 output: html_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(jsonlite)
 library(tidyverse)
+library(DT)
 ```
 
 
@@ -40,7 +41,6 @@ breakdown=c('subnational')
 # Note: some indicators may not apply to all countries/districts/surveys
 
 indicatorIds=c('ML_IRSM_H_IRS','ML_NETP_H_ITN','ML_FEVT_C_ADV','ML_PMAL_C_RDT', 'ML_PMAL_C_RDL', 'ML_PMAL_C_RDU')
-
 ```
 
 ```{r}
@@ -98,4 +98,37 @@ dhs_data %>%
   scale_x_continuous(breaks=seq(2000,2025,1)) +
   guides(color=guide_legend(direction = "vertical")) +
   labs(color=NULL) 
+```
+
+
+```{r}
+####################################################
+### View sample of available data for one survey ###
+####################################################
+
+#countryIds='BF' # selected country
+
+#indicatorIds='' # leave blank for all indicators, or list subset c('i1', 'i2', ...)
+
+surveyIds = 'BF2010DHS' # survey(s) to search 
+# Survey ID codes can be found here: https://api.dhsprogram.com/rest/dhs/surveys?f=html
+
+### Build Query ###
+base_url <- "http://api.dhsprogram.com/rest/dhs/data?f=json"
+
+url <- paste(base_url,
+             "&surveyIds=",paste(surveyIds,collapse=','),
+             end_url,
+             sep = '')
+url <- (url)
+
+### Call API ###
+dhs_data <- fromJSON(url) # get page
+dhs_data <- dhs_data$Data # save dataframe
+
+### Inspect Available Data ### 
+
+dhs_data %>%
+  select(SurveyId, IndicatorId, Indicator, IsPreferred, Value, CILow, CIHigh, CharacteristicLabel, ByVariableLabel) %>%
+  datatable()
 ```
