@@ -20,8 +20,9 @@ Before running the weekly example scripts, please ensure that EMOD and dtk have 
 and that the [repository has been cloned](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 to your local computer, ideally under _/<.username>/Documents/faculty-enrich-2022-examples_.
 It also needs dtk virtual environment loaded and assumes files are run from a working directory set to where the script is located.
+Before you start on an exercise, make sure that you have pulled or fetched the latest changes from the repository (see git-guides [git-pull](https://github.com/git-guides/git-pull)). 
 
-#### Weekly example exercises
+#### Weekly example exercises Week 1-8
 
 - [Go to Week 1](#week1)    
 - [Go to Week 2](#week2)    
@@ -31,13 +32,14 @@ It also needs dtk virtual environment loaded and assumes files are run from a wo
 - [Go to Week 6](#week6)
 - [Go to Week 7](#week7)
 - [Go to Week 8](#week8)
-- [Go to Week 9](#week9) 
+<!--
+- [Go to Week 9](#week9)
 - Week 10: no technical track
 - [Go to Week 11](#week11) 
 - [Go to Week 12](#week12)
 - [Go to Week 13](#week13) 
 - [Go to Week 14](#week14)
-
+-->
 
 __Table 1: Overview of main scripts used throughout the course__
 
@@ -1528,123 +1530,14 @@ Simple barplot showing sum of individuals per group that received an interventio
 ![img](static/w8_Individual_Events.png)
 
 
-
 </p>
 </details>
 
 </p>
 </details>
 
-## Week 9: Infusing simulations with real data <a name="week9"></a>
 
-[Lesson Week 9](https://faculty-enrich-2022.netlify.app/lessons/week-9/)
-
-EMOD How To's:
-
-- [TODO]
-
-### Instructions
-
-<details><summary><span>Click here to expand</span></summary>
-<p>
-
-- [TODO]
-
-<details><summary><span>Check results</span></summary>
-<p>
-
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
-
-</p>
-</details>
-
-</p>
-</details>
-
-### Week 10: no technical curriculum <a name="week10"></a>
-
-## Week 11: Advanced EMOD: HBHI workflow as a complex example <a name="week11"></a>
-
-[Lesson Week 11](https://faculty-enrich-2022.netlify.app/lessons/week-11/)
-
-EMOD How To's:
-
-- [TODO]
-
-### Instructions
-
-<details><summary><span>Click here to expand</span></summary>
-<p>
-
-- [TODO]
-
-<details><summary><span>Check results</span></summary>
-<p>
-
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
-
-</p>
-</details>
-
-</p>
-</details>
-
-## Week 12: Advanced EMOD: Spatial modeling in EMOD <a name="week12"></a>
-
-[Lesson Week 12](https://faculty-enrich-2022.netlify.app/lessons/week-12/)
-
-EMOD How To's:
-
-- [TODO]
-
-### Instructions
-
-<details><summary><span>Click here to expand</span></summary>
-<p>
-
-- [TODO]
-
-<details><summary><span>Check results</span></summary>
-<p>
-
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
-
-</p>
-</details>
-
-</p>
-</details>
-
-## Week 13: Advanced EMOD: gene drive and reactive interventions <a name="week13"></a>
-
-[Lesson Week 13](https://faculty-enrich-2022.netlify.app/lessons/week-13/)
-
-EMOD How To's:
-
-- [TODO]
-
-### Instructions
-
-<details><summary><span>Click here to expand</span></summary>
-<p>
-
-- [TODO]
-
-<details><summary><span>Check results</span></summary>
-<p>
-
-[To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
-
-</p>
-</details>
-
-</p>
-</details>
-
+<!-- EXAMPLE structure
 ## Week 14: HPC <a name="week14"></a>
 
 [Lesson Week 14](https://faculty-enrich-2022.netlify.app/lessons/week-14/)
@@ -1664,21 +1557,18 @@ EMOD How To's:
 <p>
 
 [To do: add image]
-<!--![img](static/w2.1_directories_files.png)-->
+![img](static/wx_image.png)
 
 </p>
 </details>
 
 </p>
 </details>
-
-
-</br>
-</br>
+-->
 
 ### Congratulations!
-
-#### You reached the end of the example lessons.
+You reached the end of the example lessons. 
+Please check on the website for additional content for the following weeks.
 
 
 
