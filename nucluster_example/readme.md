@@ -32,14 +32,13 @@ In other words, enabling them to run on COMPS or on NUCLUSTER without needing to
 *From your home directory on Quest*
 1. Clone repository under your home directory on quest `/home/<USERNAME>/`
 2. Modify simtools.ini and replace `<USERNAME>` and  `<your@email.edu>` under the section for `[NUCLUSTER]`!
-3. Navigate to repository directory via `cd faculty-enrich-2022-examples`
+3. Navigate to repository directory via `cd faculty-enrich-2022-examples/nucluster_example`
 ---------
-*From existing repository under `/projects/b1139/`*
-1. Clone repository under your home directory on quest `/home/<USERNAME>/`
-2. Modify simtools.ini and replace `<USERNAME>` and  `<your@email.edu>` under the section for `[NUCLUSTER]`!
-3. Navigate to repository directory via `cd faculty-enrich-2022-examples`
+*From existing repository under `/projects/b1139/`*  
+3. Navigate to repository directory via `cd /projects/b1139/faculty-enrich_IO/faculty-enrich-2022-examples/nucluster_example/`
+
 ---------
-4. Submit your experiment via `python nucluster_example/run_exampleSim_w2.py` _(later on this command can also be submitted as a job via sh)_
+4. Submit your experiment via `python run_exampleSim_w2.py` _(later on this command can also be submitted as a job via sh)_
 5. Monitor terminal for any error messages
 6. Type `squeue -u <username>` to check whether the experiment simulations are running on the cluster
    - if you realize you made an error, type `scancel <jobid>` to cancel the job (you are using shared resources)
