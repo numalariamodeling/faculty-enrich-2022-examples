@@ -7,7 +7,9 @@ from simtools.SetupParser import SetupParser
 # This block will be used unless overridden on the command-line
 SetupParser.default_block = 'LOCAL'
 
-cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=365)
+n_years = 1 # Number of years to run simulation
+
+cb = DTKConfigBuilder.from_defaults('MALARIA_SIM', Simulation_Duration=n_years*365)
 cb.update_params({
     'Demographics_Filenames': [os.path.join('Namawala', 'Namawala_single_node_demographics.json')],
     "Air_Temperature_Filename": os.path.join('Namawala', 'Namawala_single_node_air_temperature_daily.bin'),
